@@ -42,6 +42,8 @@ dependencies:
   cloud_firestore: ^6.0.2
   bloc: ^9.1.0
   flutter_bloc: ^9.1.1
+  font_awesome_flutter: ^10.7.0
+
 
 
 dev_dependencies:
