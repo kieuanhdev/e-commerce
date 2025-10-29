@@ -4,6 +4,7 @@ import 'package:e_commerce/features/auth/presentation/screens/forgot_password_sc
 import 'package:e_commerce/features/auth/presentation/screens/login_screen.dart';
 import 'package:e_commerce/features/auth/presentation/screens/signup_screen.dart';
 import 'package:e_commerce/features/home/presentation/home_page.dart';
+import 'package:e_commerce/features/orders/presentation/my_order_screen.dart';
 import 'package:e_commerce/features/settings/presentation/settings_screen.dart';
 import 'package:e_commerce/features/shop/presentation/shop_screen.dart';
 import 'package:e_commerce/features/bag/presentation/bag_screen.dart';
@@ -55,7 +56,7 @@ class AppGoRouter {
           GoRoute(
             path: AppRouters.favorites,
             name: AppRouteNames.favorites,
-            builder: (context, state) => const FavoritesScreen(),
+            builder: (context, state) => const MyFavoriteScreen(),
           ),
           GoRoute(
             path: AppRouters.profile,
