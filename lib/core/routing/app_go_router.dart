@@ -1,9 +1,10 @@
 import 'package:e_commerce/core/routing/app_routers.dart';
-import 'package:e_commerce/core/widgets/bottom_nav_bar.dart';
+import 'package:e_commerce/core/widgets/main_nav_bar.dart';
 import 'package:e_commerce/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:e_commerce/features/auth/presentation/screens/login_screen.dart';
 import 'package:e_commerce/features/auth/presentation/screens/signup_screen.dart';
 import 'package:e_commerce/features/home/presentation/home_page.dart';
+import 'package:e_commerce/features/settings/presentation/settings_screen.dart';
 import 'package:e_commerce/features/shop/presentation/shop_screen.dart';
 import 'package:e_commerce/features/bag/presentation/bag_screen.dart';
 import 'package:e_commerce/features/favorites/presentation/favorites_screen.dart';
@@ -60,6 +61,11 @@ class AppGoRouter {
             path: AppRouters.profile,
             name: AppRouteNames.profile,
             builder: (context, state) => const ProfileScreen(),
+          ),
+          GoRoute(
+            path: AppRouters.settings,
+            name: AppRouteNames.settings,
+            builder: (context, state) => const SettingsScreen(),
           ),
         ],
       ),

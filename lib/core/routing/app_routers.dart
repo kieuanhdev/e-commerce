@@ -10,6 +10,7 @@ class AppRouters {
   static const String bag = '/bag';
   static const String favorites = '/favorites';
   static const String profile = '/profile';
+  static const String settings = '/settings';
 }
 
 class AppRouteNames {
@@ -24,4 +25,5 @@ class AppRouteNames {
   static const String bag = 'bag';
   static const String favorites = 'favorites';
   static const String profile = 'profile';
+  static const String settings = 'settings';
 }

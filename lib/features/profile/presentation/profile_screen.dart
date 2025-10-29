@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart'; // thêm import go_router
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -29,7 +30,7 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 const CircleAvatar(
                   radius: 30,
-                  backgroundImage: AssetImage('assets/profile.jpg'),
+                  backgroundImage: AssetImage('images/avatar.png'),
                 ),
                 const SizedBox(width: 15),
                 Column(
@@ -52,19 +53,44 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 30),
 
-            _buildListTile("My orders", "Already have 12 orders"),
-            _buildListTile("Shipping address", "3 address"),
-            _buildListTile("Payment methods", "Visa **34"),
-            _buildListTile("Promocodes", "You have special promocodes"),
-            _buildListTile("My reviews", "Review for 4 items"),
-            _buildListTile("Settings", "Notifications, password"),
+            _buildNavTile(
+              context,
+              "My orders",
+              "Already have 12 orders",
+              "/orders",
+            ),
+            _buildNavTile(context, "Shipping address", "3 address", "/address"),
+            _buildNavTile(context, "Payment methods", "Visa **34", "/payment"),
+            _buildNavTile(
+              context,
+              "Promocodes",
+              "You have special promocodes",
+              "/promocodes",
+            ),
+            _buildNavTile(
+              context,
+              "My reviews",
+              "Review for 4 items",
+              "/reviews",
+            ),
+            _buildNavTile(
+              context,
+              "Settings",
+              "Notifications, password",
+              "/settings",
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildListTile(String title, String subtitle) {
+  Widget _buildNavTile(
+    BuildContext context,
+    String title,
+    String subtitle,
+    String route,
+  ) {
     return Column(
       children: [
         ListTile(
@@ -75,6 +101,7 @@ class ProfileScreen extends StatelessWidget {
           subtitle: Text(subtitle, style: const TextStyle(color: Colors.grey)),
           trailing: const Icon(Icons.chevron_right),
           contentPadding: EdgeInsets.zero,
+          onTap: () => context.push(route), // dùng go_router
         ),
         const Divider(height: 1),
       ],
