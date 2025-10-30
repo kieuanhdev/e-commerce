@@ -7,6 +7,7 @@ import 'package:e_commerce/features/auth/domain/usecase/login.dart';
 import 'package:e_commerce/features/auth/domain/usecase/logout.dart';
 import 'package:e_commerce/features/auth/domain/usecase/register.dart';
 import 'package:e_commerce/features/auth/domain/usecase/forgot_password.dart';
+import 'package:e_commerce/features/auth/domain/usecase/google_sign_in.dart';
 import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
@@ -27,6 +28,7 @@ void initDI() {
         logoutUseCase: sl(),
         getAuthStateChangesUseCase: sl(),
         forgotPasswordUseCase: sl(),
+        googleSignInUseCase: sl(),
       ));
 
   // UseCases
@@ -35,6 +37,7 @@ void initDI() {
   sl.registerLazySingleton(() => LogoutUseCase(sl()));
   sl.registerLazySingleton(() => GetAuthStateChangesUseCase(sl()));
   sl.registerLazySingleton(() => ForgotPasswordUseCase(sl()));
+  sl.registerLazySingleton(() => GoogleSignInUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<IAuthRepository>(() => AuthRepositoryImpl(sl()));

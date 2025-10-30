@@ -4,6 +4,7 @@ import 'package:e_commerce/features/auth/domain/entities/app_user.dart';
 
 abstract class IAuthRepository {
   Future<Either<Failure, AppUser>> login(String email, String password);
+  Future<Either<Failure, AppUser>> googleSignIn();
 
   // ĐÃ CẬP NHẬT: Thêm các trường mới cho đăng ký
   Future<Either<Failure, AppUser>> register({

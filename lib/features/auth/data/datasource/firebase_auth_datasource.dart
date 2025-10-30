@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce/features/auth/data/model/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
+import 'package:google_sign_in/google_sign_in.dart';
 
 
 
@@ -79,6 +80,42 @@ class FirebaseAuthDatasource {
   // Gửi email đặt lại mật khẩu
   Future<void> sendPasswordResetEmail(String email) async {
     await _auth.sendPasswordResetEmail(email: email);
+  }
+
+  // Đăng nhập bằng Google
+  Future<UserModel> signInWithGoogle() async {
+    final googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) {
+      throw Exception('Đã hủy đăng nhập Google');
+    }
+    final googleAuth = await googleUser.authentication;
+    final credential = firebase.GoogleAuthProvider.credential(
+      idToken: googleAuth.idToken,
+      accessToken: googleAuth.accessToken,
+    );
+
+    final userCredential = await _auth.signInWithCredential(credential);
+    final uid = userCredential.user!.uid;
+
+    // Lấy hoặc tạo hồ sơ Firestore
+    final docRef = _usersCollection.doc(uid);
+    final snap = await docRef.get();
+    if (!snap.exists) {
+      final newUser = UserModel(
+        id: uid,
+        email: userCredential.user!.email ?? googleUser.email,
+        displayName: userCredential.user!.displayName ?? googleUser.displayName ?? 'User',
+        phoneNumber: userCredential.user!.phoneNumber,
+        role: 'customer',
+        isDisabled: false,
+        createdAt: DateTime.now(),
+        avatarUrl: userCredential.user!.photoURL,
+        defaultAddressId: null,
+      );
+      await docRef.set(newUser.toMap());
+      return newUser;
+    }
+    return UserModel.fromSnapshot(snap);
   }
 
   // ĐÃ CẬP NHẬT: Lấy stream user đầy đủ (KHÔNG dùng yield*/RxDart, chỉ controller.listen)

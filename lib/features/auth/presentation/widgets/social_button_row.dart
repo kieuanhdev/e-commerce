@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SocialButtonRow extends StatelessWidget {
@@ -11,7 +13,9 @@ class SocialButtonRow extends StatelessWidget {
       children: [
         _buildSocialButton(
           icon: const FaIcon(FontAwesomeIcons.google, color: Colors.red),
-          onTap: () {},
+          onTap: () {
+            context.read<AuthBloc>().add(AuthGoogleSignInRequested());
+          },
         ),
         const SizedBox(width: 24),
         _buildSocialButton(
