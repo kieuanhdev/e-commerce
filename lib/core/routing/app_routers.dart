@@ -11,6 +11,9 @@ class AppRouters {
   static const String favorites = '/favorites';
   static const String profile = '/profile';
   static const String settings = '/settings';
+
+  // Admin
+  static const String admin = '/admin';
 }
 
 class AppRouteNames {
@@ -26,4 +29,7 @@ class AppRouteNames {
   static const String favorites = 'favorites';
   static const String profile = 'profile';
   static const String settings = 'settings';
+
+  // Admin
+  static const String admin = 'admin';
 }

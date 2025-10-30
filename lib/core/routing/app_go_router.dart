@@ -5,6 +5,7 @@ import 'package:e_commerce/features/auth/presentation/screens/forgot_password_sc
 import 'package:e_commerce/features/auth/presentation/screens/login_screen.dart';
 import 'package:e_commerce/features/auth/presentation/screens/signup_screen.dart';
 import 'package:e_commerce/features/home/presentation/home_page.dart';
+import 'package:e_commerce/features/admin/presentation/admin_screen.dart';
 import 'package:e_commerce/features/settings/presentation/settings_screen.dart';
 import 'package:e_commerce/features/shop/presentation/shop_screen.dart';
 import 'package:e_commerce/features/bag/presentation/bag_screen.dart';
@@ -40,6 +41,12 @@ class AppGoRouter {
       ShellRoute(
         builder: (context, state, child) => MainNavigation(child: child),
         routes: [
+          // ---------- ADMIN ----------
+          GoRoute(
+            path: AppRouters.admin,
+            name: AppRouteNames.admin,
+            builder: (context, state) => const AdminScreen(),
+          ),
           GoRoute(
             path: AppRouters.home,
             name: AppRouteNames.home,

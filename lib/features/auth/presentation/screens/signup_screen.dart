@@ -31,8 +31,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         if (state is AuthLoading) {
           // Show loading indicator
         } else if (state is AuthAuthenticated) {
-          // Navigate to home screen
-          context.go('/home');
+          // Navigate by role
+          final isAdmin = state.user.role == 'admin';
+          context.go(isAdmin ? '/admin' : '/home');
         } else if (state is AuthFailure) {
           // Show error message
           ScaffoldMessenger.of(context).showSnackBar(

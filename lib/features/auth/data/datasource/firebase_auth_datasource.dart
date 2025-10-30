@@ -32,34 +32,45 @@ class FirebaseAuthDatasource {
   // ĐÃ CẬP NHẬT: Register
   Future<UserModel> register(
       String email, String password, String displayName, String? phoneNumber) async {
-    // 1. Tạo user trong Firebase Auth
-    final userCredential = await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    
-    final uid = userCredential.user!.uid;
+    try {
+      // 1. Tạo user trong Firebase Auth
+      final userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-    // 2. Tạo đối tượng UserModel mới
-    final newUser = UserModel(
-      id: uid,
-      email: email,
-      displayName: displayName,
-      phoneNumber: phoneNumber,
-      role: 'customer', // Mặc định là customer
-      isDisabled: false,
-      createdAt: DateTime.now(),
-      avatarUrl: null, // Có thể cập nhật sau
-      defaultAddressId: null,
-    );
+      final uid = userCredential.user!.uid;
 
-    // 3. Ghi đối tượng này vào Firestore
-    await _usersCollection.doc(uid).set(newUser.toMap());
+      // 2. Tạo đối tượng UserModel mới
+      final newUser = UserModel(
+        id: uid,
+        email: email,
+        displayName: displayName,
+        phoneNumber: phoneNumber,
+        role: 'customer', // Mặc định là customer
+        isDisabled: false,
+        createdAt: DateTime.now(),
+        avatarUrl: null, // Có thể cập nhật sau
+        defaultAddressId: null,
+      );
 
-    // Cập nhật displayName trong Auth (tùy chọn)
-    await userCredential.user?.updateDisplayName(displayName);
+      // 3. Ghi đối tượng này vào Firestore
+      await _usersCollection.doc(uid).set(newUser.toMap());
 
-    return newUser;
+      // 3b. Xác thực đã ghi
+      final written = await _usersCollection.doc(uid).get();
+      if (!written.exists) {
+        throw Exception('Không thể lưu người dùng vào Firestore.');
+      }
+
+      // Cập nhật displayName trong Auth (tùy chọn)
+      await userCredential.user?.updateDisplayName(displayName);
+
+      return newUser;
+    } on firebase.FirebaseException catch (e) {
+      // Ném lỗi để tầng trên mapping thông điệp rõ ràng
+      throw Exception(e.message ?? 'Lỗi Firestore khi tạo người dùng');
+    }
   }
 
   Future<void> logout() => _auth.signOut();
