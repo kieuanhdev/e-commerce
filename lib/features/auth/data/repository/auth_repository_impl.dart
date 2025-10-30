@@ -57,6 +57,22 @@ class AuthRepositoryImpl implements IAuthRepository {
   @override
   Stream<AppUser?> get authStateChanges => dataSource.authStateChanges;
 
+  @override
+  Future<AppUser?> getCurrentUser() async {
+    return dataSource.getCurrentUser(); // Triển khai ở datasource, dùng FirebaseAuth
+  }
+
+  @override
+  Future<AppUser?> updateUser({String? displayName, String? avatarUrl, String? phoneNumber, String? defaultAddressId}) async {
+    await dataSource.updateUser(
+      displayName: displayName,
+      avatarUrl: avatarUrl,
+      phoneNumber: phoneNumber,
+      defaultAddressId: defaultAddressId,
+    );
+    return getCurrentUser();
+  }
+
   String _mapFirebaseError(firebase.FirebaseAuthException e, {required bool isRegister}) {
     switch (e.code) {
       case 'email-already-in-use':

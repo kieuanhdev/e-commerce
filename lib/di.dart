@@ -9,6 +9,10 @@ import 'package:e_commerce/features/auth/domain/usecase/register.dart';
 import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+import 'package:e_commerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:e_commerce/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:e_commerce/features/settings/domain/usecase/get_current_user.dart';
+import 'package:e_commerce/features/settings/domain/usecase/update_user_settings.dart';
 
 final sl = GetIt.instance;
 
@@ -34,6 +38,18 @@ void initDI() {
 
   // DataSource (ĐÃ CẬP NHẬT: Inject cả Auth và Firestore)
   sl.registerLazySingleton(() => FirebaseAuthDatasource(sl(), sl()));
+
+  // --- Profile Bloc (feature mới) ---
+  sl.registerFactory(() => ProfileBloc(authRepository: sl()));
+
+  // --- Settings UseCases ---
+  sl.registerFactory(() => GetCurrentUserUseCase(sl()));
+  sl.registerFactory(() => UpdateUserSettingsUseCase(sl()));
+  // --- Settings Bloc ---
+  sl.registerFactory(() => SettingsBloc(
+    getCurrentUser: sl(),
+    updateUserSettings: sl(),
+  ));
 
   // --- External ---
   sl.registerLazySingleton(() => FirebaseAuth.instance);

@@ -1,85 +1,119 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; // thêm import go_router
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:e_commerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:e_commerce/features/profile/presentation/bloc/profile_event.dart';
+import 'package:e_commerce/features/profile/presentation/bloc/profile_state.dart';
+import 'package:e_commerce/di.dart';
+import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "My profile",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: Icon(Icons.search),
+    return BlocProvider<ProfileBloc>(
+      create: (_) => sl<ProfileBloc>()..add(LoadProfile()),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            "My profile",
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: ListView(
-          children: [
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('images/avatar.png'),
-                ),
-                const SizedBox(width: 15),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      "Kieuanhdev",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      "kieuanh.dev@gmail.com",
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 30),
-
-            _buildNavTile(
-              context,
-              "My orders",
-              "Already have 12 orders",
-              "/orders",
-            ),
-            _buildNavTile(context, "Shipping address", "3 address", "/address"),
-            _buildNavTile(context, "Payment methods", "Visa **34", "/payment"),
-            _buildNavTile(
-              context,
-              "Promocodes",
-              "You have special promocodes",
-              "/promocodes",
-            ),
-            _buildNavTile(
-              context,
-              "My reviews",
-              "Review for 4 items",
-              "/reviews",
-            ),
-            _buildNavTile(
-              context,
-              "Settings",
-              "Notifications, password",
-              "/settings",
+          backgroundColor: Colors.white,
+          elevation: 0,
+          foregroundColor: Colors.black,
+          actions: const [
+            Padding(
+              padding: EdgeInsets.only(right: 16),
+              child: Icon(Icons.search),
             ),
           ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(20),
+          child: ListView(
+            children: [
+              BlocBuilder<ProfileBloc, ProfileState>(
+                builder: (context, state) {
+                  if (state is ProfileLoading || state is ProfileInitial) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (state is ProfileLoaded) {
+                    final user = state.user;
+                    final avatar = (user.avatarUrl != null && user.avatarUrl!.isNotEmpty)
+                        ? NetworkImage(user.avatarUrl!)
+                        : const AssetImage('images/avatar.png') as ImageProvider;
+                    return Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundImage: avatar,
+                        ),
+                        const SizedBox(width: 15),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user.displayName ?? 'No Name',
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              user.email,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  }
+                  if (state is ProfileError) {
+                    return Text('Lỗi: ${state.message}', style: const TextStyle(color: Colors.red));
+                  }
+                  return const SizedBox(height: 60);
+                },
+              ),
+              const SizedBox(height: 30),
+
+              _buildNavTile(
+                context,
+                "My orders",
+                "Already have 12 orders",
+                "/orders",
+              ),
+              _buildNavTile(context, "Shipping address", "3 address", "/address"),
+              _buildNavTile(context, "Payment methods", "Visa **34", "/payment"),
+              _buildNavTile(
+                context,
+                "Promocodes",
+                "You have special promocodes",
+                "/promocodes",
+              ),
+              _buildNavTile(
+                context,
+                "My reviews",
+                "Review for 4 items",
+                "/reviews",
+              ),
+              _buildNavTile(
+                context,
+                "Settings",
+                "Notifications, password",
+                "/settings",
+              ),
+              const SizedBox(height: 24),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.red),
+                title: const Text('Logout', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  context.read<AuthBloc>().add(AuthLogoutRequested());
+                  context.go('/login');
+                },
+                contentPadding: EdgeInsets.zero,
+              ),
+            ],
+          ),
         ),
       ),
     );

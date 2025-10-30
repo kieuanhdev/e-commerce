@@ -17,4 +17,10 @@ abstract class IAuthRepository {
 
   // Stream này giờ sẽ trả về AppUser đầy đủ (lấy từ Firestore)
   Stream<AppUser?> get authStateChanges;
+
+  // Lấy user hiện tại, dùng cho ProfileBloc
+  Future<AppUser?> getCurrentUser();
+
+  // Update user info theo profile (cho Settings)
+  Future<AppUser?> updateUser({String? displayName, String? avatarUrl, String? phoneNumber, String? defaultAddressId});
 }
