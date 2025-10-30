@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce/features/auth/data/model/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
-import 'package:rxdart/rxdart.dart';
 
 
 
@@ -76,6 +75,11 @@ class FirebaseAuthDatasource {
   }
 
   Future<void> logout() => _auth.signOut();
+
+  // Gửi email đặt lại mật khẩu
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
 
   // ĐÃ CẬP NHẬT: Lấy stream user đầy đủ (KHÔNG dùng yield*/RxDart, chỉ controller.listen)
   Stream<UserModel?> get authStateChanges {

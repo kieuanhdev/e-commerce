@@ -15,6 +15,9 @@ abstract class IAuthRepository {
 
   Future<Either<Failure, void>> logout();
 
+  // Quên mật khẩu: gửi email đặt lại mật khẩu
+  Future<Either<Failure, void>> forgotPassword(String email);
+
   // Stream này giờ sẽ trả về AppUser đầy đủ (lấy từ Firestore)
   Stream<AppUser?> get authStateChanges;
 

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:e_commerce/features/auth/domain/usecase/get_auth_state_changes.dart';
 import 'package:e_commerce/features/auth/domain/usecase/register.dart';
+import 'package:e_commerce/features/auth/domain/usecase/forgot_password.dart';
 import 'package:equatable/equatable.dart';
 import 'package:e_commerce/features/auth/domain/entities/app_user.dart';
 import 'package:e_commerce/features/auth/domain/usecase/login.dart';
@@ -16,6 +17,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RegisterUseCase _registerUseCase;
   final LogoutUseCase _logoutUseCase;
   final GetAuthStateChangesUseCase _getAuthStateChangesUseCase;
+  final ForgotPasswordUseCase _forgotPasswordUseCase;
   StreamSubscription<AppUser?>? _authSubscription;
 
   AuthBloc({
@@ -23,15 +25,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required RegisterUseCase registerUseCase,
     required LogoutUseCase logoutUseCase,
     required GetAuthStateChangesUseCase getAuthStateChangesUseCase,
+    required ForgotPasswordUseCase forgotPasswordUseCase,
   })  : _loginUseCase = loginUseCase,
         _registerUseCase = registerUseCase,
         _logoutUseCase = logoutUseCase,
         _getAuthStateChangesUseCase = getAuthStateChangesUseCase,
+        _forgotPasswordUseCase = forgotPasswordUseCase,
         super(AuthInitial()) {
     on<AuthStateChanged>(_onAuthStateChanged);
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthRegisterRequested>(_onRegisterRequested); // Sẽ được cập nhật
     on<AuthLogoutRequested>(_onLogoutRequested);
+    on<AuthForgotPasswordRequested>(_onForgotPasswordRequested);
 
     _authSubscription = _getAuthStateChangesUseCase().listen((user) {
       add(AuthStateChanged(user));
@@ -83,5 +88,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthLogoutRequested event, Emitter<AuthState> emit) async {
     await _logoutUseCase();
     emit(AuthUnauthenticated());
+  }
+
+  Future<void> _onForgotPasswordRequested(
+    AuthForgotPasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthForgotPasswordLoading());
+    final result = await _forgotPasswordUseCase(event.email);
+    result.fold(
+      (failure) => emit(AuthFailure(failure.message)),
+      (_) => emit(AuthForgotPasswordSuccess()),
+    );
   }
 }

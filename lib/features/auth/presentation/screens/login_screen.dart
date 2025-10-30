@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: TextButton.icon(
                   onPressed: () {
                     context.push(
-                      '/forgot',
+                      '/forgot-password',
                     ); // điều hướng sang trang Forgot Password
                   },
                   icon: const Icon(Icons.arrow_forward, size: 16),

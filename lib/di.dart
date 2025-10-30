@@ -6,6 +6,7 @@ import 'package:e_commerce/features/auth/domain/usecase/get_auth_state_changes.d
 import 'package:e_commerce/features/auth/domain/usecase/login.dart';
 import 'package:e_commerce/features/auth/domain/usecase/logout.dart';
 import 'package:e_commerce/features/auth/domain/usecase/register.dart';
+import 'package:e_commerce/features/auth/domain/usecase/forgot_password.dart';
 import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
@@ -25,6 +26,7 @@ void initDI() {
         registerUseCase: sl(),
         logoutUseCase: sl(),
         getAuthStateChangesUseCase: sl(),
+        forgotPasswordUseCase: sl(),
       ));
 
   // UseCases
@@ -32,6 +34,7 @@ void initDI() {
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl()));
   sl.registerLazySingleton(() => GetAuthStateChangesUseCase(sl()));
+  sl.registerLazySingleton(() => ForgotPasswordUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<IAuthRepository>(() => AuthRepositoryImpl(sl()));
@@ -41,6 +44,8 @@ void initDI() {
 
   // --- Profile Bloc (feature mới) ---
   sl.registerFactory(() => ProfileBloc(authRepository: sl()));
+
+  // (Gộp vào AuthBloc) Bỏ đăng ký ForgotPasswordBloc
 
   // --- Settings UseCases ---
   sl.registerFactory(() => GetCurrentUserUseCase(sl()));

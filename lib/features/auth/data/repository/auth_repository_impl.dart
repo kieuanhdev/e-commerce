@@ -73,6 +73,19 @@ class AuthRepositoryImpl implements IAuthRepository {
     return getCurrentUser();
   }
 
+  @override
+  Future<Either<Failure, void>> forgotPassword(String email) async {
+    try {
+      await dataSource.sendPasswordResetEmail(email);
+      return const Right(null);
+    } on firebase.FirebaseAuthException catch (e) {
+      final message = _mapFirebaseError(e, isRegister: false);
+      return Left(Failure(message));
+    } catch (e) {
+      return Left(Failure(e.toString()));
+    }
+  }
+
   String _mapFirebaseError(firebase.FirebaseAuthException e, {required bool isRegister}) {
     switch (e.code) {
       case 'email-already-in-use':

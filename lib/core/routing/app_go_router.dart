@@ -90,7 +90,7 @@ class AppGoRouter {
       }
 
       final isLoggedIn = authState is AuthAuthenticated;
-      final isAuthFlow = location == '/login' || location == '/register' || location == '/forgot';
+      final isAuthFlow = location == '/login' || location == '/register' || location == '/forgot-password';
 
       if (!isLoggedIn) {
         return isAuthFlow ? null : '/login';
