@@ -1,20 +1,22 @@
 import 'package:e_commerce/core/routing/app_routers.dart';
 import 'package:e_commerce/core/widgets/main_nav_bar.dart';
+import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:e_commerce/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:e_commerce/features/auth/presentation/screens/login_screen.dart';
 import 'package:e_commerce/features/auth/presentation/screens/signup_screen.dart';
 import 'package:e_commerce/features/home/presentation/home_page.dart';
-import 'package:e_commerce/features/orders/presentation/my_order_screen.dart';
 import 'package:e_commerce/features/settings/presentation/settings_screen.dart';
 import 'package:e_commerce/features/shop/presentation/shop_screen.dart';
 import 'package:e_commerce/features/bag/presentation/bag_screen.dart';
 import 'package:e_commerce/features/favorites/presentation/favorites_screen.dart';
 import 'package:e_commerce/features/profile/presentation/profile_screen.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 class AppGoRouter {
   static final GoRouter route = GoRouter(
-    initialLocation: AppRouters.home,
+    initialLocation: AppRouters.login,
     debugLogDiagnostics: true,
     routes: [
       // ---------- AUTH ----------
@@ -56,7 +58,7 @@ class AppGoRouter {
           GoRoute(
             path: AppRouters.favorites,
             name: AppRouteNames.favorites,
-            builder: (context, state) => const MyFavoriteScreen(),
+            builder: (context, state) => const FavoritesScreen(),
           ),
           GoRoute(
             path: AppRouters.profile,
@@ -71,5 +73,36 @@ class AppGoRouter {
         ],
       ),
     ],
+    redirect: (BuildContext context, GoRouterState state) {
+      final authState = context.read<AuthBloc>().state;
+      final location = state.matchedLocation;
+
+      // Không còn route '/splash' -> giữ nguyên vị trí khi đang init/loading
+      if (authState is AuthInitial || authState is AuthLoading) {
+        return null;
+      }
+
+      final isLoggedIn = authState is AuthAuthenticated;
+      final isAuthFlow = location == '/login' || location == '/register' || location == '/forgot';
+
+      if (!isLoggedIn) {
+        return isAuthFlow ? null : '/login';
+      }
+
+      // ĐÃ đăng nhập
+      final user = (authState as AuthAuthenticated).user;
+      final isAdmin = user.role == 'admin';
+      final isGoingToAdmin = location.startsWith('/admin');
+
+      if (isAuthFlow) {
+        return isAdmin ? '/admin' : '/home';
+      }
+
+      if (!isAdmin && isGoingToAdmin) {
+        return '/home';
+      }
+
+      return null;
+    },
   );
 }

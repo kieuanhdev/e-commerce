@@ -1,22 +1,92 @@
-import 'package:e_commerce/features/auth/domain/entities/user_entity.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:e_commerce/features/auth/data/model/user_model.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase;
+import 'package:rxdart/rxdart.dart';
+
+
 
 class FirebaseAuthDatasource {
-  final FirebaseAuth _firebaseAuth;
-  FirebaseAuthDatasource(this._firebaseAuth);
+  final firebase.FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
 
-  Future<UserEntity?> signIn(String email, String password) async {
-    return _firebaseAuth
-        .signInWithEmailAndPassword(email: email, password: password)
-        .then((userCredential) => _userFromFirebase(userCredential.user));
+  FirebaseAuthDatasource(this._auth, this._firestore);
+
+  // Tham chiếu đến collection 'users'
+  CollectionReference get _usersCollection => _firestore.collection('users');
+
+  // ĐÃ CẬP NHẬT: Login
+  Future<UserModel> login(String email, String password) async {
+    final userCredential = await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    // Sau khi đăng nhập Auth, lấy profile từ Firestore
+    final userDoc =
+        await _usersCollection.doc(userCredential.user!.uid).get();
+    if (!userDoc.exists) {
+      throw Exception('Không tìm thấy thông tin người dùng.');
+    }
+    return UserModel.fromSnapshot(userDoc);
   }
 
-  Future<void> signOut() async {
-    return _firebaseAuth.signOut();
+  // ĐÃ CẬP NHẬT: Register
+  Future<UserModel> register(
+      String email, String password, String displayName, String? phoneNumber) async {
+    // 1. Tạo user trong Firebase Auth
+    final userCredential = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    
+    final uid = userCredential.user!.uid;
+
+    // 2. Tạo đối tượng UserModel mới
+    final newUser = UserModel(
+      id: uid,
+      email: email,
+      displayName: displayName,
+      phoneNumber: phoneNumber,
+      role: 'customer', // Mặc định là customer
+      isDisabled: false,
+      createdAt: DateTime.now(),
+      avatarUrl: null, // Có thể cập nhật sau
+      defaultAddressId: null,
+    );
+
+    // 3. Ghi đối tượng này vào Firestore
+    await _usersCollection.doc(uid).set(newUser.toMap());
+
+    // Cập nhật displayName trong Auth (tùy chọn)
+    await userCredential.user?.updateDisplayName(displayName);
+
+    return newUser;
   }
 
-  UserEntity? _userFromFirebase(User? user) {
-    if (user == null) return null;
-    return UserEntity(id: user.uid, email: user.email);
+  Future<void> logout() => _auth.signOut();
+
+  // ĐÃ CẬP NHẬT: Lấy stream user đầy đủ
+  Stream<UserModel?> get authStateChanges {
+    // Lắng nghe stream trạng thái của FirebaseAuth
+    return _auth.authStateChanges().switchMap((firebaseUser) {
+      if (firebaseUser == null) {
+        // Nếu user là null (đã đăng xuất), trả về stream chứa null
+        return Stream.value(null);
+      } else {
+        // Nếu đã đăng nhập, dùng uid để lắng nghe thay đổi
+        // trên document của user đó trong Firestore
+        return _usersCollection
+            .doc(firebaseUser.uid)
+            .snapshots()
+            .map((snapshot) {
+          if (snapshot.exists) {
+            return UserModel.fromSnapshot(snapshot);
+          } else {
+            // Trường hợp hiếm: có user Auth nhưng không có
+            // record Firestore (có thể do lỗi lúc đăng ký)
+            return null; 
+          }
+        });
+      }
+    });
   }
 }

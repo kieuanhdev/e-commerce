@@ -44,6 +44,9 @@ dependencies:
   flutter_bloc: ^9.1.1
   font_awesome_flutter: ^10.7.0
   intl: ^0.19.0
+  dartz: ^0.10.1
+  rxdart: ^0.28.0
+  get_it: ^8.2.0
 
 
 

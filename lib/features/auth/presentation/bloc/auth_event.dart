@@ -1,22 +1,37 @@
 part of 'auth_bloc.dart';
 
-sealed class AuthEvent extends Equatable {
-  const AuthEvent();
 
+// --- EVENT ---
+abstract class AuthEvent extends Equatable {
+  const AuthEvent();
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
-final class SignInRequested extends AuthEvent {
+class AuthStateChanged extends AuthEvent {
+  final AppUser? user; // AppUser giờ đã là entity đầy đủ
+  const AuthStateChanged(this.user);
+}
+
+class AuthLoginRequested extends AuthEvent {
   final String email;
   final String password;
-
-  const SignInRequested({required this.email, required this.password});
-
-  @override
-  List<Object> get props => [email, password];
+  const AuthLoginRequested(this.email, this.password);
 }
 
-final class SignOutRequested extends AuthEvent {}
+// ĐÃ CẬP NHẬT: Event đăng ký thêm trường mới
+class AuthRegisterRequested extends AuthEvent {
+  final String email;
+  final String password;
+  final String displayName;
+  final String? phoneNumber;
 
-final class AuthCheckRequested extends AuthEvent {}
+  const AuthRegisterRequested({
+    required this.email,
+    required this.password,
+    required this.displayName,
+    this.phoneNumber,
+  });
+}
+
+class AuthLogoutRequested extends AuthEvent {}
