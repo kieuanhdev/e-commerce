@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import './product_card.dart';
-import '../../../home/presentation/widgets/bannner.dart';
-import './product_popular_section.dart';
-import './product_grid_sliver.dart';
-import './product_pagination.dart' as pagination_widget;
+import 'product_card.dart';
+import '../../../../home/presentation/widgets/bannner.dart';
+import 'product_popular_section.dart';
+import 'product_grid_sliver.dart';
+import 'product_pagination.dart' as pagination_widget;
 import '../pages/product_detail_page.dart';
 
 class ProductListBody extends StatefulWidget {
