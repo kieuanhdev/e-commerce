@@ -6,10 +6,11 @@ import 'package:e_commerce/features/auth/presentation/screens/login_screen.dart'
 import 'package:e_commerce/features/auth/presentation/screens/signup_screen.dart';
 
 import 'package:e_commerce/features/admin/presentation/admin_screen.dart';
-import 'package:e_commerce/features/products/domain/entities/product.dart';
+import 'package:e_commerce/features/home/presentation/home_page.dart';
+// import 'package:e_commerce/features/products/domain/entities/product.dart';
 import 'package:e_commerce/features/products/presentation/admin/pages/products_page.dart';
 import 'package:e_commerce/features/settings/presentation/settings_screen.dart';
-import 'package:e_commerce/features/shop/presentation/shop_screen.dart';
+// import 'package:e_commerce/features/shop/presentation/shop_screen.dart';
 import 'package:e_commerce/features/bag/presentation/bag_screen.dart';
 import 'package:e_commerce/features/favorites/presentation/favorites_screen.dart';
 import 'package:e_commerce/features/profile/presentation/profile_screen.dart';
