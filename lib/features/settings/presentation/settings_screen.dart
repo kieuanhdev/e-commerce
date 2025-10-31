@@ -4,6 +4,7 @@ import 'package:e_commerce/features/settings/presentation/bloc/settings_bloc.dar
 import 'package:e_commerce/features/settings/presentation/bloc/settings_event.dart';
 import 'package:e_commerce/features/settings/presentation/bloc/settings_state.dart';
 import 'package:e_commerce/di.dart';
+import 'package:e_commerce/features/settings/presentation/widgets/settings_text_field.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -15,12 +16,18 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController _displayNameController = TextEditingController();
   final TextEditingController _avatarUrlController = TextEditingController();
+  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   bool _initialized = false;
 
   @override
   void dispose() {
     _displayNameController.dispose();
     _avatarUrlController.dispose();
+    _currentPasswordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -106,9 +113,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     const SizedBox(height: 18),
-                    _buildTextField("Display Name", _displayNameController),
+                    SettingsTextField("Display Name", _displayNameController),
                     const SizedBox(height: 12),
-                    _buildTextField("Avatar URL", _avatarUrlController),
+                    SettingsTextField("Avatar URL", _avatarUrlController),
+                    const SizedBox(height: 24),
+                    const Text(
+                      "SECURITY",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SettingsTextField("Mật khẩu hiện tại", _currentPasswordController, obscureText: true),
+                    const SizedBox(height: 12),
+                    SettingsTextField("Mật khẩu mới", _newPasswordController, obscureText: true),
+                    const SizedBox(height: 12),
+                    SettingsTextField("Xác nhận mật khẩu mới", _confirmPasswordController, obscureText: true),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          final current = _currentPasswordController.text.trim();
+                          final next = _newPasswordController.text.trim();
+                          final confirm = _confirmPasswordController.text.trim();
+                          if (next.isEmpty || current.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Vui lòng nhập đủ mật khẩu')),);
+                            return;
+                          }
+                          if (next != confirm) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Mật khẩu xác nhận không khớp')),);
+                            return;
+                          }
+                          context.read<SettingsBloc>().add(
+                                ChangePasswordRequested(
+                                  currentPassword: current,
+                                  newPassword: next,
+                                ),
+                              );
+                        },
+                        child: const Text(
+                          "Đổi mật khẩu",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
                     const Spacer(),
                     SizedBox(
                       width: double.infinity,
@@ -146,30 +198,4 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildTextField(
-    String label,
-    TextEditingController controller, {
-    bool obscureText = false,
-    bool enabled = true,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: obscureText,
-      enabled: enabled,
-      decoration: InputDecoration(
-        labelText: label,
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 14,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-      ),
-    );
-  }
 }

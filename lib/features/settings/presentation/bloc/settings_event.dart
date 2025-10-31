@@ -24,3 +24,16 @@ class UpdateUserSettings extends SettingsEvent {
   @override
   List<Object?> get props => [displayName, avatarUrl, phoneNumber, defaultAddressId];
 }
+
+class ChangePasswordRequested extends SettingsEvent {
+  final String currentPassword;
+  final String newPassword;
+
+  const ChangePasswordRequested({
+    required this.currentPassword,
+    required this.newPassword,
+  });
+
+  @override
+  List<Object?> get props => [currentPassword, newPassword];
+}
