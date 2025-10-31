@@ -6,7 +6,8 @@ import 'package:e_commerce/features/auth/presentation/screens/login_screen.dart'
 import 'package:e_commerce/features/auth/presentation/screens/signup_screen.dart';
 
 import 'package:e_commerce/features/admin/presentation/admin_screen.dart';
-import 'package:e_commerce/features/home/presentation/home_page.dart';
+import 'package:e_commerce/features/products/domain/entities/product.dart';
+import 'package:e_commerce/features/products/presentation/admin/pages/products_page.dart';
 import 'package:e_commerce/features/settings/presentation/settings_screen.dart';
 import 'package:e_commerce/features/shop/presentation/shop_screen.dart';
 import 'package:e_commerce/features/bag/presentation/bag_screen.dart';
@@ -56,7 +57,7 @@ class AppGoRouter {
           GoRoute(
             path: AppRouters.shop,
             name: AppRouteNames.shop,
-            builder: (context, state) => const ShopScreen(),
+            builder: (context, state) => const ProductScreen(),
           ),
           GoRoute(
             path: AppRouters.bag,
@@ -91,7 +92,10 @@ class AppGoRouter {
       }
 
       final isLoggedIn = authState is AuthAuthenticated;
-      final isAuthFlow = location == '/login' || location == '/register' || location == '/forgot-password';
+      final isAuthFlow =
+          location == '/login' ||
+          location == '/register' ||
+          location == '/forgot-password';
 
       if (!isLoggedIn) {
         return isAuthFlow ? null : '/login';
