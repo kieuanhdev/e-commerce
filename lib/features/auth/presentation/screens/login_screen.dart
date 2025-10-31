@@ -29,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
         } else if (state is AuthAuthenticated) {
           // Navigate by role
           final isAdmin = state.user.role == 'admin';
-          context.go(isAdmin ? '/admin' : '/home');
+          context.go(isAdmin ? '/admin/overview' : '/home');
         } else if (state is AuthFailure) {
           // Show error message
           ScaffoldMessenger.of(context).showSnackBar(

@@ -13,7 +13,11 @@ class AppRouters {
   static const String settings = '/settings';
 
   // Admin
-  static const String admin = '/admin';
+  static const String adminOverview = '/admin/overview';
+  static const String adminProducts = '/admin/products';
+  static const String adminCustomers = '/admin/customers';
+  static const String adminOrders = '/admin/orders';
+  static const String adminProfile = '/admin/profile';
 }
 
 class AppRouteNames {
@@ -31,5 +35,9 @@ class AppRouteNames {
   static const String settings = 'settings';
 
   // Admin
-  static const String admin = 'admin';
+  static const String adminOverview = 'admin-overview';
+  static const String adminProducts = 'admin-products';
+  static const String adminCustomers = 'admin-customers';
+  static const String adminOrders = 'admin-orders';
+  static const String adminProfile = 'admin-profile';
 }

@@ -1,11 +1,14 @@
 import 'package:e_commerce/core/routing/app_routers.dart';
 import 'package:e_commerce/core/widgets/main_nav_bar.dart';
+import 'package:e_commerce/core/widgets/admin_nav_bar.dart';
 import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:e_commerce/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:e_commerce/features/auth/presentation/screens/login_screen.dart';
 import 'package:e_commerce/features/auth/presentation/screens/signup_screen.dart';
 
-import 'package:e_commerce/features/admin/presentation/admin_screen.dart';
+import 'package:e_commerce/features/admin/presentation/pages/overview_page.dart';
+import 'package:e_commerce/features/admin/presentation/pages/customers_page.dart';
+import 'package:e_commerce/features/admin/presentation/pages/orders_page.dart';
 import 'package:e_commerce/features/home/presentation/home_page.dart';
 // import 'package:e_commerce/features/products/domain/entities/product.dart';
 import 'package:e_commerce/features/products/presentation/admin/pages/products_page.dart';
@@ -14,14 +17,34 @@ import 'package:e_commerce/features/settings/presentation/settings_screen.dart';
 import 'package:e_commerce/features/bag/presentation/bag_screen.dart';
 import 'package:e_commerce/features/favorites/presentation/favorites_screen.dart';
 import 'package:e_commerce/features/profile/presentation/profile_screen.dart';
+import 'package:e_commerce/features/shop/presentation/shop_screen.dart';
 import 'package:flutter/widgets.dart';
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    _subscription = stream.asBroadcastStream().listen((_) {
+      notifyListeners();
+    });
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
+
 class AppGoRouter {
-  static final GoRouter route = GoRouter(
+  static GoRouter create(BuildContext context) => GoRouter(
     initialLocation: AppRouters.login,
     debugLogDiagnostics: true,
+    // Rebuild redirects when AuthBloc state changes
+    refreshListenable: GoRouterRefreshStream(context.read<AuthBloc>().stream),
     routes: [
       // ---------- AUTH ----------
       GoRoute(
@@ -40,16 +63,10 @@ class AppGoRouter {
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
 
-      // ---------- MAIN SHELL (navigation dùng chung) ----------
+      // ---------- CUSTOMER SHELL ----------
       ShellRoute(
         builder: (context, state, child) => MainNavigation(child: child),
         routes: [
-          // ---------- ADMIN ----------
-          GoRoute(
-            path: AppRouters.admin,
-            name: AppRouteNames.admin,
-            builder: (context, state) => const AdminScreen(),
-          ),
           GoRoute(
             path: AppRouters.home,
             name: AppRouteNames.home,
@@ -58,7 +75,7 @@ class AppGoRouter {
           GoRoute(
             path: AppRouters.shop,
             name: AppRouteNames.shop,
-            builder: (context, state) => const ProductScreen(),
+            builder: (context, state) => const ShopScreen(),
           ),
           GoRoute(
             path: AppRouters.bag,
@@ -79,6 +96,37 @@ class AppGoRouter {
             path: AppRouters.settings,
             name: AppRouteNames.settings,
             builder: (context, state) => const SettingsScreen(),
+          ),
+        ],
+      ),
+      // ---------- ADMIN SHELL ----------
+      ShellRoute(
+        builder: (context, state, child) => AdminNavigation(child: child),
+        routes: [
+          GoRoute(
+            path: AppRouters.adminOverview,
+            name: AppRouteNames.adminOverview,
+            builder: (context, state) => const AdminOverviewPage(),
+          ),
+          GoRoute(
+            path: AppRouters.adminProducts,
+            name: AppRouteNames.adminProducts,
+            builder: (context, state) => const ProductScreen(),
+          ),
+          GoRoute(
+            path: AppRouters.adminCustomers,
+            name: AppRouteNames.adminCustomers,
+            builder: (context, state) => const AdminCustomersPage(),
+          ),
+          GoRoute(
+            path: AppRouters.adminOrders,
+            name: AppRouteNames.adminOrders,
+            builder: (context, state) => const AdminOrdersPage(),
+          ),
+          GoRoute(
+            path: AppRouters.adminProfile,
+            name: AppRouteNames.adminProfile,
+            builder: (context, state) => const ProfileScreen(),
           ),
         ],
       ),
@@ -106,13 +154,18 @@ class AppGoRouter {
       final user = (authState as AuthAuthenticated).user;
       final isAdmin = user.role == 'admin';
       final isGoingToAdmin = location.startsWith('/admin');
+      final isGoingToCustomerShell = location.startsWith('/home') || location.startsWith('/shop') || location.startsWith('/bag') || location.startsWith('/favorites') || location.startsWith('/profile') || location.startsWith('/settings');
 
       if (isAuthFlow) {
-        return isAdmin ? '/admin' : '/home';
+        // Chỉ chuyển khỏi trang auth khi đã đăng nhập
+        return isLoggedIn ? (isAdmin ? AppRouters.adminOverview : AppRouters.home) : null;
       }
 
       if (!isAdmin && isGoingToAdmin) {
-        return '/home';
+        return AppRouters.home;
+      }
+      if (isAdmin && isGoingToCustomerShell && location != AppRouters.home && location != AppRouters.shop && location != AppRouters.bag && location != AppRouters.favorites && location != AppRouters.profile && location != AppRouters.settings) {
+        return AppRouters.adminOverview;
       }
 
       return null;

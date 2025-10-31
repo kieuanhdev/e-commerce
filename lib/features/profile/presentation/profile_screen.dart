@@ -108,7 +108,6 @@ class ProfileScreen extends StatelessWidget {
                 title: const Text('Logout', style: TextStyle(color: Colors.red)),
                 onTap: () {
                   context.read<AuthBloc>().add(AuthLogoutRequested());
-                  context.go('/login');
                 },
                 contentPadding: EdgeInsets.zero,
               ),

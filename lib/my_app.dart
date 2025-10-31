@@ -12,19 +12,21 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<AuthBloc>(
       create: (_) => sl<AuthBloc>(),
-      child: MaterialApp.router(
-        title: 'Shopping Clothes',
-        theme: ThemeData(primarySwatch: Colors.green),
-        debugShowCheckedModeBanner: false,
-        scrollBehavior: const MaterialScrollBehavior().copyWith(
-          dragDevices: {
-            PointerDeviceKind.touch,
-            PointerDeviceKind.mouse,
-            PointerDeviceKind.trackpad,
-            PointerDeviceKind.stylus,
-          },
+      child: Builder(
+        builder: (context) => MaterialApp.router(
+          title: 'Shopping Clothes',
+          theme: ThemeData(primarySwatch: Colors.green),
+          debugShowCheckedModeBanner: false,
+          scrollBehavior: const MaterialScrollBehavior().copyWith(
+            dragDevices: {
+              PointerDeviceKind.touch,
+              PointerDeviceKind.mouse,
+              PointerDeviceKind.trackpad,
+              PointerDeviceKind.stylus,
+            },
+          ),
+          routerConfig: AppGoRouter.create(context),
         ),
-        routerConfig: AppGoRouter.route,
       ),
     );
   }
