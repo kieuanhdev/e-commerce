@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'widgets/product_card.dart';
+import '../../product/presentation/widgets/product_card.dart';
 import 'widgets/bannner.dart';
-import 'product_popular.dart';
+import '../../product/presentation/widgets/product_popular_section.dart';
+import '../../product/presentation/widgets/product_grid_sliver.dart';
+import '../../product/presentation/widgets/product_pagination.dart' as pagination_widget;
 
 class ProductListPage extends StatelessWidget {
   const ProductListPage({super.key});
@@ -18,22 +20,39 @@ class ProductListPage extends StatelessWidget {
   }
 }
 
-class ProductListBody extends StatelessWidget {
+class ProductListBody extends StatefulWidget {
   const ProductListBody({super.key});
 
   @override
+  State<ProductListBody> createState() => _ProductListBodyState();
+}
+
+class _ProductListBodyState extends State<ProductListBody> {
+  static const int itemsPerPage = 10;
+  int currentPage = 0;
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _allProductKey = GlobalKey();
+
+  late final List<({String helper, String title, String description, int price})> products = List.generate(
+    32,
+    (index) => (
+      helper: 'Helper Text',
+      title: 'Subheading',
+      description: 'Descriptive Items',
+      price: 100000000,
+    ),
+  );
+
+  int get pageCount => (products.length / itemsPerPage).ceil();
+
+  @override
   Widget build(BuildContext context) {
-    final products = List.generate(
-      6,
-      (index) => (
-        helper: 'Helper Text',
-        title: 'Subheading',
-        description: 'Descriptive Items',
-        price: 100000000,
-      ),
-    );
+    final start = currentPage * itemsPerPage;
+    final end = (start + itemsPerPage).clamp(0, products.length);
+    final visibleCount = end - start;
 
     return CustomScrollView(
+      controller: _scrollController,
       slivers: [
         const SliverToBoxAdapter(
           child: Padding(
@@ -50,10 +69,11 @@ class ProductListBody extends StatelessWidget {
             child: PopularProductsSection(),
           ),
         ),
-        const SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: Text(
+            key: _allProductKey,
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: const Text(
               'All product',
               style: TextStyle(
                 fontSize: 16,
@@ -62,20 +82,36 @@ class ProductListBody extends StatelessWidget {
             ),
           ),
         ),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 0.78,
-            ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return const _ProductTile();
+        ProductGridSliver(
+          itemCount: visibleCount,
+          itemBuilder: (context, index) => const _ProductTile(),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+            child: pagination_widget.ProductPagination(
+              pageCount: pageCount,
+              currentPage: currentPage,
+              onPageSelected: (p) {
+                setState(() => currentPage = p);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  final ctx = _allProductKey.currentContext;
+                  if (ctx != null) {
+                    Scrollable.ensureVisible(
+                      ctx,
+                      duration: const Duration(milliseconds: 350),
+                      curve: Curves.easeInOut,
+                      alignment: 0.02,
+                    );
+                  } else {
+                    _scrollController.animateTo(
+                      0,
+                      duration: const Duration(milliseconds: 350),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                });
               },
-              childCount: products.length,
             ),
           ),
         ),
@@ -97,5 +133,7 @@ class _ProductTile extends StatelessWidget {
     );
   }
 }
+
+// Pagination widget moved to widgets/pagination.dart
 
 
