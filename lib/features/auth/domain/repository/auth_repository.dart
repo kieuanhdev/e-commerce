@@ -27,4 +27,10 @@ abstract class IAuthRepository {
 
   // Update user info theo profile (cho Settings)
   Future<AppUser?> updateUser({String? displayName, String? avatarUrl, String? phoneNumber, String? defaultAddressId});
+
+  // Đổi mật khẩu (yêu cầu re-auth)
+  Future<Either<Failure, void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
 }

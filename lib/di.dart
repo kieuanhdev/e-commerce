@@ -15,6 +15,7 @@ import 'package:e_commerce/features/profile/presentation/bloc/profile_bloc.dart'
 import 'package:e_commerce/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:e_commerce/features/settings/domain/usecase/get_current_user.dart';
 import 'package:e_commerce/features/settings/domain/usecase/update_user_settings.dart';
+import 'package:e_commerce/features/settings/domain/usecase/change_password.dart';
 
 final sl = GetIt.instance;
 
@@ -53,10 +54,12 @@ void initDI() {
   // --- Settings UseCases ---
   sl.registerFactory(() => GetCurrentUserUseCase(sl()));
   sl.registerFactory(() => UpdateUserSettingsUseCase(sl()));
+  sl.registerFactory(() => ChangePasswordUseCase(sl()));
   // --- Settings Bloc ---
   sl.registerFactory(() => SettingsBloc(
     getCurrentUser: sl(),
     updateUserSettings: sl(),
+    changePasswordUseCase: sl(),
   ));
 
   // --- External ---

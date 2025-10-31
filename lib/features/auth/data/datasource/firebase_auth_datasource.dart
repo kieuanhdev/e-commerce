@@ -183,4 +183,22 @@ class FirebaseAuthDatasource {
       await user.updateDisplayName(displayName);
     }
   }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No logged-in user!');
+    final email = user.email;
+    if (email == null) throw Exception('User has no email');
+
+    final credential = firebase.EmailAuthProvider.credential(
+      email: email,
+      password: currentPassword,
+    );
+
+    await user.reauthenticateWithCredential(credential);
+    await user.updatePassword(newPassword);
+  }
 }

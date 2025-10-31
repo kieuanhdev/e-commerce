@@ -3,11 +3,13 @@ import 'settings_event.dart';
 import 'settings_state.dart';
 import 'package:e_commerce/features/settings/domain/usecase/get_current_user.dart';
 import 'package:e_commerce/features/settings/domain/usecase/update_user_settings.dart';
+import 'package:e_commerce/features/settings/domain/usecase/change_password.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final GetCurrentUserUseCase getCurrentUser;
   final UpdateUserSettingsUseCase updateUserSettings;
-  SettingsBloc({required this.getCurrentUser, required this.updateUserSettings}) : super(SettingsInitial()) {
+  final ChangePasswordUseCase changePasswordUseCase;
+  SettingsBloc({required this.getCurrentUser, required this.updateUserSettings, required this.changePasswordUseCase}) : super(SettingsInitial()) {
     on<LoadSettings>((event, emit) async {
       emit(SettingsLoading());
       try {
@@ -37,6 +39,21 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           emit(SettingsUpdated('Cập nhật thành công!'));
           emit(SettingsLoaded(updated));
         }
+      } catch (e) {
+        emit(SettingsError(e.toString()));
+      }
+    });
+
+    on<ChangePasswordRequested>((event, emit) async {
+      try {
+        final result = await changePasswordUseCase(
+          currentPassword: event.currentPassword,
+          newPassword: event.newPassword,
+        );
+        result.fold(
+          (l) => emit(SettingsError(l.message)),
+          (r) => emit(const SettingsUpdated('Đổi mật khẩu thành công!')),
+        );
       } catch (e) {
         emit(SettingsError(e.toString()));
       }
