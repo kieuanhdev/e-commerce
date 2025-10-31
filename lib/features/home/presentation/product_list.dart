@@ -5,6 +5,7 @@ import 'widgets/bannner.dart';
 import '../../product/presentation/widgets/product_popular_section.dart';
 import '../../product/presentation/widgets/product_grid_sliver.dart';
 import '../../product/presentation/widgets/product_pagination.dart' as pagination_widget;
+import '../../product/presentation/pages/product_detail_page.dart';
 
 class ProductListPage extends StatelessWidget {
   const ProductListPage({super.key});
@@ -125,11 +126,22 @@ class _ProductTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ProductCard(
+    return ProductCard(
       helperText: 'Helper Text',
-      title: 'Subheading',
+      title: 'Sleeveless Ruffle',
       description: 'Descriptive Items',
-      price: 100000000,
+      price: 140.00,
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const ProductDetailPage(
+              title: 'Sleeveless Ruffle',
+              price: 140.00,
+              brand: 'Lipsy London',
+            ),
+          ),
+        );
+      },
     );
   }
 }
