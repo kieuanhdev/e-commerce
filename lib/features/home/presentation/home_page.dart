@@ -1,4 +1,4 @@
-import 'package:e_commerce/features/product/presentation/customer/widgets/product_list.dart';
+import 'package:e_commerce/features/products/presentation/customer/widgets/product_list.dart';
 import 'package:flutter/material.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
