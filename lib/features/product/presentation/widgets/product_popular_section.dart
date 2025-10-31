@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'widgets/product_card.dart';
+import 'product_card.dart';
 
 class PopularProductsSection extends StatelessWidget {
   const PopularProductsSection({super.key});
