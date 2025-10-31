@@ -1,25 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../product/presentation/widgets/product_card.dart';
-import 'widgets/bannner.dart';
-import '../../product/presentation/widgets/product_popular_section.dart';
-import '../../product/presentation/widgets/product_grid_sliver.dart';
-import '../../product/presentation/widgets/product_pagination.dart' as pagination_widget;
-import '../../product/presentation/pages/product_detail_page.dart';
-
-class ProductListPage extends StatelessWidget {
-  const ProductListPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: ProductListBody(),
-      ),
-    );
-  }
-}
+import './product_card.dart';
+import '../../../home/presentation/widgets/bannner.dart';
+import './product_popular_section.dart';
+import './product_grid_sliver.dart';
+import './product_pagination.dart' as pagination_widget;
+import '../pages/product_detail_page.dart';
 
 class ProductListBody extends StatefulWidget {
   const ProductListBody({super.key});
@@ -145,7 +131,5 @@ class _ProductTile extends StatelessWidget {
     );
   }
 }
-
-// Pagination widget moved to widgets/pagination.dart
 
 

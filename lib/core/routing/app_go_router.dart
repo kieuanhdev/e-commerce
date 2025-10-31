@@ -4,7 +4,7 @@ import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:e_commerce/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:e_commerce/features/auth/presentation/screens/login_screen.dart';
 import 'package:e_commerce/features/auth/presentation/screens/signup_screen.dart';
-import 'package:e_commerce/features/home/presentation/home_page.dart';
+
 import 'package:e_commerce/features/admin/presentation/admin_screen.dart';
 import 'package:e_commerce/features/products/domain/entities/product.dart';
 import 'package:e_commerce/features/products/presentation/admin/pages/products_page.dart';
