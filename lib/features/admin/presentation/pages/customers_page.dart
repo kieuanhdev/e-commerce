@@ -17,8 +17,34 @@ class AdminCustomersPage extends StatelessWidget {
   }
 }
 
-class _CustomersPageContent extends StatelessWidget {
+class _CustomersPageContent extends StatefulWidget {
   const _CustomersPageContent();
+
+  @override
+  State<_CustomersPageContent> createState() => _CustomersPageContentState();
+}
+
+class _CustomersPageContentState extends State<_CustomersPageContent> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<AppUser> _filterUsers(List<AppUser> users, String query) {
+    if (query.isEmpty) {
+      return users;
+    }
+    final lowerQuery = query.toLowerCase();
+    return users.where((user) {
+      final displayName = (user.displayName ?? '').toLowerCase();
+      final email = user.email.toLowerCase();
+      return displayName.contains(lowerQuery) || email.contains(lowerQuery);
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,13 +101,25 @@ class _CustomersPageContent extends StatelessWidget {
 
           if (state is CustomersLoaded) {
             if (state.users.isEmpty) {
-              return const Center(
-                child: Text('Chưa có người dùng nào'),
+              return Column(
+                children: [
+                  // Search bar
+                  _buildSearchBar(),
+                  const Expanded(
+                    child: Center(
+                      child: Text('Chưa có người dùng nào'),
+                    ),
+                  ),
+                ],
               );
             }
 
+            final filteredUsers = _filterUsers(state.users, _searchQuery);
+
             return Column(
               children: [
+                // Search bar
+                _buildSearchBar(),
                 // Stats bar
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -116,22 +154,123 @@ class _CustomersPageContent extends StatelessWidget {
                     ],
                   ),
                 ),
+                // Search results info
+                if (_searchQuery.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 8),
+                    color: Colors.blue[50],
+                    child: Row(
+                      children: [
+                        Icon(Icons.search, size: 16, color: Colors.blue[700]),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Tìm thấy ${filteredUsers.length} kết quả cho "$_searchQuery"',
+                          style: TextStyle(
+                            color: Colors.blue[700],
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 // Users list
                 Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(8),
-                    itemCount: state.users.length,
-                    itemBuilder: (context, index) {
-                      final user = state.users[index];
-                      return _UserCard(user: user);
-                    },
-                  ),
+                  child: filteredUsers.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.search_off,
+                                  size: 64, color: Colors.grey[400]),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Không tìm thấy người dùng nào',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Thử tìm kiếm với từ khóa khác',
+                                style: TextStyle(
+                                  color: Colors.grey[500],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(8),
+                          itemCount: filteredUsers.length,
+                          itemBuilder: (context, index) {
+                            final user = filteredUsers[index];
+                            return _UserCard(user: user);
+                          },
+                        ),
                 ),
               ],
             );
           }
 
           return const SizedBox.shrink();
+        },
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Tìm kiếm theo tên hoặc email...',
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    setState(() {
+                      _searchController.clear();
+                      _searchQuery = '';
+                    });
+                  },
+                )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue[300]!),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+        ),
+        onChanged: (value) {
+          setState(() {
+            _searchQuery = value;
+          });
         },
       ),
     );
@@ -266,6 +405,7 @@ class _UserCard extends StatelessWidget {
           backgroundImage: user.avatarUrl != null
               ? NetworkImage(user.avatarUrl!)
               : null,
+          backgroundColor: user.isDisabled ? Colors.grey : Colors.blue,
           child: user.avatarUrl == null
               ? Text(
                   user.displayName?.isNotEmpty == true
@@ -274,7 +414,6 @@ class _UserCard extends StatelessWidget {
                   style: const TextStyle(color: Colors.white),
                 )
               : null,
-          backgroundColor: user.isDisabled ? Colors.grey : Colors.blue,
         ),
         title: Text(
           user.displayName ?? user.email,
