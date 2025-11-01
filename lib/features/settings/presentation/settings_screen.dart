@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:e_commerce/features/settings/presentation/bloc/settings_bloc.dart';
@@ -22,6 +23,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController _confirmPasswordController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
   bool _initialized = false;
+  Uint8List? _previewImageBytes; // Lưu bytes của ảnh đã chọn để preview
 
   @override
   void dispose() {
@@ -68,8 +70,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
 
       if (image != null) {
-        // Gửi event upload avatar
-        blocContext.read<SettingsBloc>().add(UploadAvatarImage(imageFile: image));
+        // Đọc bytes từ file để preview
+        final imageBytes = await image.readAsBytes();
+        setState(() {
+          _previewImageBytes = imageBytes;
+        });
+        // Chỉ lưu ảnh để preview, chưa upload
+        blocContext.read<SettingsBloc>().add(ImageSelected(imageFile: image));
       }
     } catch (e) {
       if (mounted) {
@@ -131,14 +138,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             );
           }
           
-          // Xử lý UploadingAvatar state - hiển thị overlay loading
+          // Lấy user từ state
           AppUser? currentUser;
-          bool isUploading = false;
-          if (state is UploadingAvatar) {
+          if (state is SettingsLoaded) {
             currentUser = state.user;
-            isUploading = true;
-          } else if (state is SettingsLoaded) {
-            currentUser = state.user;
+            // Nếu có ảnh mới được chọn, giữ lại preview bytes
+            // Nếu đã save thành công (selectedImagePath = null), xóa preview
+            if (state.selectedImagePath == null && _previewImageBytes != null) {
+              // Sau khi save thành công, reset preview
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() {
+                    _previewImageBytes = null;
+                  });
+                }
+              });
+            }
           }
           
           if (currentUser != null) {
@@ -192,8 +207,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           children: [
                             CircleAvatar(
                               radius: 36,
-                              backgroundImage:
-                                  (user.avatarUrl != null &&
+                              backgroundImage: _previewImageBytes != null
+                                  ? MemoryImage(_previewImageBytes!) as ImageProvider
+                                  : (user.avatarUrl != null &&
                                       user.avatarUrl!.isNotEmpty)
                                   ? NetworkImage(user.avatarUrl!)
                                   : const AssetImage('images/avatar.png')
@@ -281,9 +297,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
+                          final currentState = context.read<SettingsBloc>().state;
+                          XFile? selectedImage;
+                          if (currentState is SettingsLoaded && currentState.selectedImagePath != null) {
+                            selectedImage = XFile(currentState.selectedImagePath!);
+                          }
+                          
                           context.read<SettingsBloc>().add(
                             UpdateUserSettings(
                               displayName: _displayNameController.text.trim(),
+                              avatarImageFile: selectedImage,
                             ),
                           );
                         },
@@ -297,28 +320,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                 ),
-                // Loading overlay khi đang upload
-                if (isUploading)
-                  Container(
-                    color: Colors.black.withOpacity(0.3),
-                    child: const Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(),
-                          SizedBox(height: 16),
-                          Text(
-                            'Đang upload avatar...',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
               ],
             );
           }

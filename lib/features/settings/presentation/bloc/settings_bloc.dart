@@ -32,12 +32,48 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       }
     });
 
+    // Khi chọn ảnh, chỉ lưu path để preview, chưa upload
+    on<ImageSelected>((event, emit) async {
+      final currentState = state;
+      if (currentState is SettingsLoaded) {
+        // Giữ nguyên user, chỉ thêm selectedImagePath để preview
+        emit(SettingsLoaded(currentState.user, selectedImagePath: event.imageFile.path));
+      }
+    });
+
     on<UpdateUserSettings>((event, emit) async {
       emit(SettingsLoading());
       try {
+        String? avatarUrl;
+        
+        // Nếu có ảnh mới được chọn, upload lên Cloudinary trước
+        if (event.avatarImageFile != null) {
+          try {
+            final updated = await uploadAvatarImageUseCase(event.avatarImageFile!);
+            if (updated != null) {
+              avatarUrl = updated.avatarUrl;
+            } else {
+              emit(const SettingsError('Upload avatar thất bại!'));
+              final user = await getCurrentUser();
+              if (user != null) {
+                emit(SettingsLoaded(user));
+              }
+              return;
+            }
+          } catch (e) {
+            emit(SettingsError('Lỗi khi upload avatar: $e'));
+            final user = await getCurrentUser();
+            if (user != null) {
+              emit(SettingsLoaded(user));
+            }
+            return;
+          }
+        }
+        
+        // Cập nhật thông tin user (bao gồm avatarUrl nếu có)
         final updated = await updateUserSettings(
           displayName: event.displayName,
-          avatarUrl: event.avatarUrl,
+          avatarUrl: avatarUrl,
           phoneNumber: event.phoneNumber,
           defaultAddressId: event.defaultAddressId,
         );
@@ -45,7 +81,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           emit(const SettingsError('Cập nhật thất bại!'));
         } else {
           emit(SettingsUpdated('Cập nhật thành công!'));
-          emit(SettingsLoaded(updated));
+          emit(SettingsLoaded(updated)); // Xóa selectedImagePath sau khi lưu thành công
         }
       } catch (e) {
         emit(SettingsError(e.toString()));
@@ -67,44 +103,6 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       }
     });
 
-    on<UploadAvatarImage>((event, emit) async {
-      // Lấy user hiện tại để hiển thị trong UploadingAvatar state
-      final currentUser = await getCurrentUser();
-      if (currentUser != null) {
-        emit(UploadingAvatar(currentUser));
-      } else {
-        emit(SettingsLoading());
-      }
-      
-      try {
-        // Upload ảnh và cập nhật profile thông qua usecase
-        final updated = await uploadAvatarImageUseCase(event.imageFile);
-        
-        if (updated == null) {
-          emit(const SettingsError('Cập nhật avatar thất bại!'));
-          // Reload để có user data
-          final user = await getCurrentUser();
-          if (user != null) {
-            emit(SettingsLoaded(user));
-          }
-        } else {
-          emit(const SettingsUpdated('Cập nhật avatar thành công!'));
-          emit(SettingsLoaded(updated));
-        }
-      } catch (e, stackTrace) {
-        print('[SettingsBloc] Lỗi khi upload avatar: $e');
-        print('[SettingsBloc] Stack trace: $stackTrace');
-        
-        // Reload user để quay về trạng thái ban đầu
-        final user = await getCurrentUser();
-        if (user != null) {
-          emit(SettingsError(e.toString()));
-          emit(SettingsLoaded(user)); // Quay về trạng thái loaded sau khi có lỗi
-        } else {
-          emit(SettingsError(e.toString()));
-        }
-      }
-    });
     
     // Load settings sau khi đã đăng ký tất cả handlers
     add(LoadSettings());

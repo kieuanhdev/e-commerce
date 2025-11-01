@@ -11,9 +11,10 @@ class SettingsInitial extends SettingsState {}
 class SettingsLoading extends SettingsState {}
 class SettingsLoaded extends SettingsState {
   final AppUser user;
-  const SettingsLoaded(this.user);
+  final String? selectedImagePath; // Path của ảnh đã chọn nhưng chưa lưu
+  const SettingsLoaded(this.user, {this.selectedImagePath});
   @override
-  List<Object?> get props => [user];
+  List<Object?> get props => [user, selectedImagePath];
 }
 class SettingsError extends SettingsState {
   final String message;

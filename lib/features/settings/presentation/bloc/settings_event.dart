@@ -11,19 +11,19 @@ class LoadSettings extends SettingsEvent {}
 
 class UpdateUserSettings extends SettingsEvent {
   final String? displayName;
-  final String? avatarUrl;
+  final XFile? avatarImageFile; // Ảnh mới đã chọn (nếu có)
   final String? phoneNumber;
   final String? defaultAddressId;
 
   const UpdateUserSettings({
     this.displayName,
-    this.avatarUrl,
+    this.avatarImageFile,
     this.phoneNumber,
     this.defaultAddressId,
   });
 
   @override
-  List<Object?> get props => [displayName, avatarUrl, phoneNumber, defaultAddressId];
+  List<Object?> get props => [displayName, avatarImageFile, phoneNumber, defaultAddressId];
 }
 
 class ChangePasswordRequested extends SettingsEvent {
@@ -39,10 +39,10 @@ class ChangePasswordRequested extends SettingsEvent {
   List<Object?> get props => [currentPassword, newPassword];
 }
 
-class UploadAvatarImage extends SettingsEvent {
+class ImageSelected extends SettingsEvent {
   final XFile imageFile;
 
-  const UploadAvatarImage({required this.imageFile});
+  const ImageSelected({required this.imageFile});
 
   @override
   List<Object?> get props => [imageFile];
