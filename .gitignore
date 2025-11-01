@@ -12,6 +12,11 @@
 .swiftpm/
 migrate_working_dir/
 
+# Ignore Flutter generated files
+**/generated_plugin_registrant.*
+**/generated_plugins.cmake
+
+
 # IntelliJ related
 *.iml
 *.ipr
