@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce/features/auth/data/model/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
-import 'package:rxdart/rxdart.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 
 
@@ -75,29 +77,185 @@ class FirebaseAuthDatasource {
 
   Future<void> logout() => _auth.signOut();
 
-  // ĐÃ CẬP NHẬT: Lấy stream user đầy đủ
+  // Gửi email đặt lại mật khẩu
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
+
+  // Đăng nhập bằng Google
+  Future<UserModel> signInWithGoogle() async {
+    final googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) {
+      throw Exception('Đã hủy đăng nhập Google');
+    }
+    final googleAuth = await googleUser.authentication;
+    final credential = firebase.GoogleAuthProvider.credential(
+      idToken: googleAuth.idToken,
+      accessToken: googleAuth.accessToken,
+    );
+
+    final userCredential = await _auth.signInWithCredential(credential);
+    final uid = userCredential.user!.uid;
+
+    // Lấy hoặc tạo hồ sơ Firestore
+    final docRef = _usersCollection.doc(uid);
+    final snap = await docRef.get();
+    if (!snap.exists) {
+      final newUser = UserModel(
+        id: uid,
+        email: userCredential.user!.email ?? googleUser.email,
+        displayName: userCredential.user!.displayName ?? googleUser.displayName ?? 'User',
+        phoneNumber: userCredential.user!.phoneNumber,
+        role: 'customer',
+        isDisabled: false,
+        createdAt: DateTime.now(),
+        avatarUrl: userCredential.user!.photoURL,
+        defaultAddressId: null,
+      );
+      await docRef.set(newUser.toMap());
+      return newUser;
+    }
+    return UserModel.fromSnapshot(snap);
+  }
+
+  // ĐÃ CẬP NHẬT: Lấy stream user đầy đủ (KHÔNG dùng yield*/RxDart, chỉ controller.listen)
   Stream<UserModel?> get authStateChanges {
-    // Lắng nghe stream trạng thái của FirebaseAuth
-    return _auth.authStateChanges().switchMap((firebaseUser) {
+    final controller = StreamController<UserModel?>();
+
+    StreamSubscription? userDocSub;
+    StreamSubscription? authSub;
+
+    authSub = _auth.authStateChanges().listen((firebaseUser) {
+      userDocSub?.cancel();
       if (firebaseUser == null) {
-        // Nếu user là null (đã đăng xuất), trả về stream chứa null
-        return Stream.value(null);
+        controller.add(null);
       } else {
-        // Nếu đã đăng nhập, dùng uid để lắng nghe thay đổi
-        // trên document của user đó trong Firestore
-        return _usersCollection
-            .doc(firebaseUser.uid)
-            .snapshots()
-            .map((snapshot) {
-          if (snapshot.exists) {
-            return UserModel.fromSnapshot(snapshot);
-          } else {
-            // Trường hợp hiếm: có user Auth nhưng không có
-            // record Firestore (có thể do lỗi lúc đăng ký)
-            return null; 
+        userDocSub = _usersCollection.doc(firebaseUser.uid).snapshots().listen((snap) {
+          try {
+            if (snap.exists && snap.data() != null) {
+              controller.add(UserModel.fromSnapshot(snap));
+            } else {
+              controller.add(null);
+            }
+          } catch (e, stack) {
+            print('[User Stream Error]: $e $stack');
+            controller.add(null);
           }
         });
       }
     });
+
+    controller.onCancel = () {
+      authSub?.cancel();
+      userDocSub?.cancel();
+    };
+
+    return controller.stream;
+  }
+
+  // Lấy user hiện tại (dùng cho profile)
+  Future<UserModel?> getCurrentUser() async {
+    final current = _auth.currentUser;
+    if (current == null) return null;
+    final doc = await _usersCollection.doc(current.uid).get();
+    if (doc.exists) {
+      return UserModel.fromSnapshot(doc);
+    } else {
+      return null;
+    }
+  }
+
+  // Update user profile (cho Settings)
+  Future<void> updateUser({String? displayName, String? avatarUrl, String? phoneNumber, String? defaultAddressId}) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No logged-in user!');
+    final Map<String, dynamic> data = {};
+    if (displayName != null) data['displayName'] = displayName;
+    if (avatarUrl != null) data['avatarUrl'] = avatarUrl;
+    if (phoneNumber != null) data['phoneNumber'] = phoneNumber;
+    if (defaultAddressId != null) data['defaultAddressId'] = defaultAddressId;
+
+    if (data.isEmpty) throw Exception('No update data provided');
+
+    await _usersCollection.doc(user.uid).update(data);
+    // Nếu user đổi displayName thì update lên FirebaseAuth profile luôn.
+    if (displayName != null) {
+      await user.updateDisplayName(displayName);
+    }
+  }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No logged-in user!');
+    final email = user.email;
+    if (email == null) throw Exception('User has no email');
+
+    final credential = firebase.EmailAuthProvider.credential(
+      email: email,
+      password: currentPassword,
+    );
+
+    await user.reauthenticateWithCredential(credential);
+    await user.updatePassword(newPassword);
+  }
+  
+  // Lấy tất cả users (cho admin)
+  Stream<List<UserModel>> getAllUsers() {
+    return _usersCollection
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => UserModel.fromSnapshot(doc))
+            .toList());
+  }
+
+  // Cập nhật trạng thái khóa/mở khóa tài khoản (cho admin)
+  Future<void> updateUserStatus(String userId, bool isDisabled) async {
+    await _usersCollection.doc(userId).update({'isDisabled': isDisabled});
+  }
+
+  // Tạo user mới bởi admin
+  Future<UserModel> createUserByAdmin({
+    required String email,
+    required String password,
+    required String displayName,
+    String? phoneNumber,
+    String role = 'customer',
+  }) async {
+    try {
+      // 1. Tạo user trong Firebase Auth
+      final userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final uid = userCredential.user!.uid;
+
+      // 2. Tạo đối tượng UserModel mới
+      final newUser = UserModel(
+        id: uid,
+        email: email,
+        displayName: displayName,
+        phoneNumber: phoneNumber,
+        role: role,
+        isDisabled: false,
+        createdAt: DateTime.now(),
+        avatarUrl: null,
+        defaultAddressId: null,
+      );
+
+      // 3. Ghi đối tượng này vào Firestore
+      await _usersCollection.doc(uid).set(newUser.toMap());
+
+      // 4. Cập nhật displayName trong Auth
+      await userCredential.user?.updateDisplayName(displayName);
+
+      return newUser;
+    } on firebase.FirebaseException catch (e) {
+      throw Exception(e.message ?? 'Lỗi khi tạo người dùng');
+    }
   }
 }

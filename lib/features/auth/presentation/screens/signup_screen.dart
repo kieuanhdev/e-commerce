@@ -17,12 +17,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final nameController = TextEditingController(text: 'kieuanh');
   final emailController = TextEditingController(text: 'kieuanh.dev@gmail.com');
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
   final phoneController = TextEditingController();
 
   bool isNameValid = true;
   bool isEmailValid = true;
   bool isPasswordValid = true;
+  bool isConfirmPasswordValid = true;
   bool isPhoneValid = true;
+  bool isPasswordObscured = true;
+  bool isConfirmObscured = true;
+  bool hasInteractedWithConfirm = false;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +38,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         } else if (state is AuthAuthenticated) {
           // Navigate by role
           final isAdmin = state.user.role == 'admin';
-          context.go(isAdmin ? '/admin' : '/home');
+          context.go(isAdmin ? '/admin/overview' : '/home');
         } else if (state is AuthFailure) {
           // Show error message
           ScaffoldMessenger.of(context).showSnackBar(
@@ -87,10 +92,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
               AuthTextField(
                 label: 'Password',
                 controller: passwordController,
-                obscureText: true,
+                obscureText: isPasswordObscured,
                 isValid: isPasswordValid,
-                onChanged: (v) =>
-                    setState(() => isPasswordValid = v.length >= 6),
+                showValidationIcon: false,
+                errorText: isPasswordValid ? null : 'Password must be at least 6 characters',
+                suffixIcon: IconButton(
+                  icon: Icon(isPasswordObscured ? Icons.visibility_off : Icons.visibility),
+                  onPressed: () => setState(() => isPasswordObscured = !isPasswordObscured),
+                ),
+                onChanged: (v) => setState(() {
+                  isPasswordValid = v.length >= 6;
+                  // Do not validate confirm here; only validate when user edits confirm field
+                }),
+              ),
+              const SizedBox(height: 16),
+
+              AuthTextField(
+                label: 'Re-enter password',
+                controller: confirmPasswordController,
+                obscureText: isConfirmObscured,
+                isValid: isConfirmPasswordValid,
+                showValidationIcon: false,
+                errorText: hasInteractedWithConfirm && !isConfirmPasswordValid ? 'Passwords do not match' : null,
+                suffixIcon: IconButton(
+                  icon: Icon(isConfirmObscured ? Icons.visibility_off : Icons.visibility),
+                  onPressed: () => setState(() => isConfirmObscured = !isConfirmObscured),
+                ),
+                onChanged: (v) => setState(() {
+                  hasInteractedWithConfirm = true;
+                  isConfirmPasswordValid = v == passwordController.text && isPasswordValid;
+                }),
               ),
               const SizedBox(height: 16),
 
@@ -135,7 +166,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _handleSignUp() {
     // Validate form
-    if (!isNameValid || !isEmailValid || !isPasswordValid || !isPhoneValid) {
+    if (!isNameValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordValid || !isPhoneValid) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill in all required fields correctly'),
@@ -149,6 +180,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Password must be at least 6 characters'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (confirmPasswordController.text != passwordController.text) {
+      setState(() {
+        isConfirmPasswordValid = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Passwords do not match'),
           backgroundColor: Colors.red,
         ),
       );

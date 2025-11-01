@@ -35,3 +35,10 @@ class AuthRegisterRequested extends AuthEvent {
 }
 
 class AuthLogoutRequested extends AuthEvent {}
+
+class AuthForgotPasswordRequested extends AuthEvent {
+  final String email;
+  const AuthForgotPasswordRequested(this.email);
+}
+
+class AuthGoogleSignInRequested extends AuthEvent {}

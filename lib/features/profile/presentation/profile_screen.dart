@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart'; // thêm import go_router
+import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -22,65 +24,84 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: ListView(
-          children: [
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('images/avatar.png'),
-                ),
-                const SizedBox(width: 15),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      "Kieuanhdev",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+      body: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, authState) {
+          if (authState is AuthAuthenticated) {
+            final user = authState.user;
+            final avatar = (user.avatarUrl != null && user.avatarUrl!.isNotEmpty)
+                ? NetworkImage(user.avatarUrl!)
+                : const AssetImage('images/avatar.png') as ImageProvider;
+            
+            return Padding(
+              padding: const EdgeInsets.all(20),
+              child: ListView(
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundImage: avatar,
                       ),
-                    ),
-                    Text(
-                      "kieuanh.dev@gmail.com",
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 30),
-
-            _buildNavTile(
-              context,
-              "My orders",
-              "Already have 12 orders",
-              "/orders",
-            ),
-            _buildNavTile(context, "Shipping address", "3 address", "/address"),
-            _buildNavTile(context, "Payment methods", "Visa **34", "/payment"),
-            _buildNavTile(
-              context,
-              "Promocodes",
-              "You have special promocodes",
-              "/promocodes",
-            ),
-            _buildNavTile(
-              context,
-              "My reviews",
-              "Review for 4 items",
-              "/reviews",
-            ),
-            _buildNavTile(
-              context,
-              "Settings",
-              "Notifications, password",
-              "/settings",
-            ),
-          ],
-        ),
+                      const SizedBox(width: 15),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user.displayName ?? 'No Name',
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            user.email,
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  _buildNavTile(
+                    context,
+                    "My orders",
+                    "Already have 12 orders",
+                    "/orders",
+                  ),
+                  _buildNavTile(context, "Shipping address", "3 address", "/address"),
+                  _buildNavTile(context, "Payment methods", "Visa **34", "/payment"),
+                  _buildNavTile(
+                    context,
+                    "Promocodes",
+                    "You have special promocodes",
+                    "/promocodes",
+                  ),
+                  _buildNavTile(
+                    context,
+                    "My reviews",
+                    "Review for 4 items",
+                    "/reviews",
+                  ),
+                  _buildNavTile(
+                    context,
+                    "Settings",
+                    "Notifications, password",
+                    "/settings",
+                  ),
+                  const SizedBox(height: 24),
+                  ListTile(
+                    leading: const Icon(Icons.logout, color: Colors.red),
+                    title: const Text('Logout', style: TextStyle(color: Colors.red)),
+                    onTap: () {
+                      context.read<AuthBloc>().add(AuthLogoutRequested());
+                    },
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ],
+              ),
+            );
+          }
+          
+          // Nếu chưa đăng nhập hoặc đang loading
+          return const Center(child: CircularProgressIndicator());
+        },
       ),
     );
   }

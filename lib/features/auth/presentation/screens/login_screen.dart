@@ -14,11 +14,13 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final emailController = TextEditingController(text: 'kieuanh.dev@gmail.com');
+  final emailController = TextEditingController(text: '123@gmail.com');
   final passwordController = TextEditingController();
 
   bool isEmailValid = true;
   bool isPasswordValid = true;
+  bool isPasswordObscured = true;
+  String? passwordError;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
         } else if (state is AuthAuthenticated) {
           // Navigate by role
           final isAdmin = state.user.role == 'admin';
-          context.go(isAdmin ? '/admin' : '/home');
+          context.go(isAdmin ? '/admin/overview' : '/home');
         } else if (state is AuthFailure) {
           // Show error message
           ScaffoldMessenger.of(context).showSnackBar(
@@ -74,10 +76,18 @@ class _LoginScreenState extends State<LoginScreen> {
               AuthTextField(
                 label: 'Password',
                 controller: passwordController,
-                obscureText: true,
+                obscureText: isPasswordObscured,
                 isValid: isPasswordValid,
-                onChanged: (v) =>
-                    setState(() => isPasswordValid = v.length >= 6),
+                showValidationIcon: false,
+                errorText: isPasswordValid ? null : 'Password must be at least 6 characters',
+                suffixIcon: IconButton(
+                  icon: Icon(isPasswordObscured ? Icons.visibility_off : Icons.visibility),
+                  onPressed: () => setState(() => isPasswordObscured = !isPasswordObscured),
+                ),
+                onChanged: (v) => setState(() {
+                  isPasswordValid = v.length >= 6;
+                  passwordError = isPasswordValid ? null : 'Password must be at least 6 characters';
+                }),
               ),
               const SizedBox(height: 10),
 
@@ -86,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: TextButton.icon(
                   onPressed: () {
                     context.push(
-                      '/forgot',
+                      '/forgot-password',
                     ); // điều hướng sang trang Forgot Password
                   },
                   icon: const Icon(Icons.arrow_forward, size: 16),

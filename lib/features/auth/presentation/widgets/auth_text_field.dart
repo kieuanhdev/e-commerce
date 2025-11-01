@@ -6,6 +6,9 @@ class AuthTextField extends StatelessWidget {
   final bool obscureText;
   final bool isValid;
   final ValueChanged<String>? onChanged;
+  final String? errorText;
+  final Widget? suffixIcon;
+  final bool showValidationIcon;
 
   const AuthTextField({
     super.key,
@@ -14,6 +17,9 @@ class AuthTextField extends StatelessWidget {
     this.obscureText = false,
     this.isValid = true,
     this.onChanged,
+    this.errorText,
+    this.suffixIcon,
+    this.showValidationIcon = true,
   });
 
   @override
@@ -24,9 +30,10 @@ class AuthTextField extends StatelessWidget {
       onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,
-        suffixIcon: isValid
+        errorText: errorText,
+        suffixIcon: suffixIcon ?? (showValidationIcon && isValid
             ? const Icon(Icons.check, color: Colors.green)
-            : null,
+            : null),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,

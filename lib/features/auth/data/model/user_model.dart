@@ -16,21 +16,21 @@ class UserModel extends AppUser {
 
   // Factory để tạo UserModel từ Firestore Document
   factory UserModel.fromSnapshot(DocumentSnapshot snap) {
-    final data = snap.data() as Map<String, dynamic>;
-
-    return UserModel(
-      id: snap.id, // Lấy ID từ document
-      email: data['email'],
-      displayName: data['displayName'],
-      phoneNumber: data['phoneNumber'],
-      avatarUrl: data['avatarUrl'],
-      role: data['role'] ?? 'customer',
-      defaultAddressId: data['defaultAddressId'],
-      isDisabled: data['isDisabled'] ?? false,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-    );
-  }
-
+  final data = snap.data() as Map<String, dynamic>? ?? {};
+  return UserModel(
+    id: snap.id,
+    email: data['email'] ?? '',
+    displayName: data['displayName'],
+    phoneNumber: data['phoneNumber'],
+    avatarUrl: data['avatarUrl'],
+    role: data['role'] ?? 'customer',
+    defaultAddressId: data['defaultAddressId'],
+    isDisabled: data['isDisabled'] ?? false,
+    createdAt: (data['createdAt'] is Timestamp)
+        ? (data['createdAt'] as Timestamp).toDate()
+        : DateTime.now(),
+  );
+}
   // Hàm để chuyển đổi UserModel thành Map để ghi lên Firestore
   Map<String, dynamic> toMap() {
     return {
