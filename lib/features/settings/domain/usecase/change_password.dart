@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:e_commerce/core/utils/failure.dart';
-import 'package:e_commerce/features/auth/domain/repository/auth_repository.dart';
+import 'package:e_commerce/features/settings/domain/repository/settings_repository.dart';
 
 class ChangePasswordUseCase {
-  final IAuthRepository repo;
+  final ISettingsRepository repo;
   ChangePasswordUseCase(this.repo);
 
   Future<Either<Failure, void>> call({

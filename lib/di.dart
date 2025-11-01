@@ -16,6 +16,10 @@ import 'package:e_commerce/features/settings/presentation/bloc/settings_bloc.dar
 import 'package:e_commerce/features/settings/domain/usecase/get_current_user.dart';
 import 'package:e_commerce/features/settings/domain/usecase/update_user_settings.dart';
 import 'package:e_commerce/features/settings/domain/usecase/change_password.dart';
+import 'package:e_commerce/features/settings/domain/usecase/upload_avatar_image.dart';
+import 'package:e_commerce/features/settings/data/datasource/settings_datasource.dart';
+import 'package:e_commerce/features/settings/data/repository/settings_repository_impl.dart';
+import 'package:e_commerce/features/settings/domain/repository/settings_repository.dart';
 import 'package:e_commerce/core/data/cloudinary_service.dart';
 
 final sl = GetIt.instance;
@@ -52,20 +56,27 @@ void initDI() {
 
   // (Gộp vào AuthBloc) Bỏ đăng ký ForgotPasswordBloc
 
+  // --- Cloudinary Service (dùng chung cho toàn app) ---
+  sl.registerLazySingleton(() => CloudinaryService());
+  
+  // --- Settings DataSource ---
+  sl.registerLazySingleton(() => SettingsDatasource(sl(), sl(), sl()));
+  
+  // --- Settings Repository ---
+  sl.registerLazySingleton<ISettingsRepository>(() => SettingsRepositoryImpl(sl()));
+  
   // --- Settings UseCases ---
   sl.registerFactory(() => GetCurrentUserUseCase(sl()));
   sl.registerFactory(() => UpdateUserSettingsUseCase(sl()));
   sl.registerFactory(() => ChangePasswordUseCase(sl()));
-  
-  // --- Cloudinary Service ---
-  sl.registerLazySingleton(() => CloudinaryService());
+  sl.registerFactory(() => UploadAvatarImageUseCase(sl()));
   
   // --- Settings Bloc ---
   sl.registerFactory(() => SettingsBloc(
     getCurrentUser: sl(),
     updateUserSettings: sl(),
     changePasswordUseCase: sl(),
-    cloudinaryService: sl(),
+    uploadAvatarImageUseCase: sl(),
   ));
 
   // --- External ---

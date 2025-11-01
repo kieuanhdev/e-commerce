@@ -4,19 +4,19 @@ import 'settings_state.dart';
 import 'package:e_commerce/features/settings/domain/usecase/get_current_user.dart';
 import 'package:e_commerce/features/settings/domain/usecase/update_user_settings.dart';
 import 'package:e_commerce/features/settings/domain/usecase/change_password.dart';
-import 'package:e_commerce/core/data/cloudinary_service.dart';
+import 'package:e_commerce/features/settings/domain/usecase/upload_avatar_image.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final GetCurrentUserUseCase getCurrentUser;
   final UpdateUserSettingsUseCase updateUserSettings;
   final ChangePasswordUseCase changePasswordUseCase;
-  final CloudinaryService cloudinaryService;
+  final UploadAvatarImageUseCase uploadAvatarImageUseCase;
   
   SettingsBloc({
     required this.getCurrentUser,
     required this.updateUserSettings,
     required this.changePasswordUseCase,
-    required this.cloudinaryService,
+    required this.uploadAvatarImageUseCase,
   }) : super(SettingsInitial()) {
     on<LoadSettings>((event, emit) async {
       emit(SettingsLoading());
@@ -77,28 +77,17 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       }
       
       try {
-        print('[SettingsBloc] Bắt đầu upload avatar lên Cloudinary...');
-        
-        // Upload ảnh lên Cloudinary
-        final avatarUrl = await cloudinaryService.uploadAvatarImage(event.imageFile);
-        print('[SettingsBloc] Upload Cloudinary thành công, URL: $avatarUrl');
-        
-        // Cập nhật avatarUrl trong user profile trên Firebase
-        print('[SettingsBloc] Đang cập nhật profile trên Firebase...');
-        final updated = await updateUserSettings(
-          avatarUrl: avatarUrl,
-        );
+        // Upload ảnh và cập nhật profile thông qua usecase
+        final updated = await uploadAvatarImageUseCase(event.imageFile);
         
         if (updated == null) {
-          print('[SettingsBloc] Cập nhật profile thất bại');
-          emit(SettingsError('Cập nhật avatar thất bại!'));
+          emit(const SettingsError('Cập nhật avatar thất bại!'));
           // Reload để có user data
           final user = await getCurrentUser();
           if (user != null) {
             emit(SettingsLoaded(user));
           }
         } else {
-          print('[SettingsBloc] Cập nhật profile thành công');
           emit(const SettingsUpdated('Cập nhật avatar thành công!'));
           emit(SettingsLoaded(updated));
         }
