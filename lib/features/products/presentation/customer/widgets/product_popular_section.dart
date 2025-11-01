@@ -73,6 +73,7 @@ class PopularProductsSection extends StatelessWidget {
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (_) => ProductDetailPage(
+                                  productId: p.id,
                                   title: p.name,
                                   price: p.price,
                                   brand: 'Brand',

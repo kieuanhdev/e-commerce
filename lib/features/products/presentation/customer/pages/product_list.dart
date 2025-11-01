@@ -119,6 +119,7 @@ class _ProductListBodyState extends State<ProductListBody> {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => ProductDetailPage(
+                        productId: product.id,
                         title: product.name,
                         price: product.price,
                         brand: 'Brand',

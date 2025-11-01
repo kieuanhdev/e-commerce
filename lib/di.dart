@@ -17,6 +17,17 @@ import 'package:e_commerce/features/settings/domain/usecase/update_user_settings
 import 'package:e_commerce/features/settings/domain/usecase/change_password.dart';
 import 'package:e_commerce/features/settings/domain/usecase/upload_avatar_image.dart';
 import 'package:e_commerce/core/data/cloudinary_service.dart';
+import 'package:e_commerce/features/bag/data/datasource/bag_datasource.dart';
+import 'package:e_commerce/features/bag/data/repository/bag_repository_impl.dart';
+import 'package:e_commerce/features/bag/domain/repository/bag_repository.dart';
+import 'package:e_commerce/features/bag/domain/usecase/get_cart_items_with_products.dart';
+import 'package:e_commerce/features/bag/domain/usecase/add_to_cart.dart';
+import 'package:e_commerce/features/bag/domain/usecase/remove_from_cart.dart';
+import 'package:e_commerce/features/bag/domain/usecase/update_cart_item_quantity.dart';
+import 'package:e_commerce/features/bag/presentation/bloc/bag_bloc.dart';
+import 'package:e_commerce/features/products/data/datasources/product_remote_datasource.dart';
+import 'package:e_commerce/features/products/data/repositories/product_repository_impl.dart';
+import 'package:e_commerce/features/products/domain/repositories/product_repository.dart';
 
 final sl = GetIt.instance;
 
@@ -69,5 +80,30 @@ void initDI() {
     updateUserSettings: sl(),
     changePasswordUseCase: sl(),
     uploadAvatarImageUseCase: sl(),
+  ));
+
+  // --- Bag Feature ---
+  
+  // Product Repository (dùng chung với products feature)
+  sl.registerLazySingleton<ProductRepository>(() => ProductRepositoryImpl(ProductRemoteDataSourceImpl()));
+  
+  // Bag Datasource (sử dụng FirebaseRemoteDS internally, không cần inject FirebaseFirestore)
+  sl.registerLazySingleton<BagRemoteDataSource>(() => BagRemoteDataSourceImpl());
+  
+  // Bag Repository
+  sl.registerLazySingleton<IBagRepository>(() => BagRepositoryImpl(sl()));
+  
+  // Bag UseCases
+  sl.registerFactory(() => GetCartItemsWithProductsUseCase(sl(), sl()));
+  sl.registerFactory(() => AddToCartUseCase(sl()));
+  sl.registerFactory(() => RemoveFromCartUseCase(sl()));
+  sl.registerFactory(() => UpdateCartItemQuantityUseCase(sl()));
+  
+  // Bag Bloc
+  sl.registerFactory(() => BagBloc(
+    getCartItemsUseCase: sl(),
+    addToCartUseCase: sl(),
+    removeFromCartUseCase: sl(),
+    updateQuantityUseCase: sl(),
   ));
 }

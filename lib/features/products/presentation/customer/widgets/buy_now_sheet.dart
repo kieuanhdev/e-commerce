@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:e_commerce/features/bag/presentation/bloc/bag_bloc.dart';
+import 'package:e_commerce/features/bag/presentation/bloc/bag_event.dart';
+import 'package:e_commerce/features/bag/presentation/bloc/bag_state.dart';
+import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:e_commerce/di.dart';
 
 class BuyNowSheet extends StatefulWidget {
-  const BuyNowSheet({super.key, required this.title, required this.unitPrice});
+  const BuyNowSheet({
+    super.key,
+    required this.productId,
+    required this.title,
+    required this.unitPrice,
+  });
+  final String productId;
   final String title;
   final double unitPrice;
 
@@ -81,15 +93,81 @@ class _BuyNowSheetState extends State<BuyNowSheet> {
                             ],
                           ),
                         ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFF6E56CF),
-                            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          onPressed: () {},
-                          child: const Text('Add to cart', style: TextStyle(fontWeight: FontWeight.w700)),
+                        BlocBuilder<AuthBloc, AuthState>(
+                          builder: (context, authState) {
+                            if (authState is AuthAuthenticated) {
+                              return BlocProvider<BagBloc>(
+                                create: (_) => sl<BagBloc>(),
+                                child: BlocConsumer<BagBloc, BagState>(
+                                  listener: (context, bagState) {
+                                    if (bagState is BagItemAdded) {
+                                      Navigator.pop(context);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(bagState.message),
+                                          backgroundColor: Colors.green,
+                                        ),
+                                      );
+                                    }
+                                    if (bagState is BagError) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(bagState.message),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  builder: (context, bagState) {
+                                    final isLoading = bagState is BagLoading;
+                                    return ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        foregroundColor: const Color(0xFF6E56CF),
+                                        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                      ),
+                                      onPressed: isLoading
+                                          ? null
+                                          : () {
+                                              context.read<BagBloc>().add(
+                                                    AddToCart(
+                                                      userId: authState.user.id,
+                                                      productId: widget.productId,
+                                                      quantity: quantity,
+                                                    ),
+                                                  );
+                                            },
+                                      child: isLoading
+                                          ? const SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(strokeWidth: 2),
+                                            )
+                                          : const Text('Add to cart', style: TextStyle(fontWeight: FontWeight.w700)),
+                                    );
+                                  },
+                                ),
+                              );
+                            }
+                            return ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: const Color(0xFF6E56CF),
+                                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              onPressed: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Vui lòng đăng nhập để thêm vào giỏ hàng'),
+                                    backgroundColor: Colors.orange,
+                                  ),
+                                );
+                              },
+                              child: const Text('Add to cart', style: TextStyle(fontWeight: FontWeight.w700)),
+                            );
+                          },
                         ),
                       ],
                     ),
