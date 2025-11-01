@@ -12,22 +12,26 @@ class GetCartItemsWithProductsUseCase {
     // Lấy cart items
     final cartItems = await _bagRepository.getCartItems(userId);
     
-    // Lấy product info cho mỗi cart item
-    final List<CartItemWithProduct> result = [];
-    for (final cartItem in cartItems) {
+    // Lấy product info cho mỗi cart item - fetch song song để tối ưu tốc độ
+    final futures = cartItems.map((cartItem) async {
       try {
         final product = await _productRepository.getProduct(cartItem.productId);
-        result.add(CartItemWithProduct(
+        return CartItemWithProduct(
           cartItem: cartItem,
           product: product,
-        ));
+        );
       } catch (e) {
         // Nếu product không tồn tại, bỏ qua cart item này
         print('[GetCartItemsWithProducts] Product ${cartItem.productId} not found: $e');
+        return null;
       }
-    }
+    });
     
-    return result;
+    // Chờ tất cả futures hoàn thành song song
+    final results = await Future.wait(futures);
+    
+    // Lọc bỏ các null values (products không tìm thấy)
+    return results.whereType<CartItemWithProduct>().toList();
   }
 }
 

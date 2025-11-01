@@ -5,6 +5,8 @@ import 'package:e_commerce/features/bag/domain/usecase/remove_from_cart.dart';
 import 'package:e_commerce/features/bag/domain/usecase/update_cart_item_quantity.dart';
 import 'package:e_commerce/features/bag/presentation/bloc/bag_event.dart';
 import 'package:e_commerce/features/bag/presentation/bloc/bag_state.dart';
+import 'package:e_commerce/features/bag/domain/entities/cart_item.dart';
+import 'package:e_commerce/features/bag/domain/entities/cart_item_with_product.dart';
 
 class BagBloc extends Bloc<BagEvent, BagState> {
   final GetCartItemsWithProductsUseCase getCartItemsUseCase;
@@ -50,14 +52,24 @@ class BagBloc extends Bloc<BagEvent, BagState> {
     on<RemoveFromCart>((event, emit) async {
       final currentState = state;
       if (currentState is BagLoaded) {
+        // Optimistic update: Xóa item khỏi UI ngay lập tức
+        final updatedItems = currentState.cartItems
+            .where((item) => item.cartItem.id != event.cartItemId)
+            .toList();
+        emit(BagLoaded(updatedItems, currentState.userId));
+        
         try {
+          // Sau đó xóa từ server
           await removeFromCartUseCase(event.cartItemId);
-          
-          // Reload cart items
-          final cartItems = await getCartItemsUseCase(currentState.userId);
-          emit(BagLoaded(cartItems, currentState.userId));
+          // Không cần reload vì đã update optimistic
         } catch (e) {
-          emit(BagError('Lỗi khi xóa khỏi giỏ hàng: $e'));
+          // Nếu lỗi, reload lại để sync với server
+          try {
+            final cartItems = await getCartItemsUseCase(currentState.userId);
+            emit(BagLoaded(cartItems, currentState.userId));
+          } catch (_) {
+            emit(BagError('Lỗi khi xóa khỏi giỏ hàng: $e'));
+          }
         }
       }
     });
@@ -65,14 +77,40 @@ class BagBloc extends Bloc<BagEvent, BagState> {
     on<UpdateQuantity>((event, emit) async {
       final currentState = state;
       if (currentState is BagLoaded) {
+        // Optimistic update: Cập nhật quantity ngay lập tức
+        final updatedItems = currentState.cartItems.map((item) {
+          if (item.cartItem.id == event.cartItemId) {
+            // Tạo CartItem mới với quantity đã cập nhật
+            final updatedCartItem = CartItem(
+              id: item.cartItem.id,
+              productId: item.cartItem.productId,
+              userId: item.cartItem.userId,
+              quantity: event.newQuantity,
+              color: item.cartItem.color,
+              size: item.cartItem.size,
+              addedAt: item.cartItem.addedAt,
+            );
+            return CartItemWithProduct(
+              cartItem: updatedCartItem,
+              product: item.product,
+            );
+          }
+          return item;
+        }).toList();
+        emit(BagLoaded(updatedItems, currentState.userId));
+        
         try {
+          // Sau đó cập nhật trên server
           await updateQuantityUseCase(event.cartItemId, event.newQuantity);
-          
-          // Reload cart items
-          final cartItems = await getCartItemsUseCase(currentState.userId);
-          emit(BagLoaded(cartItems, currentState.userId));
+          // Không cần reload vì đã update optimistic
         } catch (e) {
-          emit(BagError('Lỗi khi cập nhật số lượng: $e'));
+          // Nếu lỗi, reload lại để sync với server
+          try {
+            final cartItems = await getCartItemsUseCase(currentState.userId);
+            emit(BagLoaded(cartItems, currentState.userId));
+          } catch (_) {
+            emit(BagError('Lỗi khi cập nhật số lượng: $e'));
+          }
         }
       }
     });
