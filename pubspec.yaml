@@ -48,6 +48,8 @@ dependencies:
   dartz: ^0.10.1
   rxdart: ^0.28.0
   get_it: ^8.2.0
+  http: ^1.2.2
+  image_picker: ^1.1.2
 
 
 
@@ -76,6 +78,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - images/avatar.png
+    - .env
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

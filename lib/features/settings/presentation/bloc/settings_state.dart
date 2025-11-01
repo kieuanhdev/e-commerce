@@ -27,3 +27,10 @@ class SettingsUpdated extends SettingsState {
   @override
   List<Object?> get props => [message];
 }
+
+class UploadingAvatar extends SettingsState {
+  final AppUser user;
+  const UploadingAvatar(this.user);
+  @override
+  List<Object?> get props => [user];
+}

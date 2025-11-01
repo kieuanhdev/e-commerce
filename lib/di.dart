@@ -16,6 +16,7 @@ import 'package:e_commerce/features/settings/presentation/bloc/settings_bloc.dar
 import 'package:e_commerce/features/settings/domain/usecase/get_current_user.dart';
 import 'package:e_commerce/features/settings/domain/usecase/update_user_settings.dart';
 import 'package:e_commerce/features/settings/domain/usecase/change_password.dart';
+import 'package:e_commerce/core/data/cloudinary_service.dart';
 
 final sl = GetIt.instance;
 
@@ -55,11 +56,16 @@ void initDI() {
   sl.registerFactory(() => GetCurrentUserUseCase(sl()));
   sl.registerFactory(() => UpdateUserSettingsUseCase(sl()));
   sl.registerFactory(() => ChangePasswordUseCase(sl()));
+  
+  // --- Cloudinary Service ---
+  sl.registerLazySingleton(() => CloudinaryService());
+  
   // --- Settings Bloc ---
   sl.registerFactory(() => SettingsBloc(
     getCurrentUser: sl(),
     updateUserSettings: sl(),
     changePasswordUseCase: sl(),
+    cloudinaryService: sl(),
   ));
 
   // --- External ---
