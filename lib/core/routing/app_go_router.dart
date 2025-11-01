@@ -15,6 +15,8 @@ import 'package:e_commerce/features/products/presentation/admin/pages/products_p
 import 'package:e_commerce/features/settings/presentation/settings_screen.dart';
 // import 'package:e_commerce/features/shop/presentation/shop_screen.dart';
 import 'package:e_commerce/features/bag/presentation/bag_screen.dart';
+import 'package:e_commerce/features/bag/presentation/payment_screen.dart';
+import 'package:e_commerce/features/bag/presentation/payment_success_screen.dart';
 import 'package:e_commerce/features/favorites/presentation/favorites_screen.dart';
 import 'package:e_commerce/features/profile/presentation/profile_screen.dart';
 import 'package:e_commerce/features/shop/presentation/shop_screen.dart';
@@ -61,6 +63,24 @@ class AppGoRouter {
         path: AppRouters.forgotPassword,
         name: AppRouteNames.forgotPassword,
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      
+      // ---------- PAYMENT ----------
+      GoRoute(
+        path: AppRouters.payment,
+        name: AppRouteNames.payment,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return PaymentScreen(
+            cartItems: extra?['cartItems'] ?? [],
+            totalPrice: extra?['totalPrice'] ?? 0.0,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRouters.paymentSuccess,
+        name: AppRouteNames.paymentSuccess,
+        builder: (context, state) => const PaymentSuccessScreen(),
       ),
 
       // ---------- CUSTOMER SHELL ----------
@@ -151,7 +171,7 @@ class AppGoRouter {
       }
 
       // ĐÃ đăng nhập
-      final user = (authState as AuthAuthenticated).user;
+      final user = authState.user;
       final isAdmin = user.role == 'admin';
       final isGoingToAdmin = location.startsWith('/admin');
       final isGoingToCustomerShell = location.startsWith('/home') || location.startsWith('/shop') || location.startsWith('/bag') || location.startsWith('/favorites') || location.startsWith('/profile') || location.startsWith('/settings');

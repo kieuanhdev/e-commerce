@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:e_commerce/features/bag/presentation/bloc/bag_bloc.dart';
 import 'package:e_commerce/features/bag/presentation/bloc/bag_event.dart';
 import 'package:e_commerce/features/bag/presentation/bloc/bag_state.dart';
 import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:e_commerce/di.dart';
 import 'package:intl/intl.dart';
+import 'package:e_commerce/core/routing/app_routers.dart';
 
 class BagScreen extends StatefulWidget {
   const BagScreen({super.key});
@@ -15,18 +17,10 @@ class BagScreen extends StatefulWidget {
 }
 
 class _BagScreenState extends State<BagScreen> {
-  final TextEditingController _couponController = TextEditingController();
-
   String formatAmount(num amount, {bool withVnd = false}) {
     final formatter = NumberFormat('#,###');
     final formatted = formatter.format(amount);
     return withVnd ? '$formatted VND' : formatted;
-  }
-
-  @override
-  void dispose() {
-    _couponController.dispose();
-    super.dispose();
   }
 
   @override
@@ -295,34 +289,6 @@ class _BagScreenState extends State<BagScreen> {
                             },
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          decoration: InputDecoration(
-                            hintText: "Nhập mã giảm giá",
-                            suffixIcon: Padding(
-                              padding: const EdgeInsets.only(right: 6),
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                  color: Colors.black87,
-                                  shape: BoxShape.circle,
-                                ),
-                                margin: const EdgeInsets.all(4),
-                                child: IconButton(
-                                  icon: const Icon(Icons.arrow_forward, color: Colors.white),
-                                  onPressed: () {},
-                                ),
-                              ),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                          ),
-                          controller: _couponController,
-                        ),
                         const SizedBox(height: 16),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -341,7 +307,15 @@ class _BagScreenState extends State<BagScreen> {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              context.push(
+                                AppRouters.payment,
+                                extra: {
+                                  'cartItems': state.cartItems,
+                                  'totalPrice': state.totalPrice,
+                                },
+                              );
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
                               padding: const EdgeInsets.symmetric(vertical: 14),
