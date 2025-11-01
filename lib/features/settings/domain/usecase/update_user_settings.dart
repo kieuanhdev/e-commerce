@@ -1,8 +1,8 @@
 import 'package:e_commerce/features/auth/domain/entities/app_user.dart';
-import 'package:e_commerce/features/settings/domain/repository/settings_repository.dart';
+import 'package:e_commerce/features/auth/domain/repository/auth_repository.dart';
 
 class UpdateUserSettingsUseCase {
-  final ISettingsRepository repo;
+  final IAuthRepository repo;
   UpdateUserSettingsUseCase(this.repo);
   Future<AppUser?> call({
     String? displayName,

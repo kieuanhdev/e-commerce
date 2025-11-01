@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:e_commerce/core/utils/failure.dart';
 import 'package:e_commerce/features/auth/domain/entities/app_user.dart';
+import 'package:image_picker/image_picker.dart';
 
 abstract class IAuthRepository {
   Future<Either<Failure, AppUser>> login(String email, String password);
@@ -33,4 +34,8 @@ abstract class IAuthRepository {
     required String currentPassword,
     required String newPassword,
   });
+
+  // Upload ảnh avatar lên Cloudinary và cập nhật vào user profile
+  /// Trả về AppUser đã được cập nhật với avatarUrl mới
+  Future<AppUser?> uploadAvatarImage(XFile imageFile);
 }

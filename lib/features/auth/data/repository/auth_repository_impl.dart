@@ -3,12 +3,15 @@ import 'package:e_commerce/core/utils/failure.dart';
 import 'package:e_commerce/features/auth/data/datasource/firebase_auth_datasource.dart';
 import 'package:e_commerce/features/auth/domain/entities/app_user.dart';
 import 'package:e_commerce/features/auth/domain/repository/auth_repository.dart';
+import 'package:e_commerce/core/data/cloudinary_service.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
+import 'package:image_picker/image_picker.dart';
 
 class AuthRepositoryImpl implements IAuthRepository {
   final FirebaseAuthDatasource dataSource;
+  final CloudinaryService cloudinaryService;
 
-  AuthRepositoryImpl(this.dataSource);
+  AuthRepositoryImpl(this.dataSource, this.cloudinaryService);
 
   @override
   Future<Either<Failure, AppUser>> login(String email, String password) async {
@@ -115,6 +118,24 @@ class AuthRepositoryImpl implements IAuthRepository {
       return Left(Failure(message));
     } catch (e) {
       return Left(Failure(e.toString()));
+    }
+  }
+
+  @override
+  Future<AppUser?> uploadAvatarImage(XFile imageFile) async {
+    try {
+      // Upload lên Cloudinary
+      final avatarUrl = await cloudinaryService.uploadImage(
+        imageFile: imageFile,
+        folder: 'avatars',
+        publicIdPrefix: 'avatar',
+      );
+      // Cập nhật avatarUrl vào Firestore
+      return await updateUser(avatarUrl: avatarUrl);
+    } catch (e) {
+      // Repository không throw exception, trả về null để bloc xử lý
+      print('[AuthRepository] Lỗi khi upload avatar: $e');
+      rethrow;
     }
   }
 

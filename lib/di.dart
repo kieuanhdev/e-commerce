@@ -17,9 +17,6 @@ import 'package:e_commerce/features/settings/domain/usecase/get_current_user.dar
 import 'package:e_commerce/features/settings/domain/usecase/update_user_settings.dart';
 import 'package:e_commerce/features/settings/domain/usecase/change_password.dart';
 import 'package:e_commerce/features/settings/domain/usecase/upload_avatar_image.dart';
-import 'package:e_commerce/features/settings/data/datasource/settings_datasource.dart';
-import 'package:e_commerce/features/settings/data/repository/settings_repository_impl.dart';
-import 'package:e_commerce/features/settings/domain/repository/settings_repository.dart';
 import 'package:e_commerce/core/data/cloudinary_service.dart';
 
 final sl = GetIt.instance;
@@ -37,7 +34,20 @@ void initDI() {
         googleSignInUseCase: sl(),
       ));
 
-  // UseCases
+  // --- External (đăng ký trước để dùng cho các dependencies khác) ---
+  sl.registerLazySingleton(() => FirebaseAuth.instance);
+  sl.registerLazySingleton(() => FirebaseFirestore.instance);
+
+  // --- Cloudinary Service (dùng chung cho toàn app, đăng ký trước) ---
+  sl.registerLazySingleton(() => CloudinaryService());
+
+  // --- DataSource (đăng ký trước Repository) ---
+  sl.registerLazySingleton(() => FirebaseAuthDatasource(sl(), sl()));
+
+  // --- Repository (inject CloudinaryService cho upload avatar) ---
+  sl.registerLazySingleton<IAuthRepository>(() => AuthRepositoryImpl(sl(), sl()));
+
+  // --- UseCases (dùng Repository, nên đăng ký sau) ---
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl()));
@@ -45,27 +55,12 @@ void initDI() {
   sl.registerLazySingleton(() => ForgotPasswordUseCase(sl()));
   sl.registerLazySingleton(() => GoogleSignInUseCase(sl()));
 
-  // Repository
-  sl.registerLazySingleton<IAuthRepository>(() => AuthRepositoryImpl(sl()));
-
-  // DataSource (ĐÃ CẬP NHẬT: Inject cả Auth và Firestore)
-  sl.registerLazySingleton(() => FirebaseAuthDatasource(sl(), sl()));
-
   // --- Profile Bloc (feature mới) ---
   sl.registerFactory(() => ProfileBloc(authRepository: sl()));
 
   // (Gộp vào AuthBloc) Bỏ đăng ký ForgotPasswordBloc
-
-  // --- Cloudinary Service (dùng chung cho toàn app) ---
-  sl.registerLazySingleton(() => CloudinaryService());
   
-  // --- Settings DataSource ---
-  sl.registerLazySingleton(() => SettingsDatasource(sl(), sl(), sl()));
-  
-  // --- Settings Repository ---
-  sl.registerLazySingleton<ISettingsRepository>(() => SettingsRepositoryImpl(sl()));
-  
-  // --- Settings UseCases ---
+  // --- Settings UseCases (dùng chung IAuthRepository) ---
   sl.registerFactory(() => GetCurrentUserUseCase(sl()));
   sl.registerFactory(() => UpdateUserSettingsUseCase(sl()));
   sl.registerFactory(() => ChangePasswordUseCase(sl()));
@@ -78,8 +73,4 @@ void initDI() {
     changePasswordUseCase: sl(),
     uploadAvatarImageUseCase: sl(),
   ));
-
-  // --- External ---
-  sl.registerLazySingleton(() => FirebaseAuth.instance);
-  sl.registerLazySingleton(() => FirebaseFirestore.instance); // Thêm Firestore
 }
