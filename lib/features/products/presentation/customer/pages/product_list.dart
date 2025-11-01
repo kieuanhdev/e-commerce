@@ -23,13 +23,16 @@ class _ProductListBodyState extends State<ProductListBody> {
   int currentPage = 0;
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _allProductKey = GlobalKey();
+  final TextEditingController _searchController = TextEditingController();
 
   late final ProductRemoteDataSource _remote = ProductRemoteDataSourceImpl();
   late final ProductRepositoryImpl _repo = ProductRepositoryImpl(_remote);
   late final GetProducts _getAllProducts = GetProducts(_repo);
 
   bool _isLoading = true;
+  List<Product> _allVisibleProducts = [];
   List<Product> _visibleProducts = [];
+  String _searchQuery = '';
 
   int get pageCount => (_visibleProducts.length / itemsPerPage).ceil().clamp(1, 9999);
 
@@ -37,6 +40,13 @@ class _ProductListBodyState extends State<ProductListBody> {
   void initState() {
     super.initState();
     _loadProducts();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadProducts() async {
@@ -48,8 +58,8 @@ class _ProductListBodyState extends State<ProductListBody> {
       // Chỉ hiển thị sản phẩm đang bật isVisible
       final visible = items.where((p) => p.isVisible == true).toList();
       setState(() {
-        _visibleProducts = visible;
-        currentPage = 0;
+        _allVisibleProducts = visible;
+        _applySearch();
       });
     } finally {
       if (mounted) {
@@ -58,6 +68,27 @@ class _ProductListBodyState extends State<ProductListBody> {
         });
       }
     }
+  }
+
+  void _applySearch() {
+    if (_searchQuery.isEmpty) {
+      setState(() {
+        _visibleProducts = _allVisibleProducts;
+        currentPage = 0;
+      });
+      return;
+    }
+
+    final lowerQuery = _searchQuery.toLowerCase();
+    final filtered = _allVisibleProducts.where((product) {
+      return product.name.toLowerCase().contains(lowerQuery) ||
+          (product.shortDescription.toLowerCase().contains(lowerQuery));
+    }).toList();
+
+    setState(() {
+      _visibleProducts = filtered;
+      currentPage = 0;
+    });
   }
 
   @override
@@ -69,6 +100,10 @@ class _ProductListBodyState extends State<ProductListBody> {
     return CustomScrollView(
       controller: _scrollController,
       slivers: [
+        // Search Bar
+        SliverToBoxAdapter(
+          child: _buildSearchBar(),
+        ),
         const SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.fromLTRB(12, 12, 12, 8),
@@ -165,6 +200,63 @@ class _ProductListBodyState extends State<ProductListBody> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Tìm kiếm sản phẩm...',
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    setState(() {
+                      _searchController.clear();
+                      _searchQuery = '';
+                      _applySearch();
+                    });
+                  },
+                )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue[300]!),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        ),
+        onChanged: (value) {
+          setState(() {
+            _searchQuery = value;
+            _applySearch();
+          });
+        },
+      ),
     );
   }
 }
