@@ -3,6 +3,7 @@ import 'package:e_commerce/features/products/data/datasources/product_remote_dat
 import 'package:e_commerce/features/products/data/repositories/product_repository_impl.dart';
 import 'package:e_commerce/features/products/domain/entities/product.dart';
 import 'package:e_commerce/features/products/domain/usecases/get_products.dart';
+import 'package:e_commerce/features/products/domain/services/product_cache_service.dart';
 
 import '../widgets/product_card.dart';
 import '../../../../home/presentation/widgets/bannner.dart';
@@ -29,6 +30,7 @@ class _ProductListBodyState extends State<ProductListBody> {
   late final ProductRemoteDataSource _remote = ProductRemoteDataSourceImpl();
   late final ProductRepositoryImpl _repo = ProductRepositoryImpl(_remote);
   late final GetProducts _getAllProducts = GetProducts(_repo);
+  final _cacheService = ProductCacheService.instance;
 
   bool _isLoading = true;
   List<Product> _allVisibleProducts = [];
@@ -56,12 +58,47 @@ class _ProductListBodyState extends State<ProductListBody> {
     super.dispose();
   }
 
-  Future<void> _loadProducts() async {
+  Future<void> _loadProducts({bool forceRefresh = false}) async {
+    // Nếu có cache và không force refresh, dùng cache ngay
+    if (!forceRefresh && _cacheService.isCacheValid()) {
+      final cached = _cacheService.getCachedProducts();
+      if (cached != null) {
+        final visible = cached.where((p) => p.isVisible == true).toList();
+        if (mounted) {
+          setState(() {
+            _allVisibleProducts = visible;
+            _applySearch();
+            _isLoading = false;
+          });
+        }
+        // Chỉ refresh background nếu cache đã > 50% thời gian (tức > 2.5 phút)
+        // Tránh refresh quá nhiều khi user chuyển màn hình liên tục
+        final cacheAge = _cacheService.lastFetchTime != null 
+            ? DateTime.now().difference(_cacheService.lastFetchTime!)
+            : const Duration(minutes: 10);
+        if (cacheAge.inMinutes >= 2) {
+          _cacheService.getProducts(_getAllProducts, forceRefresh: true).then((items) {
+            final visible = items.where((p) => p.isVisible == true).toList();
+            if (mounted) {
+              setState(() {
+                _allVisibleProducts = visible;
+                _applySearch();
+              });
+            }
+          }).catchError((e) {
+            print('Background refresh failed: $e');
+          });
+        }
+        return;
+      }
+    }
+
     setState(() {
       _isLoading = true;
     });
     try {
-      final items = await _getAllProducts();
+      // Dùng cache service để tránh load lại nếu đã có cache
+      final items = await _cacheService.getProducts(_getAllProducts, forceRefresh: forceRefresh);
       // Chỉ hiển thị sản phẩm đang bật isVisible
       final visible = items.where((p) => p.isVisible == true).toList();
       if (mounted) {
@@ -77,7 +114,6 @@ class _ProductListBodyState extends State<ProductListBody> {
           _allVisibleProducts = [];
           _visibleProducts = [];
         });
-        // Có thể hiển thị thông báo lỗi cho user ở đây
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Không thể tải danh sách sản phẩm: ${e.toString()}'),

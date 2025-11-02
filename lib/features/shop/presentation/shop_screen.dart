@@ -2,6 +2,7 @@ import 'package:e_commerce/features/products/data/datasources/product_remote_dat
 import 'package:e_commerce/features/products/data/repositories/product_repository_impl.dart';
 import 'package:e_commerce/features/products/domain/entities/product.dart';
 import 'package:e_commerce/features/products/domain/usecases/get_products.dart';
+import 'package:e_commerce/features/products/domain/services/product_cache_service.dart';
 import 'package:e_commerce/features/products/presentation/customer/pages/product_detail_page.dart';
 import 'package:e_commerce/features/products/presentation/customer/widgets/product_card.dart';
 import 'package:e_commerce/features/products/presentation/customer/widgets/product_grid_sliver.dart';
@@ -18,6 +19,7 @@ class _ShopScreenState extends State<ShopScreen> {
   late final ProductRemoteDataSource _remote = ProductRemoteDataSourceImpl();
   late final ProductRepositoryImpl _repo = ProductRepositoryImpl(_remote);
   late final GetProducts _getAllProducts = GetProducts(_repo);
+  final _cacheService = ProductCacheService.instance;
 
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -43,18 +45,55 @@ class _ShopScreenState extends State<ShopScreen> {
     super.dispose();
   }
 
-  Future<void> _loadProducts() async {
+  Future<void> _loadProducts({bool forceRefresh = false}) async {
+    // Nếu có cache và không force refresh, dùng cache ngay
+    if (!forceRefresh && _cacheService.isCacheValid()) {
+      final cached = _cacheService.getCachedProducts();
+      if (cached != null) {
+        final visible = cached.where((p) => p.isVisible == true).toList();
+        if (mounted) {
+          setState(() {
+            _allProducts = visible;
+            _applyFilters();
+            _isLoading = false;
+          });
+        }
+        // Chỉ refresh background nếu cache đã > 50% thời gian (tức > 2.5 phút)
+        // Tránh refresh quá nhiều khi user chuyển màn hình liên tục
+        final cacheAge = _cacheService.lastFetchTime != null 
+            ? DateTime.now().difference(_cacheService.lastFetchTime!)
+            : const Duration(minutes: 10);
+        if (cacheAge.inMinutes >= 2) {
+          _cacheService.getProducts(_getAllProducts, forceRefresh: true).then((items) {
+            final visible = items.where((p) => p.isVisible == true).toList();
+            if (mounted) {
+              setState(() {
+                _allProducts = visible;
+                _applyFilters();
+              });
+            }
+          }).catchError((e) {
+            print('Background refresh failed: $e');
+          });
+        }
+        return;
+      }
+    }
+
     setState(() {
       _isLoading = true;
     });
     try {
-      final items = await _getAllProducts();
+      // Dùng cache service để tránh load lại nếu đã có cache
+      final items = await _cacheService.getProducts(_getAllProducts, forceRefresh: forceRefresh);
       // Chỉ hiển thị sản phẩm đang bật isVisible
       final visible = items.where((p) => p.isVisible == true).toList();
-      setState(() {
-        _allProducts = visible;
-        _applyFilters();
-      });
+      if (mounted) {
+        setState(() {
+          _allProducts = visible;
+          _applyFilters();
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {
