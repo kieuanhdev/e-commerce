@@ -382,6 +382,11 @@ class _ShopScreenState extends State<ShopScreen> {
                                             ? [product.imageUrl!]
                                             : const [],
                                         inStock: product.quantity > 0,
+                                        categoryId: product.categoryId,
+                                        quantity: product.quantity,
+                                        shortDescription: product.shortDescription,
+                                        createdAt: product.createdAt,
+                                        updatedAt: product.updatedAt,
                                       ),
                                     ),
                                   );

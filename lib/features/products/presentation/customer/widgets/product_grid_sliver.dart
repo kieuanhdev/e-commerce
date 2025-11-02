@@ -14,11 +14,16 @@ class ProductGridSliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Responsive columns based on screen width
+    // Mobile: 2 columns, Tablet/Web: 4 columns
+    final screenWidth = MediaQuery.of(context).size.width;
+    final crossAxisCount = screenWidth > 600 ? 4 : 2;
+    
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+          crossAxisCount: crossAxisCount,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
           childAspectRatio: childAspectRatio,

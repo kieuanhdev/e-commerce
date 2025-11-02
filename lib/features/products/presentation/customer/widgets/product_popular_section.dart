@@ -82,6 +82,11 @@ class PopularProductsSection extends StatelessWidget {
                                       ? [p.imageUrl!]
                                       : const [],
                                   inStock: (p.quantity) > 0,
+                                  categoryId: p.categoryId,
+                                  quantity: p.quantity,
+                                  shortDescription: p.shortDescription,
+                                  createdAt: p.createdAt,
+                                  updatedAt: p.updatedAt,
                                 ),
                               ),
                             );
