@@ -5,6 +5,8 @@ import 'package:e_commerce/features/bag/presentation/bloc/bag_event.dart';
 import 'package:e_commerce/features/bag/presentation/bloc/bag_state.dart';
 import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:e_commerce/di.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
 
 class BuyNowSheet extends StatefulWidget {
   const BuyNowSheet({
@@ -38,7 +40,7 @@ class _BuyNowSheetState extends State<BuyNowSheet> {
             child: Row(
               children: [
                 Expanded(
-                  child: Text(widget.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  child: Text(widget.title, style: AppTextStyles.text16.copyWith(fontWeight: FontWeight.w700)),
                 ),
                 IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
               ],
@@ -53,14 +55,14 @@ class _BuyNowSheetState extends State<BuyNowSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Unit price', style: TextStyle(color: Colors.black54)),
+                      Text('Unit price', style: AppTextStyles.text14.copyWith(color: AppColors.text.withOpacity(0.54))),
                       const SizedBox(height: 8),
                       Text('\$${widget.unitPrice.toStringAsFixed(2)}',
-                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+                          style: AppTextStyles.headline2.copyWith(fontWeight: FontWeight.w800)),
                     ],
                   ),
                 ),
-                const Text('Quantity', style: TextStyle(color: Colors.black54)),
+                Text('Quantity', style: AppTextStyles.text14.copyWith(color: AppColors.text.withOpacity(0.54))),
                 const SizedBox(width: 8),
                 _QtyControl(value: quantity, onChanged: (v) => setState(() => quantity = v)),
               ],
@@ -76,7 +78,7 @@ class _BuyNowSheetState extends State<BuyNowSheet> {
                   child: Container(
                     height: 56,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF6E56CF),
+                      color: AppColors.primary,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -88,8 +90,8 @@ class _BuyNowSheetState extends State<BuyNowSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('\$${total.toStringAsFixed(2)}',
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
-                              const Text('Total price', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                                  style: AppTextStyles.headline3.copyWith(color: AppColors.white, fontWeight: FontWeight.w800)),
+                              Text('Total price', style: AppTextStyles.text11.copyWith(color: AppColors.white.withOpacity(0.7))),
                             ],
                           ),
                         ),
@@ -105,7 +107,7 @@ class _BuyNowSheetState extends State<BuyNowSheet> {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(bagState.message),
-                                          backgroundColor: Colors.green,
+                                          backgroundColor: AppColors.success,
                                         ),
                                       );
                                     }
@@ -113,7 +115,7 @@ class _BuyNowSheetState extends State<BuyNowSheet> {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(bagState.message),
-                                          backgroundColor: Colors.red,
+                                          backgroundColor: AppColors.error,
                                         ),
                                       );
                                     }
@@ -122,8 +124,8 @@ class _BuyNowSheetState extends State<BuyNowSheet> {
                                     final isLoading = bagState is BagLoading;
                                     return ElevatedButton(
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.white,
-                                        foregroundColor: const Color(0xFF6E56CF),
+                                        backgroundColor: AppColors.white,
+                                        foregroundColor: AppColors.primary,
                                         padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                       ),
@@ -144,7 +146,7 @@ class _BuyNowSheetState extends State<BuyNowSheet> {
                                               height: 20,
                                               child: CircularProgressIndicator(strokeWidth: 2),
                                             )
-                                          : const Text('Add to cart', style: TextStyle(fontWeight: FontWeight.w700)),
+                                          : Text('Add to cart', style: AppTextStyles.text14.copyWith(fontWeight: FontWeight.w700)),
                                     );
                                   },
                                 ),
@@ -152,20 +154,20 @@ class _BuyNowSheetState extends State<BuyNowSheet> {
                             }
                             return ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: const Color(0xFF6E56CF),
+                                backgroundColor: AppColors.white,
+                                foregroundColor: AppColors.primary,
                                 padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
                               onPressed: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
+                                  SnackBar(
                                     content: Text('Vui lòng đăng nhập để thêm vào giỏ hàng'),
-                                    backgroundColor: Colors.orange,
+                                    backgroundColor: AppColors.saleHot,
                                   ),
                                 );
                               },
-                              child: const Text('Add to cart', style: TextStyle(fontWeight: FontWeight.w700)),
+                              child: Text('Add to cart', style: AppTextStyles.text14.copyWith(fontWeight: FontWeight.w700)),
                             );
                           },
                         ),
@@ -194,7 +196,7 @@ class _QtyControl extends StatelessWidget {
         _QtyButton(icon: Icons.remove, onTap: () => onChanged(value > 1 ? value - 1 : 1)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text('$value', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          child: Text('$value', style: AppTextStyles.text16.copyWith(fontWeight: FontWeight.w700)),
         ),
         _QtyButton(icon: Icons.add, onTap: () => onChanged(value + 1)),
       ],
@@ -217,7 +219,7 @@ class _QtyButton extends StatelessWidget {
         height: 40,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFE0E3E7)),
+          border: Border.all(color: AppColors.placeholder),
         ),
         child: Icon(icon),
       ),

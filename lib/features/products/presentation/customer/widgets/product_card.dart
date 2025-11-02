@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
 
 class ProductCard extends StatelessWidget {
   const ProductCard({
@@ -26,13 +28,12 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final cardRadius = BorderRadius.circular(20);
     final imageRadius = BorderRadius.circular(16);
     final priceText = NumberFormat.decimalPattern('vi_VN').format(price);
 
     return Material(
-      color: backgroundColor ?? Colors.grey.shade300,
+      color: backgroundColor ?? AppColors.placeholder,
       borderRadius: cardRadius,
       child: InkWell(
         borderRadius: cardRadius,
@@ -56,8 +57,8 @@ class ProductCard extends StatelessWidget {
                     helperText,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
+                    style: AppTextStyles.text11.copyWith(
+                      color: AppColors.placeholder,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -65,9 +66,9 @@ class ProductCard extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleLarge?.copyWith(
+                    style: AppTextStyles.text16.copyWith(
                       fontWeight: FontWeight.w800,
-                      color: Colors.black,
+                      color: AppColors.text,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -75,8 +76,8 @@ class ProductCard extends StatelessWidget {
                     description,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: Colors.black87,
+                    style: AppTextStyles.text14.copyWith(
+                      color: AppColors.text.withOpacity(0.87),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -84,8 +85,8 @@ class ProductCard extends StatelessWidget {
                     '$priceText VND',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: const Color(0xFF23B39B),
+                    style: AppTextStyles.text14.copyWith(
+                      color: AppColors.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -104,10 +105,12 @@ class ProductCard extends StatelessWidget {
         height: height,
         width: double.infinity,
         alignment: Alignment.center,
-        color: const Color(0xFF8E4E4E),
-        child: const Text(
+        color: AppColors.placeholder,
+        child: Text(
           'ảnh',
-          style: TextStyle(color: Colors.white, fontSize: 20),
+          style: AppTextStyles.text14.copyWith(
+            color: AppColors.white,
+          ),
         ),
       );
     }
@@ -121,7 +124,7 @@ class ProductCard extends StatelessWidget {
         height: height,
         width: double.infinity,
         alignment: Alignment.center,
-        color: const Color(0xFF8E4E4E),
+        color: AppColors.placeholder,
         child: const Text(
           'ảnh',
           style: TextStyle(color: Colors.white, fontSize: 20),

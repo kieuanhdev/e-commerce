@@ -4,6 +4,8 @@ import 'package:e_commerce/features/orders/domain/entities/order.dart';
 import 'package:e_commerce/features/orders/domain/usecases/get_order_by_id.dart';
 import 'package:e_commerce/di.dart';
 import 'package:intl/intl.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final String orderId;
@@ -59,11 +61,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Color _getStatusColor(OrderStatus status) {
     switch (status) {
       case OrderStatus.processing:
-        return const Color(0xFFF5A524);
+        return AppColors.saleHot; // Màu cam cho processing
       case OrderStatus.delivery:
-        return const Color(0xFF19B072);
+        return AppColors.success; // Màu xanh cho delivery
       case OrderStatus.cancelled:
-        return const Color(0xFFE5484D);
+        return AppColors.error; // Màu đỏ cho cancelled
     }
   }
 
@@ -71,18 +73,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Chi tiết đơn hàng',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+          style: AppTextStyles.headline3,
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          icon: Icon(Icons.arrow_back_ios_new, color: AppColors.text),
           onPressed: () => context.pop(),
         ),
       ),
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.background,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
@@ -92,7 +94,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     child: Text(
                       _error!,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
+                      style: AppTextStyles.text14.copyWith(color: AppColors.error),
                     ),
                   ),
                 )
@@ -113,11 +115,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           // Order Status Card
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: AppColors.shadow,
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -134,7 +136,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       'Mã đơn hàng',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[600],
+                        color: AppColors.placeholder,
                       ),
                     ),
                     Text(
@@ -154,7 +156,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       'Trạng thái',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[600],
+                        color: AppColors.placeholder,
                       ),
                     ),
                     Container(
@@ -185,7 +187,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       'Ngày đặt hàng',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[600],
+                        color: AppColors.placeholder,
                       ),
                     ),
                     Text(
@@ -215,11 +217,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: AppColors.shadow,
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -241,7 +243,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                               errorBuilder: (context, error, stackTrace) => Container(
                                 width: 70,
                                 height: 70,
-                                color: Colors.grey[300],
+                                color: AppColors.placeholder,
                                 child: const Icon(Icons.image),
                               ),
                             )
@@ -272,11 +274,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   Text.rich(
                                     TextSpan(
                                       text: 'Màu: ',
-                                      style: const TextStyle(fontSize: 11, color: Colors.black54),
+                                      style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                                       children: [
                                         TextSpan(
                                           text: item.color,
-                                          style: const TextStyle(color: Colors.red),
+                                          style: AppTextStyles.text11.copyWith(color: AppColors.error),
                                         ),
                                       ],
                                     ),
@@ -285,11 +287,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   Text.rich(
                                     TextSpan(
                                       text: 'Size: ',
-                                      style: const TextStyle(fontSize: 11, color: Colors.black54),
+                                      style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                                       children: [
                                         TextSpan(
                                           text: item.size,
-                                          style: const TextStyle(color: Colors.red),
+                                          style: AppTextStyles.text11.copyWith(color: AppColors.error),
                                         ),
                                       ],
                                     ),
@@ -302,9 +304,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             children: [
                               Text(
                                 'x${item.quantity}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.black54,
+                                  color: AppColors.text.withOpacity(0.54),
                                 ),
                               ),
                               const Spacer(),
@@ -330,11 +332,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           // Summary
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: AppColors.shadow,
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -350,7 +352,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       'Tổng số lượng',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: AppColors.placeholder,
                       ),
                     ),
                     Text(
@@ -380,7 +382,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: AppColors.success,
                       ),
                     ),
                   ],

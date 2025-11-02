@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:e_commerce/core/routing/app_routers.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
 
 class PaymentSuccessScreen extends StatelessWidget {
   final String? orderId;
@@ -17,7 +19,7 @@ class PaymentSuccessScreen extends StatelessWidget {
       }
     }
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -28,33 +30,30 @@ class PaymentSuccessScreen extends StatelessWidget {
               Container(
                 width: 100,
                 height: 100,
-                decoration: const BoxDecoration(
-                  color: Colors.green,
+                decoration: BoxDecoration(
+                  color: AppColors.success,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.check,
                   size: 60,
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
               ),
               const SizedBox(height: 24),
               // Success Message
-              const Text(
+              Text(
                 "Thanh toán thành công!",
-                style: TextStyle(
-                  fontSize: 24,
+                style: AppTextStyles.headline2.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 "Cảm ơn bạn đã mua sắm tại cửa hàng của chúng tôi.\nĐơn hàng của bạn đã được xử lý thành công.",
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
+                style: AppTextStyles.text14.copyWith(
+                  color: AppColors.text.withOpacity(0.54),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -67,18 +66,17 @@ class PaymentSuccessScreen extends StatelessWidget {
                     context.go(AppRouters.home);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: AppColors.success,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     "Về trang chủ",
-                    style: TextStyle(
+                    style: AppTextStyles.text16.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontSize: 16,
+                      color: AppColors.white,
                     ),
                   ),
                 ),
@@ -90,17 +88,16 @@ class PaymentSuccessScreen extends StatelessWidget {
                   onPressed: navigateToOrderDetail,
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: const BorderSide(color: Colors.green, width: 2),
+                    side: BorderSide(color: AppColors.success, width: 2),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     "Xem đơn hàng",
-                    style: TextStyle(
+                    style: AppTextStyles.text16.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.green,
-                      fontSize: 16,
+                      color: AppColors.success,
                     ),
                   ),
                 ),

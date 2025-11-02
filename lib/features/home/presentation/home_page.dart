@@ -1,4 +1,6 @@
 import 'package:e_commerce/features/products/presentation/customer/pages/product_list.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,16 +32,16 @@ class _HomePageState extends State<HomePage> {
               child: Container(
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: AppColors.placeholder.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: TextField(
                   controller: _searchController,
-                  style: const TextStyle(fontSize: 14),
+                  style: AppTextStyles.text14,
                   decoration: InputDecoration(
                     hintText: 'Tìm kiếm...',
-                    hintStyle: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                    prefixIcon: Icon(Icons.search, size: 20, color: Colors.grey[600]),
+                    hintStyle: AppTextStyles.text14.copyWith(color: AppColors.placeholder),
+                    prefixIcon: Icon(Icons.search, size: 20, color: AppColors.placeholder),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
                             icon: Icon(Icons.clear, size: 18),

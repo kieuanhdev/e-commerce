@@ -6,6 +6,8 @@ import 'package:e_commerce/features/orders/domain/entities/order.dart';
 import 'package:e_commerce/features/orders/domain/usecases/get_orders_by_user_id.dart';
 import 'package:e_commerce/di.dart';
 import 'package:e_commerce/core/routing/app_routers.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
 
 class MyOrderScreen extends StatefulWidget {
   const MyOrderScreen({super.key});
@@ -69,7 +71,7 @@ class _MyOrderScreenState extends State<MyOrderScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Lỗi khi tải đơn hàng: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -89,20 +91,20 @@ class _MyOrderScreenState extends State<MyOrderScreen>
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          icon: Icon(Icons.arrow_back_ios_new, color: AppColors.text),
           onPressed: () => Navigator.maybePop(context),
         ),
-        title: const Text(
+        title: Text(
           'My Orders',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+          style: AppTextStyles.headline3,
         ),
         centerTitle: false,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         actions: [
           IconButton(
             onPressed: _loadOrders,
-            icon: const Icon(Icons.refresh, color: Colors.black),
+            icon: Icon(Icons.refresh, color: AppColors.text),
           ),
         ],
         bottom: PreferredSize(
@@ -110,7 +112,7 @@ class _MyOrderScreenState extends State<MyOrderScreen>
           child: _SegmentedTabBar(controller: _tabController),
         ),
       ),
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.background,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : TabBarView(
@@ -135,11 +137,11 @@ class _SegmentedTabBar extends StatelessWidget {
       height: 44,
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: AppColors.shadow,
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -148,15 +150,15 @@ class _SegmentedTabBar extends StatelessWidget {
       child: TabBar(
         controller: controller,
         indicator: BoxDecoration(
-          color: Colors.black,
+          color: AppColors.primary,
           borderRadius: BorderRadius.circular(20),
         ),
         indicatorPadding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
         labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.black,
-        labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+        labelColor: AppColors.white,
+        unselectedLabelColor: AppColors.text,
+        labelStyle: AppTextStyles.text14.copyWith(fontWeight: FontWeight.w600),
+        unselectedLabelStyle: AppTextStyles.text14.copyWith(fontWeight: FontWeight.w500),
         tabs: const [
           Tab(text: 'Delivery'),
           Tab(text: 'Processing'),
@@ -208,11 +210,11 @@ class _OrderCard extends StatelessWidget {
   Color _getStatusColor(OrderStatus status) {
     switch (status) {
       case OrderStatus.processing:
-        return const Color(0xFFF5A524);
+        return AppColors.saleHot; // Màu cam cho processing
       case OrderStatus.delivery:
-        return const Color(0xFF19B072);
+        return AppColors.success; // Màu xanh cho delivery
       case OrderStatus.cancelled:
-        return const Color(0xFFE5484D);
+        return AppColors.error; // Màu đỏ cho cancelled
     }
   }
 
@@ -220,11 +222,11 @@ class _OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.shadow,
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -244,19 +246,19 @@ class _OrderCard extends StatelessWidget {
                     children: [
                       Text(
                         'Order #${order.id.substring(0, 8)}',
-                        style: const TextStyle(
+                        style: AppTextStyles.text16.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         'Tracking number: ${order.trackingNumber}',
-                        style: const TextStyle(fontSize: 12, color: Colors.black54),
+                        style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         'Quantity: ${order.totalQuantity}',
-                        style: const TextStyle(fontSize: 12, color: Colors.black54),
+                        style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                       ),
                     ],
                   ),
@@ -266,18 +268,18 @@ class _OrderCard extends StatelessWidget {
                   children: [
                     Text(
                       _formatDate(order.createdAt),
-                      style: const TextStyle(fontSize: 12, color: Colors.black54),
+                      style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                     ),
                     const SizedBox(height: 18),
                     Row(
                       children: [
-                        const Text(
+                        Text(
                           'Total amount:  ',
-                          style: TextStyle(fontSize: 12, color: Colors.black54),
+                          style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                         ),
                         Text(
                           '${formatAmount(order.totalAmount)} VND',
-                          style: const TextStyle(fontSize: 12),
+                          style: AppTextStyles.text11,
                         ),
                       ],
                     ),

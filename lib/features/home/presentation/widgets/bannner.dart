@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
 
 class BannerCarousel extends StatefulWidget {
   const BannerCarousel({
@@ -99,7 +100,7 @@ class _BannerImage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Placeholder grey panel if url is empty
     if (url.isEmpty) {
-      return Container(color: Colors.grey.shade300);
+      return Container(color: AppColors.placeholder);
     }
 
     // Load from assets only
@@ -108,7 +109,7 @@ class _BannerImage extends StatelessWidget {
       fit: BoxFit.cover,
       width: double.infinity,
       errorBuilder: (context, error, stackTrace) => Container(
-        color: Colors.grey.shade300,
+        color: AppColors.placeholder,
       ),
     );
   }
@@ -125,7 +126,6 @@ class _BannerIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const activeColor = Color(0xFF23B39B);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(length, (i) {
@@ -136,7 +136,7 @@ class _BannerIndicator extends StatelessWidget {
           width: 3,
           height: isActive ? 28 : 14,
           decoration: BoxDecoration(
-            color: activeColor.withOpacity(isActive ? 1 : 0.6),
+            color: AppColors.primary.withOpacity(isActive ? 1 : 0.6),
             borderRadius: BorderRadius.circular(2),
           ),
         );

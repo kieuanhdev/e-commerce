@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../widgets/product_image_carousel.dart';
 import '../widgets/buy_now_sheet.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
 
 class ProductDetailPage extends StatefulWidget {
   const ProductDetailPage({
@@ -47,12 +49,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   Widget build(BuildContext context) {
     final images = widget.imageUrls;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: AppColors.text),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -75,11 +77,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     if (widget.categoryId != null && widget.categoryId!.isNotEmpty)
                       Text(
                         widget.categoryId!.toUpperCase(),
-                        style: const TextStyle(
-                          color: Color(0xFF9AA4B2),
+                        style: AppTextStyles.text11.copyWith(
+                          color: AppColors.placeholder,
                           letterSpacing: 1,
                           fontWeight: FontWeight.w700,
-                          fontSize: 12,
                         ),
                       ),
                     if (widget.categoryId != null && widget.categoryId!.isNotEmpty)
@@ -90,17 +91,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
-                        color: Colors.black,
+                        color: AppColors.text,
                       ),
                     ),
                     const SizedBox(height: 16),
                     // Price
                     Text(
                       '${NumberFormat.decimalPattern('vi_VN').format(widget.price)} VND',
-                      style: const TextStyle(
-                        fontSize: 28,
+                      style: AppTextStyles.headline2.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF6E56CF),
+                        color: AppColors.primary,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -108,41 +108,37 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     const SizedBox(height: 16),
                     // Short Description
                     if (widget.shortDescription != null && widget.shortDescription!.isNotEmpty) ...[
-                      const Text(
+                      Text(
                         'Mô tả ngắn',
-                        style: TextStyle(
+                        style: AppTextStyles.text16.copyWith(
                           fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                          color: Colors.black87,
+                          color: AppColors.text.withOpacity(0.87),
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         widget.shortDescription!,
-                        style: const TextStyle(
-                          color: Colors.black87,
+                        style: AppTextStyles.text14.copyWith(
+                          color: AppColors.text.withOpacity(0.87),
                           height: 1.5,
-                          fontSize: 14,
                         ),
                       ),
                       const SizedBox(height: 16),
                     ],
                     // Long Description
-                    const Text(
+                    Text(
                       'Mô tả chi tiết',
-                      style: TextStyle(
+                      style: AppTextStyles.text16.copyWith(
                         fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        color: Colors.black87,
+                        color: AppColors.text.withOpacity(0.87),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       widget.description ?? 'Không có mô tả',
-                      style: const TextStyle(
-                        color: Colors.black87,
+                      style: AppTextStyles.text14.copyWith(
+                        color: AppColors.text.withOpacity(0.87),
                         height: 1.5,
-                        fontSize: 14,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -153,7 +149,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       icon: Icons.inventory_2_outlined,
                       label: 'Số lượng tồn kho',
                       value: widget.quantity.toString(),
-                      color: widget.quantity > 0 ? const Color(0xFF16A085) : Colors.orange,
+                      color: widget.quantity > 0 ? AppColors.success : AppColors.saleHot,
                     ),
                     const SizedBox(height: 12),
                     if (widget.createdAt != null)
@@ -182,7 +178,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           child: Container(
             height: 56,
             decoration: BoxDecoration(
-              color: const Color(0xFF6E56CF),
+              color: AppColors.primary,
               borderRadius: BorderRadius.circular(14),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -195,16 +191,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     children: [
                       Text(
                         '${NumberFormat.decimalPattern('vi_VN').format(widget.price)} VND',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18),
+                        style: AppTextStyles.headline3.copyWith(color: AppColors.white, fontWeight: FontWeight.w800),
                       ),
-                      const Text('Đơn giá', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text('Đơn giá', style: AppTextStyles.text11.copyWith(color: AppColors.white.withOpacity(0.7))),
                     ],
                   ),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF6E56CF),
+                    backgroundColor: AppColors.white,
+                    foregroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
@@ -222,7 +218,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
                     );
                   },
-                  child: const Text('Buy Now', style: TextStyle(fontWeight: FontWeight.w700)),
+                  child: Text('Buy Now', style: AppTextStyles.text14.copyWith(fontWeight: FontWeight.w700)),
                 ),
               ],
             ),
@@ -240,22 +236,20 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
+        Icon(icon, size: 20, color: AppColors.placeholder),
         const SizedBox(width: 12),
         Text(
           '$label: ',
-          style: TextStyle(
-            color: Colors.grey[700],
-            fontSize: 14,
+          style: AppTextStyles.text14.copyWith(
+            color: AppColors.placeholder,
             fontWeight: FontWeight.w500,
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: TextStyle(
-              color: color ?? Colors.black87,
-              fontSize: 14,
+            style: AppTextStyles.text14.copyWith(
+              color: color ?? AppColors.text.withOpacity(0.87),
               fontWeight: FontWeight.w600,
             ),
           ),

@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:e_commerce/core/routing/app_routers.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -11,13 +13,13 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "My profile",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: AppTextStyles.headline3,
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: AppColors.text,
       ),
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, authState) {
@@ -43,12 +45,11 @@ class ProfileScreen extends StatelessWidget {
                         children: [
                           Text(
                             user.displayName ?? 'No Name',
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
+                            style: AppTextStyles.text16,
                           ),
                           Text(
                             user.email,
-                            style: const TextStyle(color: Colors.grey),
+                            style: AppTextStyles.text14.copyWith(color: AppColors.placeholder),
                           ),
                         ],
                       ),
@@ -99,7 +100,7 @@ class ProfileScreen extends StatelessWidget {
             title,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-          subtitle: Text(subtitle, style: const TextStyle(color: Colors.grey)),
+          subtitle: Text(subtitle, style: AppTextStyles.text14.copyWith(color: AppColors.placeholder)),
           trailing: const Icon(Icons.chevron_right),
           contentPadding: EdgeInsets.zero,
           onTap: () {

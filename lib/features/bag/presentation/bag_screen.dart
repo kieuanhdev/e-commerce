@@ -9,6 +9,8 @@ import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:e_commerce/di.dart';
 import 'package:intl/intl.dart';
 import 'package:e_commerce/core/routing/app_routers.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
 
 class BagScreen extends StatefulWidget {
   const BagScreen({super.key});
@@ -51,11 +53,11 @@ class _BagScreenState extends State<BagScreen> {
         if (authState is! AuthAuthenticated) {
           return Scaffold(
             appBar: AppBar(
-              title: const Text(
+              title: Text(
                 "My Bag",
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                style: AppTextStyles.headline3,
               ),
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.white,
               elevation: 0,
             ),
             body: const Center(
@@ -76,25 +78,25 @@ class _BagScreenState extends State<BagScreen> {
             appBar: AppBar(
               title: Row(
                 children: [
-                  const Text(
+                  Text(
                     "My Bag",
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                    style: AppTextStyles.headline3,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Container(
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.grey[100],
+                        color: AppColors.placeholder.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: TextField(
                         controller: _searchController,
-                        style: const TextStyle(fontSize: 14),
+                        style: AppTextStyles.text14,
                         decoration: InputDecoration(
                           hintText: 'Tìm kiếm sản phẩm...',
-                          hintStyle: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                          prefixIcon: Icon(Icons.search, size: 20, color: Colors.grey[600]),
+                          hintStyle: AppTextStyles.text14.copyWith(color: AppColors.placeholder),
+                          prefixIcon: Icon(Icons.search, size: 20, color: AppColors.placeholder),
                           suffixIcon: _searchQuery.isNotEmpty
                               ? IconButton(
                                   icon: Icon(Icons.clear, size: 18),
@@ -120,17 +122,17 @@ class _BagScreenState extends State<BagScreen> {
                 ],
               ),
               centerTitle: false,
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.white,
               elevation: 0,
             ),
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.white,
             body: BlocConsumer<BagBloc, BagState>(
               listener: (context, state) {
                 if (state is BagError) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(state.message),
-                      backgroundColor: Colors.red,
+                      backgroundColor: AppColors.error,
                     ),
                   );
                 }
@@ -190,7 +192,7 @@ class _BagScreenState extends State<BagScreen> {
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 12),
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[100],
+                                  color: AppColors.placeholder.withOpacity(0.3),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Padding(
@@ -209,7 +211,7 @@ class _BagScreenState extends State<BagScreen> {
                                                 errorBuilder: (context, error, stackTrace) => Container(
                                                   width: 70,
                                                   height: 70,
-                                                  color: Colors.grey[300],
+                                                  color: AppColors.placeholder,
                                                   child: const Icon(Icons.image),
                                                 ),
                                               )
@@ -246,11 +248,11 @@ class _BagScreenState extends State<BagScreen> {
                                                               Text.rich(
                                                                 TextSpan(
                                                                   text: 'Color: ',
-                                                                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                                                                  style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                                                                   children: [
                                                                     TextSpan(
                                                                       text: cartItem.color,
-                                                                      style: const TextStyle(color: Colors.red),
+                                                                      style: AppTextStyles.text11.copyWith(color: AppColors.error),
                                                                     ),
                                                                   ],
                                                                 ),
@@ -261,11 +263,11 @@ class _BagScreenState extends State<BagScreen> {
                                                               Text.rich(
                                                                 TextSpan(
                                                                   text: 'Size: ',
-                                                                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                                                                  style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                                                                   children: [
                                                                     TextSpan(
                                                                       text: cartItem.size,
-                                                                      style: const TextStyle(color: Colors.red),
+                                                                      style: AppTextStyles.text11.copyWith(color: AppColors.error),
                                                                     ),
                                                                   ],
                                                                 ),

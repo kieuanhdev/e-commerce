@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
 
 class AuthButton extends StatelessWidget {
   final String text;
@@ -14,7 +16,7 @@ class AuthButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.teal,
+          backgroundColor: AppColors.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -22,9 +24,8 @@ class AuthButton extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
+          style: AppTextStyles.text16.copyWith(
+            color: AppColors.white,
             fontWeight: FontWeight.bold,
           ),
         ),

@@ -11,6 +11,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:e_commerce/features/bag/data/datasource/bag_datasource.dart';
 import 'package:e_commerce/features/products/domain/services/product_cache_service.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
 
 class PaymentScreen extends StatefulWidget {
   final List<CartItemWithProduct> cartItems;
@@ -45,9 +47,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is! AuthAuthenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Bạn cần đăng nhập để thanh toán'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
       setState(() {
@@ -105,7 +107,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Lỗi khi thanh toán: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -122,18 +124,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Thanh toán",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+          style: AppTextStyles.headline3,
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: AppColors.text),
           onPressed: () => context.pop(),
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -142,9 +144,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
             Expanded(
               child: ListView(
                 children: [
-                  const Text(
+                  Text(
                     "Đơn hàng",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: AppTextStyles.headline3,
                   ),
                   const SizedBox(height: 12),
                   ...widget.cartItems.map((item) {

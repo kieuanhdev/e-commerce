@@ -6,6 +6,8 @@ import 'package:e_commerce/features/products/domain/services/product_cache_servi
 import 'package:e_commerce/features/products/presentation/customer/pages/product_detail_page.dart';
 import 'package:e_commerce/features/products/presentation/customer/widgets/product_card.dart';
 import 'package:e_commerce/features/products/presentation/customer/widgets/product_grid_sliver.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
 class ShopScreen extends StatefulWidget {
@@ -148,10 +150,10 @@ class _ShopScreenState extends State<ShopScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: AppColors.shadow,
             spreadRadius: 1,
             blurRadius: 3,
             offset: const Offset(0, 2),
@@ -160,12 +162,14 @@ class _ShopScreenState extends State<ShopScreen> {
       ),
       child: TextField(
         controller: _searchController,
+        style: AppTextStyles.text14,
         decoration: InputDecoration(
           hintText: 'Tìm kiếm sản phẩm...',
-          prefixIcon: const Icon(Icons.search),
+          hintStyle: AppTextStyles.text14.copyWith(color: AppColors.placeholder),
+          prefixIcon: Icon(Icons.search, color: AppColors.placeholder),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.clear),
+                  icon: Icon(Icons.clear, color: AppColors.placeholder),
                   onPressed: () {
                     setState(() {
                       _searchController.clear();
@@ -177,18 +181,18 @@ class _ShopScreenState extends State<ShopScreen> {
               : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[300]!),
+            borderSide: BorderSide(color: AppColors.placeholder),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[300]!),
+            borderSide: BorderSide(color: AppColors.placeholder),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.blue[300]!),
+            borderSide: BorderSide(color: AppColors.primary),
           ),
           filled: true,
-          fillColor: Colors.grey[50],
+          fillColor: AppColors.placeholder.withOpacity(0.1),
         ),
         onChanged: (value) {
           setState(() {
@@ -204,9 +208,9 @@ class _ShopScreenState extends State<ShopScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         border: Border(
-          bottom: BorderSide(color: Colors.grey[200]!),
+          bottom: BorderSide(color: AppColors.placeholder),
         ),
       ),
       child: Row(
@@ -295,17 +299,16 @@ class _ShopScreenState extends State<ShopScreen> {
           if (_searchQuery.isNotEmpty || _selectedCategory != null)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: Colors.blue[50],
+              color: AppColors.primary.withOpacity(0.1),
               child: Row(
                 children: [
-                  Icon(Icons.filter_list, size: 16, color: Colors.blue[700]),
+                  Icon(Icons.filter_list, size: 16, color: AppColors.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _buildFilterInfo(),
-                      style: TextStyle(
-                        color: Colors.blue[700],
-                        fontSize: 12,
+                      style: AppTextStyles.text11.copyWith(
+                        color: AppColors.primary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -335,21 +338,19 @@ class _ShopScreenState extends State<ShopScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.search_off,
-                                size: 64, color: Colors.grey[400]),
+                                size: 64, color: AppColors.placeholder),
                             const SizedBox(height: 16),
                             Text(
                               'Không tìm thấy sản phẩm nào',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 16,
+                              style: AppTextStyles.text16.copyWith(
+                                color: AppColors.placeholder,
                               ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm',
-                              style: TextStyle(
-                                color: Colors.grey[500],
-                                fontSize: 12,
+                              style: AppTextStyles.text11.copyWith(
+                                color: AppColors.placeholder,
                               ),
                             ),
                           ],
