@@ -61,11 +61,7 @@ class _OverviewPageContent extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Thống kê tổng quan',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 24),
+                 
 
                   // Stats cards grid
                   GridView.count(
