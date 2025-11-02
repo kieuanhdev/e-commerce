@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:e_commerce/core/data/cloudinary_service.dart';
 import 'package:e_commerce/features/products/data/datasources/product_remote_datasource.dart';
 import 'package:e_commerce/features/products/data/repositories/product_repository_impl.dart';
 import 'package:e_commerce/features/products/domain/entities/product.dart';
@@ -12,7 +13,10 @@ class PopularProductsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final repo = ProductRepositoryImpl(ProductRemoteDataSourceImpl());
+    final repo = ProductRepositoryImpl(
+      ProductRemoteDataSourceImpl(),
+      CloudinaryService(),
+    );
     final usecase = GetProducts(repo);
 
     return FutureBuilder<List<Product>>(
@@ -20,10 +24,9 @@ class PopularProductsSection extends StatelessWidget {
       builder: (context, snapshot) {
         final isLoading = snapshot.connectionState == ConnectionState.waiting;
         final hasError = snapshot.hasError;
-        final items = (snapshot.data ?? [])
-            .where((p) => p.isVisible == true)
-            .toList()
-          ..sort((a, b) => b.quantity.compareTo(a.quantity));
+        final items =
+            (snapshot.data ?? []).where((p) => p.isVisible == true).toList()
+              ..sort((a, b) => b.quantity.compareTo(a.quantity));
         final topItems = items.take(10).toList();
 
         return Column(
@@ -49,10 +52,14 @@ class PopularProductsSection extends StatelessWidget {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (hasError) {
-                    return const Center(child: Text('Không thể tải sản phẩm phổ biến'));
+                    return const Center(
+                      child: Text('Không thể tải sản phẩm phổ biến'),
+                    );
                   }
                   if (topItems.isEmpty) {
-                    return const Center(child: Text('Không có sản phẩm phổ biến'));
+                    return const Center(
+                      child: Text('Không có sản phẩm phổ biến'),
+                    );
                   }
                   return ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -78,7 +85,9 @@ class PopularProductsSection extends StatelessWidget {
                                   price: p.price,
                                   brand: 'Thương hiệu',
                                   description: p.longDescription,
-                                  imageUrls: p.imageUrl != null && p.imageUrl!.isNotEmpty
+                                  imageUrls:
+                                      p.imageUrl != null &&
+                                          p.imageUrl!.isNotEmpty
                                       ? [p.imageUrl!]
                                       : const [],
                                   inStock: (p.quantity) > 0,
@@ -94,7 +103,8 @@ class PopularProductsSection extends StatelessWidget {
                         ),
                       );
                     },
-                    separatorBuilder: (context, index) => const SizedBox(width: 16),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 16),
                     itemCount: topItems.length,
                   );
                 },
@@ -106,5 +116,3 @@ class PopularProductsSection extends StatelessWidget {
     );
   }
 }
-
-
