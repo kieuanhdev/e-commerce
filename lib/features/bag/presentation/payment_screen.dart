@@ -135,15 +135,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
           onPressed: () => context.pop(),
         ),
       ),
-      backgroundColor: AppColors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Order Summary
-            Expanded(
-              child: ListView(
-                children: [
+      backgroundColor: AppColors.background,
+      body: Column(
+        children: [
+          // Order Summary
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
                   Text(
                     "Đơn hàng",
                     style: AppTextStyles.headline3,
@@ -156,11 +155,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
-                        color: Colors.grey[100],
+                        color: AppColors.white,
                         borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.shadow,
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(12),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -169,21 +175,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               child: product.imageUrl != null && product.imageUrl!.isNotEmpty
                                   ? Image.network(
                                       product.imageUrl!,
-                                      width: 60,
-                                      height: 60,
+                                      width: 70,
+                                      height: 70,
                                       fit: BoxFit.cover,
                                       errorBuilder: (context, error, stackTrace) => Container(
-                                        width: 60,
-                                        height: 60,
-                                        color: Colors.grey[300],
-                                        child: const Icon(Icons.image, size: 24),
+                                        width: 70,
+                                        height: 70,
+                                        color: AppColors.background,
+                                        child: Icon(Icons.image, size: 24, color: AppColors.placeholder),
                                       ),
                                     )
                                   : Container(
-                                      width: 60,
-                                      height: 60,
-                                      color: Colors.grey[300],
-                                      child: const Icon(Icons.image, size: 24),
+                                      width: 70,
+                                      height: 70,
+                                      color: AppColors.background,
+                                      child: Icon(Icons.image, size: 24, color: AppColors.placeholder),
                                     ),
                             ),
                             const SizedBox(width: 12),
@@ -193,10 +199,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                 children: [
                                   Text(
                                     product.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                                    style: AppTextStyles.text14.copyWith(
+                                      fontWeight: FontWeight.w600,
                                     ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 4),
                                   if (cartItem.color != null || cartItem.size != null)
@@ -207,11 +214,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                           Text.rich(
                                             TextSpan(
                                               text: 'Màu sắc: ',
-                                              style: const TextStyle(fontSize: 11, color: Colors.black54),
+                                              style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                                               children: [
                                                 TextSpan(
                                                   text: cartItem.color,
-                                                  style: const TextStyle(color: Colors.red),
+                                                  style: AppTextStyles.text11.copyWith(color: AppColors.error),
                                                 ),
                                               ],
                                             ),
@@ -220,11 +227,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                           Text.rich(
                                             TextSpan(
                                               text: 'Kích cỡ: ',
-                                              style: const TextStyle(fontSize: 11, color: Colors.black54),
+                                              style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                                               children: [
                                                 TextSpan(
                                                   text: cartItem.size,
-                                                  style: const TextStyle(color: Colors.red),
+                                                  style: AppTextStyles.text11.copyWith(color: AppColors.error),
                                                 ),
                                               ],
                                             ),
@@ -236,14 +243,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                     children: [
                                       Text(
                                         'x${cartItem.quantity}',
-                                        style: const TextStyle(fontSize: 12, color: Colors.black54),
+                                        style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                                       ),
                                       const Spacer(),
                                       Text(
                                         formatAmount(item.totalPrice, withVnd: true),
-                                        style: const TextStyle(
+                                        style: AppTextStyles.text14.copyWith(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 14,
+                                          color: AppColors.primary,
                                         ),
                                       ),
                                     ],
@@ -256,62 +263,110 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       ),
                     );
                   }),
-                  const SizedBox(height: 24),
-                  const Divider(),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Tổng tiền",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        formatAmount(widget.totalPrice, withVnd: true),
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              ],
             ),
-            // Payment Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isProcessing ? null : _processPayment,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+          ),
+          // Bottom payment section
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadow,
+                  blurRadius: 16,
+                  offset: const Offset(0, -4),
                 ),
-                child: _isProcessing
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text(
-                        "Thanh toán",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
+              ],
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Tổng tiền",
+                                style: AppTextStyles.text14.copyWith(
+                                  color: AppColors.text.withOpacity(0.6),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                formatAmount(widget.totalPrice, withVnd: true),
+                                style: AppTextStyles.headline3.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            '${widget.cartItems.length} sản phẩm',
+                            style: AppTextStyles.text14.copyWith(
+                              color: AppColors.text.withOpacity(0.6),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _isProcessing ? null : _processPayment,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.white,
+                          elevation: 0,
+                          disabledBackgroundColor: AppColors.placeholder,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: _isProcessing
+                            ? SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: AppColors.white,
+                                ),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Xác nhận thanh toán",
+                                    style: AppTextStyles.text16.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Icon(Icons.check_circle_outline, size: 20),
+                                ],
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

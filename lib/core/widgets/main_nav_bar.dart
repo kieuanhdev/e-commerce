@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:e_commerce/core/routing/app_routers.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
 
 class MainNavigation extends StatefulWidget {
   final Widget child;
@@ -46,8 +47,8 @@ class _MainNavigationState extends State<MainNavigation> {
         currentIndex: currentIndex,
         onTap: (index) => _onTap(context, index),
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: AppColors.placeholder,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
           BottomNavigationBarItem(icon: Icon(Icons.shop), label: 'Cửa hàng'),

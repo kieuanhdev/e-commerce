@@ -125,7 +125,7 @@ class _BagScreenState extends State<BagScreen> {
               backgroundColor: AppColors.white,
               elevation: 0,
             ),
-            backgroundColor: AppColors.white,
+            backgroundColor: AppColors.background,
             body: BlocConsumer<BagBloc, BagState>(
               listener: (context, state) {
                 if (state is BagError) {
@@ -139,7 +139,11 @@ class _BagScreenState extends State<BagScreen> {
               },
               builder: (context, state) {
                 if (state is BagLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primary,
+                    ),
+                  );
                 }
 
                 if (state is BagError) {
@@ -147,7 +151,17 @@ class _BagScreenState extends State<BagScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(state.message),
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: AppColors.error,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          state.message,
+                          style: AppTextStyles.text14,
+                          textAlign: TextAlign.center,
+                        ),
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
@@ -162,8 +176,31 @@ class _BagScreenState extends State<BagScreen> {
 
                 if (state is BagLoaded) {
                   if (state.cartItems.isEmpty) {
-                    return const Center(
-                      child: Text('Giỏ hàng trống'),
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 100,
+                            color: AppColors.placeholder,
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Giỏ hàng trống',
+                            style: AppTextStyles.headline3.copyWith(
+                              color: AppColors.text.withOpacity(0.6),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Hãy thêm sản phẩm vào giỏ hàng của bạn',
+                            style: AppTextStyles.text14.copyWith(
+                              color: AppColors.placeholder,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   }
 
@@ -177,49 +214,55 @@ class _BagScreenState extends State<BagScreen> {
 
                   final filteredTotalPrice = filteredItems.fold(0.0, (sum, item) => sum + item.totalPrice);
 
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: filteredItems.length,
-                            itemBuilder: (context, index) {
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: filteredItems.length,
+                          itemBuilder: (context, index) {
                               final item = filteredItems[index];
                               final cartItem = item.cartItem;
                               final product = item.product;
 
                               return Container(
-                                margin: const EdgeInsets.only(bottom: 12),
+                                margin: const EdgeInsets.only(bottom: 16),
                                 decoration: BoxDecoration(
-                                  color: AppColors.placeholder.withOpacity(0.3),
-                                  borderRadius: BorderRadius.circular(12),
+                                  color: AppColors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.shadow,
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(12),
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(12),
                                         child: product.imageUrl != null && product.imageUrl!.isNotEmpty
                                             ? Image.network(
                                                 product.imageUrl!,
-                                                width: 70,
-                                                height: 70,
+                                                width: 80,
+                                                height: 80,
                                                 fit: BoxFit.cover,
                                                 errorBuilder: (context, error, stackTrace) => Container(
-                                                  width: 70,
-                                                  height: 70,
-                                                  color: AppColors.placeholder,
-                                                  child: const Icon(Icons.image),
+                                                  width: 80,
+                                                  height: 80,
+                                                  color: AppColors.background,
+                                                  child: Icon(Icons.image, color: AppColors.placeholder),
                                                 ),
                                               )
                                             : Container(
-                                                width: 70,
-                                                height: 70,
-                                                color: Colors.grey[300],
-                                                child: const Icon(Icons.image),
+                                                width: 80,
+                                                height: 80,
+                                                color: AppColors.background,
+                                                child: Icon(Icons.image, color: AppColors.placeholder),
                                               ),
                                       ),
                                       const SizedBox(width: 12),
@@ -236,9 +279,11 @@ class _BagScreenState extends State<BagScreen> {
                                                     children: [
                                                       Text(
                                                         product.name,
-                                                        style: const TextStyle(
-                                                          fontWeight: FontWeight.bold,
+                                                        style: AppTextStyles.text16.copyWith(
+                                                          fontWeight: FontWeight.w600,
                                                         ),
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow.ellipsis,
                                                       ),
                                                       const SizedBox(height: 4),
                                                       if (cartItem.color != null || cartItem.size != null)
@@ -294,48 +339,60 @@ class _BagScreenState extends State<BagScreen> {
                                                 ),
                                               ],
                                             ),
-                                            const SizedBox(height: 10),
+                                            const SizedBox(height: 12),
                                             Row(
                                               children: [
                                                 Container(
                                                   decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius: BorderRadius.circular(24),
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.black.withOpacity(0.08),
-                                                        blurRadius: 6,
-                                                        offset: const Offset(0, 2),
-                                                      ),
-                                                    ],
+                                                    color: AppColors.background,
+                                                    borderRadius: BorderRadius.circular(8),
+                                                    border: Border.all(
+                                                      color: AppColors.placeholder.withOpacity(0.3),
+                                                    ),
                                                   ),
-                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                                   child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
                                                     children: [
-                                                      _CircleIconButton(
-                                                        icon: Icons.remove,
-                                                        onPressed: () {
+                                                      InkWell(
+                                                        onTap: () {
                                                           if (cartItem.quantity > 1) {
                                                             context.read<BagBloc>().add(
                                                                   UpdateQuantity(cartItem.id, cartItem.quantity - 1),
                                                                 );
                                                           }
                                                         },
-                                                      ),
-                                                      Padding(
-                                                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                                                        child: Text(
-                                                          '${cartItem.quantity}',
-                                                          style: const TextStyle(fontSize: 16),
+                                                        child: Container(
+                                                          padding: const EdgeInsets.all(8),
+                                                          child: Icon(
+                                                            Icons.remove,
+                                                            size: 18,
+                                                            color: cartItem.quantity > 1 ? AppColors.text : AppColors.placeholder,
+                                                          ),
                                                         ),
                                                       ),
-                                                      _CircleIconButton(
-                                                        icon: Icons.add,
-                                                        onPressed: () {
+                                                      Container(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                                                        child: Text(
+                                                          '${cartItem.quantity}',
+                                                          style: AppTextStyles.text14.copyWith(
+                                                            fontWeight: FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      InkWell(
+                                                        onTap: () {
                                                           context.read<BagBloc>().add(
                                                                 UpdateQuantity(cartItem.id, cartItem.quantity + 1),
                                                               );
                                                         },
+                                                        child: Container(
+                                                          padding: const EdgeInsets.all(8),
+                                                          child: Icon(
+                                                            Icons.add,
+                                                            size: 18,
+                                                            color: AppColors.primary,
+                                                          ),
+                                                        ),
                                                       ),
                                                     ],
                                                   ),
@@ -343,7 +400,10 @@ class _BagScreenState extends State<BagScreen> {
                                                 const Spacer(),
                                                 Text(
                                                   formatAmount(item.totalPrice, withVnd: true),
-                                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                                  style: AppTextStyles.text16.copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: AppColors.primary,
+                                                  ),
                                                 ),
                                               ],
                                             ),
@@ -354,54 +414,108 @@ class _BagScreenState extends State<BagScreen> {
                                   ),
                                 ),
                               );
-                            },
-                          ),
+                          },
                         ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text("Tổng tiền", style: TextStyle(fontSize: 16)),
-                            Text(
-                              formatAmount(filteredTotalPrice),
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      ),
+                      // Bottom checkout section with shadow
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.shadow,
+                              blurRadius: 16,
+                              offset: const Offset(0, -4),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              context.push(
-                                AppRouters.payment,
-                                extra: {
-                                  'cartItems': state.cartItems,
-                                  'totalPrice': state.totalPrice,
-                                },
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                            ),
-                            child: const Text(
-                              "CHECK OUT",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                        child: SafeArea(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.background,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Tổng tiền",
+                                            style: AppTextStyles.text14.copyWith(
+                                              color: AppColors.text.withOpacity(0.6),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            formatAmount(filteredTotalPrice, withVnd: true),
+                                            style: AppTextStyles.headline3.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.primary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Text(
+                                        '${filteredItems.length} sản phẩm',
+                                        style: AppTextStyles.text14.copyWith(
+                                          color: AppColors.text.withOpacity(0.6),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 56,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      context.push(
+                                        AppRouters.payment,
+                                        extra: {
+                                          'cartItems': state.cartItems,
+                                          'totalPrice': state.totalPrice,
+                                        },
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: AppColors.white,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "Thanh toán",
+                                          style: AppTextStyles.text16.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.white,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Icon(Icons.arrow_forward, size: 20),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   );
                 }
 
@@ -411,38 +525,6 @@ class _BagScreenState extends State<BagScreen> {
           ),
         );
       },
-    );
-  }
-}
-
-class _CircleIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  const _CircleIconButton({
-    required this.icon,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: IconButton(
-        visualDensity: VisualDensity.compact,
-        icon: Icon(icon, size: 18),
-        onPressed: onPressed,
-      ),
     );
   }
 }
