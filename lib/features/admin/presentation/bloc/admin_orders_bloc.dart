@@ -17,9 +17,9 @@ class AdminOrdersBloc extends Bloc<AdminOrdersEvent, AdminOrdersState> {
   AdminOrdersBloc({
     required GetAllOrdersUseCase getAllOrdersUseCase,
     required UpdateOrderStatusUseCase updateOrderStatusUseCase,
-  })  : _getAllOrdersUseCase = getAllOrdersUseCase,
-        _updateOrderStatusUseCase = updateOrderStatusUseCase,
-        super(AdminOrdersInitial()) {
+  }) : _getAllOrdersUseCase = getAllOrdersUseCase,
+       _updateOrderStatusUseCase = updateOrderStatusUseCase,
+       super(AdminOrdersInitial()) {
     on<LoadAllOrders>(_onLoadAllOrders);
     on<OrdersUpdated>(_onOrdersUpdated);
     on<UpdateOrderStatus>(_onUpdateOrderStatus);
@@ -47,20 +47,17 @@ class AdminOrdersBloc extends Bloc<AdminOrdersEvent, AdminOrdersState> {
   ) async {
     if (state is AdminOrdersLoaded) {
       final currentState = state as AdminOrdersLoaded;
-      
+
       emit(AdminOrdersLoading(currentState.orders));
-      
+
       final result = await _updateOrderStatusUseCase(
         event.orderId,
         event.newStatus.displayName,
       );
-      
-      result.fold(
-        (failure) => emit(AdminOrdersError(failure.message)),
-        (_) {
-          // State sẽ được cập nhật tự động qua stream
-        },
-      );
+
+      result.fold((failure) => emit(AdminOrdersError(failure.message)), (_) {
+        // State sẽ được cập nhật tự động qua stream
+      });
     }
   }
 
@@ -70,4 +67,3 @@ class AdminOrdersBloc extends Bloc<AdminOrdersEvent, AdminOrdersState> {
     return super.close();
   }
 }
-

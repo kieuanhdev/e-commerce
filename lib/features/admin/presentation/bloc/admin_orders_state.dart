@@ -35,4 +35,3 @@ class AdminOrdersError extends AdminOrdersState {
   @override
   List<Object?> get props => [message];
 }
-

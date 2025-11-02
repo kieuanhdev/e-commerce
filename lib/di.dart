@@ -127,7 +127,10 @@ void initDI() {
 
   // Product Repository (dùng chung với products feature)
   sl.registerLazySingleton<ProductRepository>(
-    () => ProductRepositoryImpl(ProductRemoteDataSourceImpl()),
+    () => ProductRepositoryImpl(
+      ProductRemoteDataSourceImpl(),
+      sl(), // CloudinaryService
+    ),
   );
 
   sl.registerLazySingleton<ProductRepository>(
@@ -203,13 +206,6 @@ void initDI() {
 
   // Overview Bloc
   sl.registerFactory(() => OverviewBloc(getOverviewStatsUseCase: sl()));
-  sl.registerFactory(
-    () => CustomersBloc(
-      getAllUsersUseCase: sl(),
-      updateUserStatusUseCase: sl(),
-      createUserByAdminUseCase: sl(),
-    ),
-  );
 
   // --- Orders Feature ---
 
