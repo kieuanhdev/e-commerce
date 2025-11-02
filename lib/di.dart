@@ -29,9 +29,12 @@ import 'package:e_commerce/features/products/data/datasources/product_remote_dat
 import 'package:e_commerce/features/products/data/repositories/product_repository_impl.dart';
 import 'package:e_commerce/features/products/domain/repositories/product_repository.dart';
 import 'package:e_commerce/features/admin/presentation/bloc/customers_bloc.dart';
+import 'package:e_commerce/features/admin/presentation/bloc/admin_orders_bloc.dart';
 import 'package:e_commerce/features/admin/domain/usecase/get_all_users.dart';
 import 'package:e_commerce/features/admin/domain/usecase/update_user_status.dart';
 import 'package:e_commerce/features/admin/domain/usecase/create_user_by_admin.dart';
+import 'package:e_commerce/features/admin/domain/usecase/get_all_orders.dart';
+import 'package:e_commerce/features/admin/domain/usecase/update_order_status.dart';
 import 'package:e_commerce/features/orders/data/datasources/order_datasource.dart';
 import 'package:e_commerce/features/orders/data/repository/order_repository_impl.dart';
 import 'package:e_commerce/features/orders/domain/repository/order_repository.dart';
@@ -123,12 +126,20 @@ void initDI() {
   sl.registerFactory(() => GetAllUsersUseCase(sl()));
   sl.registerFactory(() => UpdateUserStatusUseCase(sl()));
   sl.registerFactory(() => CreateUserByAdminUseCase(sl()));
+  sl.registerFactory(() => GetAllOrdersUseCase(sl()));
+  sl.registerFactory(() => UpdateOrderStatusUseCase(sl()));
   
   // Customers Bloc
   sl.registerFactory(() => CustomersBloc(
     getAllUsersUseCase: sl(),
     updateUserStatusUseCase: sl(),
     createUserByAdminUseCase: sl(),
+  ));
+  
+  // Admin Orders Bloc
+  sl.registerFactory(() => AdminOrdersBloc(
+    getAllOrdersUseCase: sl(),
+    updateOrderStatusUseCase: sl(),
   ));
 
   // --- Orders Feature ---

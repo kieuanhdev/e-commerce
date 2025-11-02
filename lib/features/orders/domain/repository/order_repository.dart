@@ -5,5 +5,6 @@ abstract class IOrderRepository {
   Future<List<Order>> getOrdersByUserId(String userId);
   Future<Order?> getOrderById(String orderId);
   Future<void> updateOrderStatus(String orderId, String status);
+  Stream<List<Order>> getAllOrders();
 }
 

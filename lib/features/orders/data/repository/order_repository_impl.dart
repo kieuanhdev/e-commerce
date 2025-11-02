@@ -30,5 +30,12 @@ class OrderRepositoryImpl implements IOrderRepository {
   Future<void> updateOrderStatus(String orderId, String status) async {
     await _dataSource.updateOrderStatus(orderId, status);
   }
+
+  @override
+  Stream<List<Order>> getAllOrders() {
+    return _dataSource.getAllOrders().map(
+      (models) => models.map((model) => model.toEntity()).toList(),
+    );
+  }
 }
 
