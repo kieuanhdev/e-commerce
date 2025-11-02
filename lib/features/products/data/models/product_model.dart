@@ -18,21 +18,28 @@ class ProductModel extends Product {
   });
 
   factory ProductModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return ProductModel(
-      id: doc.id,
-      name: data['name'] ?? '',
-      price: (data['price'] as num?)?.toDouble() ?? 0,
-      quantity: (data['quantity'] as num?)?.toInt() ?? 0,
-      isVisible: (data['isVisible'] as bool?) ?? true,
-      lowStockThreshold: (data['lowStockThreshold'] as num?)?.toInt() ?? 10,
-      imageUrl: data['imageUrl'] as String?,
-      shortDescription: data['shortDescription'] as String? ?? '',
-      longDescription: data['longDescription'] as String? ?? '',
-      categoryId: data['categoryId'] as String?,
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.fromMillisecondsSinceEpoch(0),
-      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
-    );
+    final data = doc.data();
+    if (data == null || data is! Map<String, dynamic>) {
+      throw FormatException('Document ${doc.id} has invalid or null data');
+    }
+    try {
+      return ProductModel(
+        id: doc.id,
+        name: data['name'] as String? ?? '',
+        price: (data['price'] as num?)?.toDouble() ?? 0,
+        quantity: (data['quantity'] as num?)?.toInt() ?? 0,
+        isVisible: (data['isVisible'] as bool?) ?? true,
+        lowStockThreshold: (data['lowStockThreshold'] as num?)?.toInt() ?? 10,
+        imageUrl: data['imageUrl'] as String?,
+        shortDescription: data['shortDescription'] as String? ?? '',
+        longDescription: data['longDescription'] as String? ?? '',
+        categoryId: data['categoryId'] as String?,
+        createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.fromMillisecondsSinceEpoch(0),
+        updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
+      );
+    } catch (e) {
+      throw FormatException('Error parsing ProductModel from document ${doc.id}: $e');
+    }
   }
 
   Map<String, dynamic> toJson() => {

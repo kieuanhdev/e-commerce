@@ -1,5 +1,6 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-  
+
 /// A generic Firestore DataSource for basic CRUD operations.
 /// T = Model type that represents the Firestore document.
 class FirebaseRemoteDS<T> {
@@ -19,8 +20,30 @@ class FirebaseRemoteDS<T> {
   /// Get all documents in the collection
   /// Note: Returns unsorted data for better performance
   Future<List<T>> getAll() async {
-    final snapshot = await _collection.get();
-    return snapshot.docs.map((e) => fromFirestore(e)).toList();
+    try {
+      final snapshot = await _collection
+          .get(const GetOptions(source: Source.serverAndCache))
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw TimeoutException('Firestore query timeout after 30 seconds');
+            },
+          );
+      return snapshot.docs.map((doc) {
+        try {
+          return fromFirestore(doc);
+        } catch (error) {
+          print('Error parsing document ${doc.id}: $error');
+          rethrow;
+        }
+      }).toList();
+    } on FirebaseException catch (e) {
+      print('Firebase error in getAll(): ${e.code} - ${e.message}');
+      rethrow;
+    } catch (e) {
+      print('Error in getAll(): $e');
+      rethrow;
+    }
   }
 
   /// Get a single document by ID
