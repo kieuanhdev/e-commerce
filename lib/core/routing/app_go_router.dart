@@ -17,7 +17,6 @@ import 'package:e_commerce/features/settings/presentation/settings_screen.dart';
 import 'package:e_commerce/features/bag/presentation/bag_screen.dart';
 import 'package:e_commerce/features/bag/presentation/payment_screen.dart';
 import 'package:e_commerce/features/bag/presentation/payment_success_screen.dart';
-import 'package:e_commerce/features/favorites/presentation/favorites_screen.dart';
 import 'package:e_commerce/features/profile/presentation/profile_screen.dart';
 import 'package:e_commerce/features/shop/presentation/shop_screen.dart';
 import 'package:e_commerce/features/orders/presentation/my_order_screen.dart';
@@ -108,11 +107,6 @@ class AppGoRouter {
             builder: (context, state) => const BagScreen(),
           ),
           GoRoute(
-            path: AppRouters.favorites,
-            name: AppRouteNames.favorites,
-            builder: (context, state) => const FavoritesScreen(),
-          ),
-          GoRoute(
             path: AppRouters.profile,
             name: AppRouteNames.profile,
             builder: (context, state) => const ProfileScreen(),
@@ -192,7 +186,7 @@ class AppGoRouter {
       final user = authState.user;
       final isAdmin = user.role == 'admin';
       final isGoingToAdmin = location.startsWith('/admin');
-      final isGoingToCustomerShell = location.startsWith('/home') || location.startsWith('/shop') || location.startsWith('/bag') || location.startsWith('/favorites') || location.startsWith('/profile') || location.startsWith('/settings');
+      final isGoingToCustomerShell = location.startsWith('/home') || location.startsWith('/shop') || location.startsWith('/bag') || location.startsWith('/profile') || location.startsWith('/settings');
 
       if (isAuthFlow) {
         // Chỉ chuyển khỏi trang auth khi đã đăng nhập
@@ -202,7 +196,7 @@ class AppGoRouter {
       if (!isAdmin && isGoingToAdmin) {
         return AppRouters.home;
       }
-      if (isAdmin && isGoingToCustomerShell && location != AppRouters.home && location != AppRouters.shop && location != AppRouters.bag && location != AppRouters.favorites && location != AppRouters.profile && location != AppRouters.settings) {
+      if (isAdmin && isGoingToCustomerShell && location != AppRouters.home && location != AppRouters.shop && location != AppRouters.bag && location != AppRouters.profile && location != AppRouters.settings) {
         return AppRouters.adminOverview;
       }
 

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:e_commerce/features/bag/presentation/bloc/bag_bloc.dart';
 import 'package:e_commerce/features/bag/presentation/bloc/bag_event.dart';
 import 'package:e_commerce/features/bag/presentation/bloc/bag_state.dart';
+import 'package:e_commerce/features/bag/domain/entities/cart_item_with_product.dart';
 import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:e_commerce/di.dart';
 import 'package:intl/intl.dart';
@@ -17,10 +18,30 @@ class BagScreen extends StatefulWidget {
 }
 
 class _BagScreenState extends State<BagScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   String formatAmount(num amount, {bool withVnd = false}) {
     final formatter = NumberFormat('#,###');
     final formatted = formatter.format(amount);
     return withVnd ? '$formatted VND' : formatted;
+  }
+
+  List<CartItemWithProduct> _filterCartItems(List<CartItemWithProduct> items, String query) {
+    if (query.isEmpty) {
+      return items;
+    }
+    final lowerQuery = query.toLowerCase();
+    return items.where((item) {
+      return item.product.name.toLowerCase().contains(lowerQuery) ||
+          (item.product.shortDescription.toLowerCase().contains(lowerQuery));
+    }).toList();
   }
 
   @override
@@ -53,19 +74,54 @@ class _BagScreenState extends State<BagScreen> {
           },
           child: Scaffold(
             appBar: AppBar(
-              title: const Text(
-                "My Bag",
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+              title: Row(
+                children: [
+                  const Text(
+                    "My Bag",
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        style: const TextStyle(fontSize: 14),
+                        decoration: InputDecoration(
+                          hintText: 'Tìm kiếm sản phẩm...',
+                          hintStyle: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                          prefixIcon: Icon(Icons.search, size: 20, color: Colors.grey[600]),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(Icons.clear, size: 18),
+                                  onPressed: () {
+                                    setState(() {
+                                      _searchController.clear();
+                                      _searchQuery = '';
+                                    });
+                                  },
+                                )
+                              : null,
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
               centerTitle: false,
               backgroundColor: Colors.white,
               elevation: 0,
-              actions: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.search, color: Colors.black),
-                ),
-              ],
             ),
             backgroundColor: Colors.white,
             body: BlocConsumer<BagBloc, BagState>(
@@ -109,15 +165,25 @@ class _BagScreenState extends State<BagScreen> {
                     );
                   }
 
+                  final filteredItems = _filterCartItems(state.cartItems, _searchQuery);
+                  
+                  if (filteredItems.isEmpty && _searchQuery.isNotEmpty) {
+                    return const Center(
+                      child: Text('Không tìm thấy sản phẩm nào trong giỏ hàng'),
+                    );
+                  }
+
+                  final filteredTotalPrice = filteredItems.fold(0.0, (sum, item) => sum + item.totalPrice);
+
                   return Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
                         Expanded(
                           child: ListView.builder(
-                            itemCount: state.cartItems.length,
+                            itemCount: filteredItems.length,
                             itemBuilder: (context, index) {
-                              final item = state.cartItems[index];
+                              final item = filteredItems[index];
                               final cartItem = item.cartItem;
                               final product = item.product;
 
@@ -295,7 +361,7 @@ class _BagScreenState extends State<BagScreen> {
                           children: [
                             const Text("Tổng tiền", style: TextStyle(fontSize: 16)),
                             Text(
-                              formatAmount(state.totalPrice),
+                              formatAmount(filteredTotalPrice),
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

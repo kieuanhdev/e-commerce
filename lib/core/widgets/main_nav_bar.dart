@@ -16,8 +16,7 @@ class _MainNavigationState extends State<MainNavigation> {
     if (location.startsWith(AppRouters.home)) return 0;
     if (location.startsWith(AppRouters.shop)) return 1;
     if (location.startsWith(AppRouters.bag)) return 2;
-    if (location.startsWith(AppRouters.favorites)) return 3;
-    if (location.startsWith(AppRouters.profile)) return 4;
+    if (location.startsWith(AppRouters.profile)) return 3;
     return 0;
   }
 
@@ -33,9 +32,6 @@ class _MainNavigationState extends State<MainNavigation> {
         context.go(AppRouters.bag);
         break;
       case 3:
-        context.go(AppRouters.favorites);
-        break;
-      case 4:
         context.go(AppRouters.profile);
         break;
     }
@@ -56,10 +52,6 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.shop), label: 'Shop'),
           BottomNavigationBarItem(icon: Icon(Icons.shopping_bag), label: 'Bag'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favorites',
-          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:e_commerce/core/routing/app_routers.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -17,12 +18,6 @@ class ProfileScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: Colors.black,
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: Icon(Icons.search),
-          ),
-        ],
       ),
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, authState) {
@@ -62,37 +57,21 @@ class ProfileScreen extends StatelessWidget {
                   _buildNavTile(
                     context,
                     "My orders",
-                    "Already have 12 orders",
-                    "/orders",
-                  ),
-                  _buildNavTile(context, "Shipping address", "3 address", "/address"),
-                  _buildNavTile(context, "Payment methods", "Visa **34", "/payment"),
-                  _buildNavTile(
-                    context,
-                    "Promocodes",
-                    "You have special promocodes",
-                    "/promocodes",
-                  ),
-                  _buildNavTile(
-                    context,
-                    "My reviews",
-                    "Review for 4 items",
-                    "/reviews",
+                    "View your order history",
+                    AppRouters.orders,
                   ),
                   _buildNavTile(
                     context,
                     "Settings",
                     "Notifications, password",
-                    "/settings",
+                    AppRouters.settings,
                   ),
-                  const SizedBox(height: 24),
-                  ListTile(
-                    leading: const Icon(Icons.logout, color: Colors.red),
-                    title: const Text('Logout', style: TextStyle(color: Colors.red)),
-                    onTap: () {
-                      context.read<AuthBloc>().add(AuthLogoutRequested());
-                    },
-                    contentPadding: EdgeInsets.zero,
+                  _buildNavTile(
+                    context,
+                    "Logout",
+                    "Sign out from your account",
+                    "",
+                    isLogout: true,
                   ),
                 ],
               ),
@@ -110,8 +89,9 @@ class ProfileScreen extends StatelessWidget {
     BuildContext context,
     String title,
     String subtitle,
-    String route,
-  ) {
+    String route, {
+    bool isLogout = false,
+  }) {
     return Column(
       children: [
         ListTile(
@@ -122,7 +102,13 @@ class ProfileScreen extends StatelessWidget {
           subtitle: Text(subtitle, style: const TextStyle(color: Colors.grey)),
           trailing: const Icon(Icons.chevron_right),
           contentPadding: EdgeInsets.zero,
-          onTap: () => context.push(route), // dùng go_router
+          onTap: () {
+            if (isLogout) {
+              context.read<AuthBloc>().add(AuthLogoutRequested());
+            } else {
+              context.push(route);
+            }
+          },
         ),
         const Divider(height: 1),
       ],

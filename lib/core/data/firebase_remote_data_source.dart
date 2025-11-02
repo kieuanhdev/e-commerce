@@ -21,14 +21,16 @@ class FirebaseRemoteDS<T> {
   /// Note: Returns unsorted data for better performance
   Future<List<T>> getAll() async {
     try {
+      // Ưu tiên cache trước, sau đó server
       final snapshot = await _collection
           .get(const GetOptions(source: Source.serverAndCache))
           .timeout(
-            const Duration(seconds: 30),
+            const Duration(seconds: 15),
             onTimeout: () {
-              throw TimeoutException('Firestore query timeout after 30 seconds');
+              throw TimeoutException('Firestore query timeout after 15 seconds');
             },
           );
+      
       return snapshot.docs.map((doc) {
         try {
           return fromFirestore(doc);
@@ -37,8 +39,19 @@ class FirebaseRemoteDS<T> {
           rethrow;
         }
       }).toList();
+    } on TimeoutException catch (e) {
+      print('Query timeout: $e');
+      // Thử load từ cache nếu timeout
+      try {
+        final cacheSnapshot = await _collection
+            .get(const GetOptions(source: Source.cache))
+            .timeout(const Duration(seconds: 2));
+        return cacheSnapshot.docs.map((doc) => fromFirestore(doc)).toList();
+      } catch (_) {
+        rethrow;
+      }
     } on FirebaseException catch (e) {
-      print('Firebase error in getAll(): ${e.code} - ${e.message}');
+      print('Firebase error: ${e.code} - ${e.message}');
       rethrow;
     } catch (e) {
       print('Error in getAll(): $e');

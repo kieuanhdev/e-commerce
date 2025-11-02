@@ -8,7 +8,6 @@ class AppRouters {
   static const String home = '/home';
   static const String shop = '/shop';
   static const String bag = '/bag';
-  static const String favorites = '/favorites';
   static const String profile = '/profile';
   static const String settings = '/settings';
   
@@ -38,7 +37,6 @@ class AppRouteNames {
   static const String home = 'home';
   static const String shop = 'shop';
   static const String bag = 'bag';
-  static const String favorites = 'favorites';
   static const String profile = 'profile';
   static const String settings = 'settings';
   
