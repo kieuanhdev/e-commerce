@@ -20,6 +20,8 @@ import 'package:e_commerce/features/bag/presentation/payment_success_screen.dart
 import 'package:e_commerce/features/favorites/presentation/favorites_screen.dart';
 import 'package:e_commerce/features/profile/presentation/profile_screen.dart';
 import 'package:e_commerce/features/shop/presentation/shop_screen.dart';
+import 'package:e_commerce/features/orders/presentation/my_order_screen.dart';
+import 'package:e_commerce/features/orders/presentation/order_detail_screen.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -80,7 +82,10 @@ class AppGoRouter {
       GoRoute(
         path: AppRouters.paymentSuccess,
         name: AppRouteNames.paymentSuccess,
-        builder: (context, state) => const PaymentSuccessScreen(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return PaymentSuccessScreen(orderId: extra?['orderId']);
+        },
       ),
 
       // ---------- CUSTOMER SHELL ----------
@@ -116,6 +121,19 @@ class AppGoRouter {
             path: AppRouters.settings,
             name: AppRouteNames.settings,
             builder: (context, state) => const SettingsScreen(),
+          ),
+          GoRoute(
+            path: AppRouters.orders,
+            name: AppRouteNames.orders,
+            builder: (context, state) => const MyOrderScreen(),
+          ),
+          GoRoute(
+            path: AppRouters.orderDetail,
+            name: AppRouteNames.orderDetail,
+            builder: (context, state) {
+              final orderId = state.pathParameters['orderId'] ?? '';
+              return OrderDetailScreen(orderId: orderId);
+            },
           ),
         ],
       ),

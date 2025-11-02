@@ -12,6 +12,10 @@ class AppRouters {
   static const String profile = '/profile';
   static const String settings = '/settings';
   
+  // Orders
+  static const String orders = '/orders';
+  static const String orderDetail = '/orders/:orderId';
+  
   // Payment
   static const String payment = '/payment';
   static const String paymentSuccess = '/payment-success';
@@ -37,6 +41,10 @@ class AppRouteNames {
   static const String favorites = 'favorites';
   static const String profile = 'profile';
   static const String settings = 'settings';
+  
+  // Orders
+  static const String orders = 'orders';
+  static const String orderDetail = 'order-detail';
   
   // Payment
   static const String payment = 'payment';

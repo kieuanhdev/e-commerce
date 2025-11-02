@@ -3,8 +3,15 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:e_commerce/features/bag/domain/entities/cart_item_with_product.dart';
 import 'package:e_commerce/core/routing/app_routers.dart';
+import 'package:e_commerce/features/orders/domain/entities/order.dart';
+import 'package:e_commerce/features/orders/domain/entities/order_item.dart';
+import 'package:e_commerce/features/orders/domain/usecases/create_order_with_reduce_stock.dart';
+import 'package:e_commerce/di.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:e_commerce/features/bag/data/datasource/bag_datasource.dart';
 
-class PaymentScreen extends StatelessWidget {
+class PaymentScreen extends StatefulWidget {
   final List<CartItemWithProduct> cartItems;
   final double totalPrice;
 
@@ -14,10 +21,97 @@ class PaymentScreen extends StatelessWidget {
     required this.totalPrice,
   });
 
+  @override
+  State<PaymentScreen> createState() => _PaymentScreenState();
+}
+
+class _PaymentScreenState extends State<PaymentScreen> {
+  bool _isProcessing = false;
+
   String formatAmount(num amount, {bool withVnd = false}) {
     final formatter = NumberFormat('#,###');
     final formatted = formatter.format(amount);
     return withVnd ? '$formatted VND' : formatted;
+  }
+
+  Future<void> _processPayment() async {
+    if (_isProcessing) return;
+    
+    setState(() {
+      _isProcessing = true;
+    });
+
+    final authState = context.read<AuthBloc>().state;
+    if (authState is! AuthAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Bạn cần đăng nhập để thanh toán'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      setState(() {
+        _isProcessing = false;
+      });
+      return;
+    }
+
+    try {
+      // Tạo order items từ cart items
+      final orderItems = widget.cartItems.map((item) {
+        return OrderItem(
+          productId: item.cartItem.productId,
+          productName: item.product.name,
+          productImageUrl: item.product.imageUrl,
+          quantity: item.cartItem.quantity,
+          price: item.product.price,
+          color: item.cartItem.color,
+          size: item.cartItem.size,
+        );
+      }).toList();
+
+      // Tạo order
+      final order = Order(
+        id: '', // Sẽ được generate
+        userId: authState.user.id,
+        customerName: authState.user.displayName ?? '',
+        customerEmail: authState.user.email,
+        items: orderItems,
+        totalAmount: widget.totalPrice,
+        createdAt: DateTime.now(),
+        status: OrderStatus.processing,
+      );
+
+      // Tạo order và giảm stock
+      final createOrderUseCase = sl<CreateOrderWithReduceStockUseCase>();
+      final orderId = await createOrderUseCase(order);
+
+      // Xóa giỏ hàng
+      final bagDataSource = sl<BagRemoteDataSource>();
+      await bagDataSource.clearCart(authState.user.id);
+
+      if (mounted) {
+        // Navigate to success screen với orderId
+        context.push(
+          AppRouters.paymentSuccess,
+          extra: {'orderId': orderId},
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi thanh toán: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+      }
+    }
   }
 
   @override
@@ -49,7 +143,7 @@ class PaymentScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
-                  ...cartItems.map((item) {
+                  ...widget.cartItems.map((item) {
                     final cartItem = item.cartItem;
                     final product = item.product;
 
@@ -167,7 +261,7 @@ class PaymentScreen extends StatelessWidget {
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        formatAmount(totalPrice, withVnd: true),
+                        formatAmount(widget.totalPrice, withVnd: true),
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -183,9 +277,7 @@ class PaymentScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  context.push(AppRouters.paymentSuccess);
-                },
+                onPressed: _isProcessing ? null : _processPayment,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -193,14 +285,23 @@ class PaymentScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  "Thanh toán",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
+                child: _isProcessing
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        "Thanh toán",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
           ],

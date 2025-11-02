@@ -17,10 +17,9 @@ class FirebaseRemoteDS<T> {
       FirebaseFirestore.instance.collection(collectionName);
 
   /// Get all documents in the collection
+  /// Note: Returns unsorted data for better performance
   Future<List<T>> getAll() async {
-    final snapshot = await _collection
-        .orderBy('createdAt', descending: true)
-        .get();
+    final snapshot = await _collection.get();
     return snapshot.docs.map((e) => fromFirestore(e)).toList();
   }
 
@@ -48,9 +47,9 @@ class FirebaseRemoteDS<T> {
   }
 
   /// Listen to realtime changes in a collection
+  /// Note: Returns unsorted data for better performance
   Stream<List<T>> watchAll() {
     return _collection
-        .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((e) => fromFirestore(e)).toList());
   }

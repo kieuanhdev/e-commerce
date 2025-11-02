@@ -32,6 +32,12 @@ import 'package:e_commerce/features/admin/presentation/bloc/customers_bloc.dart'
 import 'package:e_commerce/features/admin/domain/usecase/get_all_users.dart';
 import 'package:e_commerce/features/admin/domain/usecase/update_user_status.dart';
 import 'package:e_commerce/features/admin/domain/usecase/create_user_by_admin.dart';
+import 'package:e_commerce/features/orders/data/datasources/order_datasource.dart';
+import 'package:e_commerce/features/orders/data/repository/order_repository_impl.dart';
+import 'package:e_commerce/features/orders/domain/repository/order_repository.dart';
+import 'package:e_commerce/features/orders/domain/usecases/create_order_with_reduce_stock.dart';
+import 'package:e_commerce/features/orders/domain/usecases/get_orders_by_user_id.dart';
+import 'package:e_commerce/features/orders/domain/usecases/get_order_by_id.dart';
 
 final sl = GetIt.instance;
 
@@ -124,4 +130,17 @@ void initDI() {
     updateUserStatusUseCase: sl(),
     createUserByAdminUseCase: sl(),
   ));
+
+  // --- Orders Feature ---
+  
+  // Order Datasource
+  sl.registerLazySingleton<OrderRemoteDataSource>(() => OrderRemoteDataSourceImpl());
+  
+  // Order Repository
+  sl.registerLazySingleton<IOrderRepository>(() => OrderRepositoryImpl(sl()));
+  
+  // Order UseCases
+  sl.registerFactory(() => CreateOrderWithReduceStockUseCase(sl()));
+  sl.registerFactory(() => GetOrdersByUserIdUseCase(sl()));
+  sl.registerFactory(() => GetOrderByIdUseCase(sl()));
 }

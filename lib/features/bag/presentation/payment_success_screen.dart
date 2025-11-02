@@ -3,10 +3,19 @@ import 'package:go_router/go_router.dart';
 import 'package:e_commerce/core/routing/app_routers.dart';
 
 class PaymentSuccessScreen extends StatelessWidget {
-  const PaymentSuccessScreen({super.key});
+  final String? orderId;
+
+  const PaymentSuccessScreen({super.key, this.orderId});
 
   @override
   Widget build(BuildContext context) {
+    void navigateToOrderDetail() {
+      if (orderId != null) {
+        context.go('${AppRouters.orders}/$orderId');
+      } else {
+        context.go(AppRouters.orders);
+      }
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -78,9 +87,7 @@ class PaymentSuccessScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () {
-                    context.go(AppRouters.bag);
-                  },
+                  onPressed: navigateToOrderDetail,
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     side: const BorderSide(color: Colors.green, width: 2),

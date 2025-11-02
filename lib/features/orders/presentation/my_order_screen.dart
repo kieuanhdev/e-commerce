@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:e_commerce/features/orders/domain/entities/order.dart';
+import 'package:e_commerce/features/orders/domain/usecases/get_orders_by_user_id.dart';
+import 'package:e_commerce/di.dart';
+import 'package:e_commerce/core/routing/app_routers.dart';
 
 class MyOrderScreen extends StatefulWidget {
   const MyOrderScreen({super.key});
@@ -10,56 +17,63 @@ class MyOrderScreen extends StatefulWidget {
 class _MyOrderScreenState extends State<MyOrderScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  List<Order> _allOrders = [];
+  bool _isLoading = true;
 
-  final List<_Order> deliveryOrders = List.generate(
-    3,
-    (i) => _Order(
-      id: '123456',
-      trackingNumber: 'KA456789',
-      quantity: 1,
-      date: DateTime(2025, 9, 28),
-      totalAmount: 100000,
-      statusText: 'DELIVERY',
-      statusColor: const Color(0xFF19B072),
-    ),
-  );
+  List<Order> get deliveryOrders =>
+      _allOrders.where((o) => o.status == OrderStatus.delivery).toList();
 
-  final List<_Order> processingOrders = List.generate(
-    3,
-    (i) => _Order(
-      id: '987654',
-      trackingNumber: 'KB123456',
-      quantity: 2,
-      date: DateTime(2025, 9, 29),
-      totalAmount: 250000,
-      statusText: 'PROCESSING',
-      statusColor: const Color(0xFFF5A524),
-    ),
-  );
+  List<Order> get processingOrders =>
+      _allOrders.where((o) => o.status == OrderStatus.processing).toList();
 
-  final List<_Order> cancelledOrders = List.generate(
-    2,
-    (i) => _Order(
-      id: '111222',
-      trackingNumber: 'KC654321',
-      quantity: 1,
-      date: DateTime(2025, 9, 30),
-      totalAmount: 90000,
-      statusText: 'CANCELLED',
-      statusColor: const Color(0xFFE5484D),
-    ),
-  );
+  List<Order> get cancelledOrders =>
+      _allOrders.where((o) => o.status == OrderStatus.cancelled).toList();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _loadOrders();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadOrders() async {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is! AuthAuthenticated) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final useCase = sl<GetOrdersByUserIdUseCase>();
+      final orders = await useCase(authState.user.id);
+      
+      if (mounted) {
+        setState(() {
+          _allOrders = orders;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi tải đơn hàng: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   String formatAmount(num amount) {
@@ -87,8 +101,8 @@ class _MyOrderScreenState extends State<MyOrderScreen>
         elevation: 0,
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.search, color: Colors.black),
+            onPressed: _loadOrders,
+            icon: const Icon(Icons.refresh, color: Colors.black),
           ),
         ],
         bottom: PreferredSize(
@@ -97,14 +111,16 @@ class _MyOrderScreenState extends State<MyOrderScreen>
         ),
       ),
       backgroundColor: const Color(0xFFF5F5F5),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _OrderList(orders: deliveryOrders, formatAmount: formatAmount),
-          _OrderList(orders: processingOrders, formatAmount: formatAmount),
-          _OrderList(orders: cancelledOrders, formatAmount: formatAmount),
-        ],
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _OrderList(orders: deliveryOrders, formatAmount: formatAmount),
+                _OrderList(orders: processingOrders, formatAmount: formatAmount),
+                _OrderList(orders: cancelledOrders, formatAmount: formatAmount),
+              ],
+            ),
     );
   }
 }
@@ -152,7 +168,7 @@ class _SegmentedTabBar extends StatelessWidget {
 }
 
 class _OrderList extends StatelessWidget {
-  final List<_Order> orders;
+  final List<Order> orders;
   final String Function(num) formatAmount;
 
   const _OrderList({
@@ -162,6 +178,12 @@ class _OrderList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (orders.isEmpty) {
+      return const Center(
+        child: Text('Không có đơn hàng nào'),
+      );
+    }
+
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       itemCount: orders.length,
@@ -175,13 +197,24 @@ class _OrderList extends StatelessWidget {
 }
 
 class _OrderCard extends StatelessWidget {
-  final _Order order;
+  final Order order;
   final String Function(num) formatAmount;
 
   const _OrderCard({
     required this.order,
     required this.formatAmount,
   });
+
+  Color _getStatusColor(OrderStatus status) {
+    switch (status) {
+      case OrderStatus.processing:
+        return const Color(0xFFF5A524);
+      case OrderStatus.delivery:
+        return const Color(0xFF19B072);
+      case OrderStatus.cancelled:
+        return const Color(0xFFE5484D);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -210,19 +243,19 @@ class _OrderCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Order #${order.id}',
+                        'Order #${order.id.substring(0, 8)}',
                         style: const TextStyle(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Tracking number : ${order.trackingNumber}',
+                        'Tracking number: ${order.trackingNumber}',
                         style: const TextStyle(fontSize: 12, color: Colors.black54),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Quantity:  ${order.quantity}',
+                        'Quantity: ${order.totalQuantity}',
                         style: const TextStyle(fontSize: 12, color: Colors.black54),
                       ),
                     ],
@@ -232,7 +265,7 @@ class _OrderCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      _formatDate(order.date),
+                      _formatDate(order.createdAt),
                       style: const TextStyle(fontSize: 12, color: Colors.black54),
                     ),
                     const SizedBox(height: 18),
@@ -256,7 +289,11 @@ class _OrderCard extends StatelessWidget {
             Row(
               children: [
                 OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    context.push(
+                      '${AppRouters.orders}/${order.id}',
+                    );
+                  },
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -265,9 +302,9 @@ class _OrderCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  order.statusText,
+                  order.status.displayName,
                   style: TextStyle(
-                    color: order.statusColor,
+                    color: _getStatusColor(order.status),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -278,33 +315,11 @@ class _OrderCard extends StatelessWidget {
       ),
     );
   }
+
+  String _formatDate(DateTime d) {
+    final day = d.day.toString().padLeft(2, '0');
+    final month = d.month.toString().padLeft(2, '0');
+    final year = d.year.toString();
+    return '$day - $month - $year';
+  }
 }
-
-class _Order {
-  final String id;
-  final String trackingNumber;
-  final int quantity;
-  final DateTime date;
-  final num totalAmount;
-  final String statusText;
-  final Color statusColor;
-
-  const _Order({
-    required this.id,
-    required this.trackingNumber,
-    required this.quantity,
-    required this.date,
-    required this.totalAmount,
-    required this.statusText,
-    required this.statusColor,
-  });
-}
-
-String _formatDate(DateTime d) {
-  final day = d.day.toString().padLeft(2, '0');
-  final month = d.month.toString().padLeft(2, '0');
-  final year = d.year.toString();
-  return '$day - $month - $year';
-}
-
-
