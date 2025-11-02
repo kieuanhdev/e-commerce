@@ -273,7 +273,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 if (item.color != null)
                                   Text.rich(
                                     TextSpan(
-                                      text: 'Màu: ',
+                                      text: 'Màu sắc: ',
                                       style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                                       children: [
                                         TextSpan(
@@ -286,7 +286,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 if (item.size != null)
                                   Text.rich(
                                     TextSpan(
-                                      text: 'Size: ',
+                                      text: 'Kích cỡ: ',
                                       style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                                       children: [
                                         TextSpan(

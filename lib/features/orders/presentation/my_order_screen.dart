@@ -95,7 +95,7 @@ class _MyOrderScreenState extends State<MyOrderScreen>
           onPressed: () => Navigator.maybePop(context),
         ),
         title: Text(
-          'My Orders',
+          'Đơn hàng của tôi',
           style: AppTextStyles.headline3,
         ),
         centerTitle: false,
@@ -160,9 +160,9 @@ class _SegmentedTabBar extends StatelessWidget {
         labelStyle: AppTextStyles.text14.copyWith(fontWeight: FontWeight.w600),
         unselectedLabelStyle: AppTextStyles.text14.copyWith(fontWeight: FontWeight.w500),
         tabs: const [
-          Tab(text: 'Delivery'),
-          Tab(text: 'Processing'),
-          Tab(text: 'Cancelled'),
+          Tab(text: 'Đang giao'),
+          Tab(text: 'Đang xử lý'),
+          Tab(text: 'Đã hủy'),
         ],
       ),
     );
@@ -245,19 +245,19 @@ class _OrderCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Order #${order.id.substring(0, 8)}',
+                        'Đơn hàng #${order.id.substring(0, 8)}',
                         style: AppTextStyles.text16.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Tracking number: ${order.trackingNumber}',
+                        'Mã vận đơn: ${order.trackingNumber}',
                         style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Quantity: ${order.totalQuantity}',
+                        'Số lượng: ${order.totalQuantity}',
                         style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                       ),
                     ],
@@ -274,7 +274,7 @@ class _OrderCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'Total amount:  ',
+                          'Tổng tiền:  ',
                           style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                         ),
                         Text(
@@ -300,7 +300,7 @@ class _OrderCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  child: const Text('DETAILS'),
+                  child: const Text('CHI TIẾT'),
                 ),
                 const Spacer(),
                 Text(

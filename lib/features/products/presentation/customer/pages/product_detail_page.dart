@@ -218,7 +218,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
                     );
                   },
-                  child: Text('Buy Now', style: AppTextStyles.text14.copyWith(fontWeight: FontWeight.w700)),
+                  child: Text('Mua ngay', style: AppTextStyles.text14.copyWith(fontWeight: FontWeight.w700)),
                 ),
               ],
             ),

@@ -57,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     icon: const Icon(Icons.arrow_back_ios_new, size: 20),
                   ),
                   const Text(
-                    "Login",
+                    "Đăng nhập",
                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -74,12 +74,12 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
 
               AuthTextField(
-                label: 'Password',
+                label: 'Mật khẩu',
                 controller: passwordController,
                 obscureText: isPasswordObscured,
                 isValid: isPasswordValid,
                 showValidationIcon: false,
-                errorText: isPasswordValid ? null : 'Password must be at least 6 characters',
+                errorText: isPasswordValid ? null : 'Mật khẩu phải có ít nhất 6 ký tự',
                 suffixIcon: IconButton(
                   icon: Icon(isPasswordObscured ? Icons.visibility_off : Icons.visibility),
                   onPressed: () => setState(() => isPasswordObscured = !isPasswordObscured),
@@ -100,14 +100,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     ); // điều hướng sang trang Forgot Password
                   },
                   icon: const Icon(Icons.arrow_forward, size: 16),
-                  label: const Text("Forgot your password?"),
+                  label: const Text("Quên mật khẩu?"),
                 ),
               ),
 
               BlocBuilder<AuthBloc, AuthState>(
                 builder: (context, state) {
                   return AuthButton(
-                    text: state is AuthLoading ? "Logging in..." : "LOGIN",
+                    text: state is AuthLoading ? "Đang đăng nhập..." : "ĐĂNG NHẬP",
                     onPressed: state is AuthLoading ? null : _handleLogin,
                   );
                 },
@@ -115,13 +115,13 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Don’t have an account? "),
+                  const Text("Chưa có tài khoản? "),
                   GestureDetector(
                     onTap: () {
                       context.push('/register'); // điều hướng sang trang Sign Up
                     },
                     child: const Text(
-                      "Sign Up",
+                      "Đăng ký",
                       style: TextStyle(
                         color: Colors.blue,
                         fontWeight: FontWeight.bold,
@@ -146,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!isEmailValid || !isPasswordValid) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please fill in all required fields correctly'),
+          content: Text('Vui lòng điền đầy đủ và đúng các trường bắt buộc'),
           backgroundColor: Colors.red,
         ),
       );
@@ -156,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (passwordController.text.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Password must be at least 6 characters'),
+          content: Text('Mật khẩu phải có ít nhất 6 ký tự'),
           backgroundColor: Colors.red,
         ),
       );

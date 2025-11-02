@@ -49,10 +49,10 @@ class _MainNavigationState extends State<MainNavigation> {
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.shop), label: 'Shop'),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_bag), label: 'Bag'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
+          BottomNavigationBarItem(icon: Icon(Icons.shop), label: 'Cửa hàng'),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_bag), label: 'Giỏ hàng'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Hồ sơ'),
         ],
       ),
     );

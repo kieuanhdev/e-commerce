@@ -32,7 +32,7 @@ class PopularProductsSection extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                'Popular Products',
+                'Sản phẩm phổ biến',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
@@ -49,10 +49,10 @@ class PopularProductsSection extends StatelessWidget {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (hasError) {
-                    return const Center(child: Text('Failed to load popular products'));
+                    return const Center(child: Text('Không thể tải sản phẩm phổ biến'));
                   }
                   if (topItems.isEmpty) {
-                    return const Center(child: Text('No popular products'));
+                    return const Center(child: Text('Không có sản phẩm phổ biến'));
                   }
                   return ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -65,7 +65,7 @@ class PopularProductsSection extends StatelessWidget {
                         width: 280,
                         child: ProductCard(
                           imageUrl: p.imageUrl,
-                          helperText: p.categoryId ?? 'Product',
+                          helperText: p.categoryId ?? 'Sản phẩm',
                           title: p.name,
                           description: p.shortDescription,
                           price: p.price,
@@ -76,7 +76,7 @@ class PopularProductsSection extends StatelessWidget {
                                   productId: p.id,
                                   title: p.name,
                                   price: p.price,
-                                  brand: 'Brand',
+                                  brand: 'Thương hiệu',
                                   description: p.longDescription,
                                   imageUrls: p.imageUrl != null && p.imageUrl!.isNotEmpty
                                       ? [p.imageUrl!]

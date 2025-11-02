@@ -206,7 +206,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                         if (cartItem.color != null)
                                           Text.rich(
                                             TextSpan(
-                                              text: 'Màu: ',
+                                              text: 'Màu sắc: ',
                                               style: const TextStyle(fontSize: 11, color: Colors.black54),
                                               children: [
                                                 TextSpan(
@@ -219,7 +219,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                         if (cartItem.size != null)
                                           Text.rich(
                                             TextSpan(
-                                              text: 'Size: ',
+                                              text: 'Kích cỡ: ',
                                               style: const TextStyle(fontSize: 11, color: Colors.black54),
                                               children: [
                                                 TextSpan(

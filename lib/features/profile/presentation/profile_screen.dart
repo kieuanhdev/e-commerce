@@ -14,7 +14,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "My profile",
+          "Hồ sơ của tôi",
           style: AppTextStyles.headline3,
         ),
         backgroundColor: AppColors.white,
@@ -44,7 +44,7 @@ class ProfileScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            user.displayName ?? 'No Name',
+                            user.displayName ?? 'Chưa có tên',
                             style: AppTextStyles.text16,
                           ),
                           Text(
@@ -57,20 +57,20 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   _buildNavTile(
                     context,
-                    "My orders",
-                    "View your order history",
+                    "Đơn hàng của tôi",
+                    "Xem lịch sử đơn hàng",
                     AppRouters.orders,
                   ),
                   _buildNavTile(
                     context,
-                    "Settings",
-                    "Notifications, password",
+                    "Cài đặt",
+                    "Thông báo, mật khẩu",
                     AppRouters.settings,
                   ),
                   _buildNavTile(
                     context,
-                    "Logout",
-                    "Sign out from your account",
+                    "Đăng xuất",
+                    "Đăng xuất khỏi tài khoản",
                     "",
                     isLogout: true,
                   ),

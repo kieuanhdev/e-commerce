@@ -55,14 +55,14 @@ class _BuyNowSheetState extends State<BuyNowSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Unit price', style: AppTextStyles.text14.copyWith(color: AppColors.text.withOpacity(0.54))),
+                      Text('Đơn giá', style: AppTextStyles.text14.copyWith(color: AppColors.text.withOpacity(0.54))),
                       const SizedBox(height: 8),
                       Text('\$${widget.unitPrice.toStringAsFixed(2)}',
                           style: AppTextStyles.headline2.copyWith(fontWeight: FontWeight.w800)),
                     ],
                   ),
                 ),
-                Text('Quantity', style: AppTextStyles.text14.copyWith(color: AppColors.text.withOpacity(0.54))),
+                Text('Số lượng', style: AppTextStyles.text14.copyWith(color: AppColors.text.withOpacity(0.54))),
                 const SizedBox(width: 8),
                 _QtyControl(value: quantity, onChanged: (v) => setState(() => quantity = v)),
               ],
@@ -91,7 +91,7 @@ class _BuyNowSheetState extends State<BuyNowSheet> {
                             children: [
                               Text('\$${total.toStringAsFixed(2)}',
                                   style: AppTextStyles.headline3.copyWith(color: AppColors.white, fontWeight: FontWeight.w800)),
-                              Text('Total price', style: AppTextStyles.text11.copyWith(color: AppColors.white.withOpacity(0.7))),
+                              Text('Tổng tiền', style: AppTextStyles.text11.copyWith(color: AppColors.white.withOpacity(0.7))),
                             ],
                           ),
                         ),
@@ -146,7 +146,7 @@ class _BuyNowSheetState extends State<BuyNowSheet> {
                                               height: 20,
                                               child: CircularProgressIndicator(strokeWidth: 2),
                                             )
-                                          : Text('Add to cart', style: AppTextStyles.text14.copyWith(fontWeight: FontWeight.w700)),
+                                          : Text('Thêm vào giỏ', style: AppTextStyles.text14.copyWith(fontWeight: FontWeight.w700)),
                                     );
                                   },
                                 ),

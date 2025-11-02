@@ -181,7 +181,7 @@ class _ProductListBodyState extends State<ProductListBody> {
             key: _allProductKey,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: const Text(
-              'All product',
+              'Tất cả sản phẩm',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -203,7 +203,7 @@ class _ProductListBodyState extends State<ProductListBody> {
               final product = _visibleProducts[start + index];
               return ProductCard(
                 imageUrl: product.imageUrl,
-                helperText: product.categoryId ?? 'Product',
+                helperText: product.categoryId ?? 'Sản phẩm',
                 title: product.name,
                 description: product.shortDescription,
                 price: product.price,
@@ -214,7 +214,7 @@ class _ProductListBodyState extends State<ProductListBody> {
                         productId: product.id,
                         title: product.name,
                         price: product.price,
-                        brand: 'Brand',
+                        brand: 'Thương hiệu',
                         description: product.longDescription,
                         imageUrls: product.imageUrl != null && product.imageUrl!.isNotEmpty
                             ? [product.imageUrl!]

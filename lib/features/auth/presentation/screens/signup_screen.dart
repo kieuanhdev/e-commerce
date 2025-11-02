@@ -64,7 +64,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     icon: const Icon(Icons.arrow_back_ios_new, size: 20),
                   ),
                   const Text(
-                    "Sign Up",
+                    "Đăng ký",
                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -72,7 +72,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 40),
 
               AuthTextField(
-                label: 'Name',
+                label: 'Họ và tên',
                 controller: nameController,
                 isValid: isNameValid,
                 onChanged: (v) =>
@@ -90,12 +90,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 16),
 
               AuthTextField(
-                label: 'Password',
+                label: 'Mật khẩu',
                 controller: passwordController,
                 obscureText: isPasswordObscured,
                 isValid: isPasswordValid,
                 showValidationIcon: false,
-                errorText: isPasswordValid ? null : 'Password must be at least 6 characters',
+                errorText: isPasswordValid ? null : 'Mật khẩu phải có ít nhất 6 ký tự',
                 suffixIcon: IconButton(
                   icon: Icon(isPasswordObscured ? Icons.visibility_off : Icons.visibility),
                   onPressed: () => setState(() => isPasswordObscured = !isPasswordObscured),
@@ -108,12 +108,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 16),
 
               AuthTextField(
-                label: 'Re-enter password',
+                label: 'Nhập lại mật khẩu',
                 controller: confirmPasswordController,
                 obscureText: isConfirmObscured,
                 isValid: isConfirmPasswordValid,
                 showValidationIcon: false,
-                errorText: hasInteractedWithConfirm && !isConfirmPasswordValid ? 'Passwords do not match' : null,
+                errorText: hasInteractedWithConfirm && !isConfirmPasswordValid ? 'Mật khẩu không khớp' : null,
                 suffixIcon: IconButton(
                   icon: Icon(isConfirmObscured ? Icons.visibility_off : Icons.visibility),
                   onPressed: () => setState(() => isConfirmObscured = !isConfirmObscured),
@@ -126,7 +126,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 16),
 
               AuthTextField(
-                label: 'Phone Number (Optional)',
+                label: 'Số điện thoại (Tùy chọn)',
                 controller: phoneController,
                 isValid: isPhoneValid,
                 onChanged: (v) =>
@@ -141,7 +141,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     context.push('/login');
                   },
                   icon: const Icon(Icons.arrow_forward, size: 16),
-                  label: const Text("Login"),
+                  label: const Text("Đăng nhập"),
                 ),
               ),
               const SizedBox(height: 16),
@@ -149,7 +149,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               BlocBuilder<AuthBloc, AuthState>(
                 builder: (context, state) {
                   return AuthButton(
-                    text: state is AuthLoading ? "Signing up..." : "Sign up",
+                    text: state is AuthLoading ? "Đang đăng ký..." : "Đăng ký",
                     onPressed: state is AuthLoading ? null : _handleSignUp,
                   );
                 },
@@ -169,7 +169,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (!isNameValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordValid || !isPhoneValid) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please fill in all required fields correctly'),
+          content: Text('Vui lòng điền đầy đủ và đúng các trường bắt buộc'),
           backgroundColor: Colors.red,
         ),
       );
@@ -179,7 +179,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (passwordController.text.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Password must be at least 6 characters'),
+          content: Text('Mật khẩu phải có ít nhất 6 ký tự'),
           backgroundColor: Colors.red,
         ),
       );
@@ -192,7 +192,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Passwords do not match'),
+          content: Text('Mật khẩu không khớp'),
           backgroundColor: Colors.red,
         ),
       );

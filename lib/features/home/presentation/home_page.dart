@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Row(
           children: [
-            const Text('Home Page'),
+            const Text('Trang chủ'),
             const SizedBox(width: 12),
             Expanded(
               child: Container(

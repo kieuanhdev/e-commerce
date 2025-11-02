@@ -54,7 +54,7 @@ class _BagScreenState extends State<BagScreen> {
           return Scaffold(
             appBar: AppBar(
               title: Text(
-                "My Bag",
+                "Giỏ hàng",
                 style: AppTextStyles.headline3,
               ),
               backgroundColor: AppColors.white,
@@ -79,7 +79,7 @@ class _BagScreenState extends State<BagScreen> {
               title: Row(
                 children: [
                   Text(
-                    "My Bag",
+                    "Giỏ hàng",
                     style: AppTextStyles.headline3,
                   ),
                   const SizedBox(width: 12),
@@ -247,7 +247,7 @@ class _BagScreenState extends State<BagScreen> {
                                                             if (cartItem.color != null)
                                                               Text.rich(
                                                                 TextSpan(
-                                                                  text: 'Color: ',
+                                                                  text: 'Màu sắc: ',
                                                                   style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                                                                   children: [
                                                                     TextSpan(
@@ -262,7 +262,7 @@ class _BagScreenState extends State<BagScreen> {
                                                             if (cartItem.size != null)
                                                               Text.rich(
                                                                 TextSpan(
-                                                                  text: 'Size: ',
+                                                                  text: 'Kích cỡ: ',
                                                                   style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
                                                                   children: [
                                                                     TextSpan(

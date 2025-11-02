@@ -17,7 +17,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   String? get _emailErrorText {
     if (isEmailValid) return null;
-    return "Not a valid email address. Should be your@email.com";
+    return "Địa chỉ email không hợp lệ. Vui lòng nhập đúng định dạng email";
   }
 
   void _validateEmail(String value) {
@@ -43,7 +43,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           );
         } else if (state is AuthForgotPasswordSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Password reset link sent!')),
+            const SnackBar(content: Text('Đã gửi liên kết đặt lại mật khẩu!')),
           );
         }
       },
@@ -63,7 +63,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     icon: const Icon(Icons.arrow_back_ios_new, size: 20),
                   ),
                   const Text(
-                    "Forgot password",
+                    "Quên mật khẩu",
                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -72,7 +72,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
               // Hướng dẫn
               const Text(
-                "Please, enter your email address.\nYou will receive a link to create a new password via email.",
+                "Vui lòng nhập địa chỉ email của bạn.\nBạn sẽ nhận được liên kết để tạo mật khẩu mới qua email.",
                 style: TextStyle(fontSize: 15, color: Colors.black87),
               ),
               const SizedBox(height: 24),
@@ -101,7 +101,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 builder: (context, state) {
                   final isLoading = state is AuthForgotPasswordLoading;
                   return AuthButton(
-                    text: isLoading ? "Sending..." : "Send",
+                    text: isLoading ? "Đang gửi..." : "Gửi",
                     onPressed: isLoading ? null : _sendResetEmail,
                   );
                 },
