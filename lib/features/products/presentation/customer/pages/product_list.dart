@@ -22,7 +22,7 @@ class ProductListBody extends StatefulWidget {
 }
 
 class _ProductListBodyState extends State<ProductListBody> {
-  static const int itemsPerPage = 10;
+  static const int itemsPerPage = 12;
   int currentPage = 0;
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _allProductKey = GlobalKey();

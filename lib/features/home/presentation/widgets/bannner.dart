@@ -26,11 +26,9 @@ class _BannerCarouselState extends State<BannerCarousel> {
   int _currentIndex = 0;
 
   List<String> get _images => widget.imageUrls ?? const [
-        // placeholders; replace with real URLs/assets if needed
-        '',
-        '',
-        '',
-        '',
+        'images/banner/banner1.jpg',
+        'images/banner/banner2.jpg',
+        'images/banner/banner3.jpg',
       ];
 
   @override
@@ -77,19 +75,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                 return _BannerImage(url: url);
               },
             ),
-            if (widget.title != null && widget.title!.isNotEmpty)
-              Positioned(
-                left: 16,
-                bottom: 24,
-                child: Text(
-                  widget.title!,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
+          
             Positioned(
               right: 16,
               bottom: 16,
@@ -111,19 +97,16 @@ class _BannerImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Placeholder grey panel if url is empty; show network image otherwise
+    // Placeholder grey panel if url is empty
     if (url.isEmpty) {
       return Container(color: Colors.grey.shade300);
     }
 
-    return Image.network(
+    // Load from assets only
+    return Image.asset(
       url,
       fit: BoxFit.cover,
       width: double.infinity,
-      loadingBuilder: (context, child, progress) {
-        if (progress == null) return child;
-        return Container(color: Colors.grey.shade300);
-      },
       errorBuilder: (context, error, stackTrace) => Container(
         color: Colors.grey.shade300,
       ),
