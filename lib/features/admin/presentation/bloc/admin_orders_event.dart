@@ -29,4 +29,3 @@ class UpdateOrderStatus extends AdminOrdersEvent {
   @override
   List<Object?> get props => [orderId, newStatus];
 }
-

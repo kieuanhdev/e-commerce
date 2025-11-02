@@ -145,24 +145,26 @@ void initDI() {
   sl.registerFactory(() => GetAllOrdersUseCase(sl()));
   sl.registerFactory(() => UpdateOrderStatusUseCase(sl()));
   sl.registerFactory(() => GetOverviewStatsUseCase(sl(), sl(), sl()));
-  
+
   // Customers Bloc
-  sl.registerFactory(() => CustomersBloc(
-    getAllUsersUseCase: sl(),
-    updateUserStatusUseCase: sl(),
-    createUserByAdminUseCase: sl(),
-  ));
-  
+  sl.registerFactory(
+    () => CustomersBloc(
+      getAllUsersUseCase: sl(),
+      updateUserStatusUseCase: sl(),
+      createUserByAdminUseCase: sl(),
+    ),
+  );
+
   // Admin Orders Bloc
-  sl.registerFactory(() => AdminOrdersBloc(
-    getAllOrdersUseCase: sl(),
-    updateOrderStatusUseCase: sl(),
-  ));
-  
+  sl.registerFactory(
+    () => AdminOrdersBloc(
+      getAllOrdersUseCase: sl(),
+      updateOrderStatusUseCase: sl(),
+    ),
+  );
+
   // Overview Bloc
-  sl.registerFactory(() => OverviewBloc(
-    getOverviewStatsUseCase: sl(),
-  ));
+  sl.registerFactory(() => OverviewBloc(getOverviewStatsUseCase: sl()));
 
   // --- Orders Feature ---
 

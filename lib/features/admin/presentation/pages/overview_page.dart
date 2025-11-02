@@ -22,9 +22,7 @@ class _OverviewPageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tổng quan'),
-      ),
+      appBar: AppBar(title: const Text('Tổng quan')),
       body: BlocBuilder<OverviewBloc, OverviewState>(
         builder: (context, state) {
           if (state is OverviewInitial || state is OverviewLoading) {
@@ -46,7 +44,9 @@ class _OverviewPageContent extends StatelessWidget {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      context.read<OverviewBloc>().add(const LoadOverviewStats());
+                      context.read<OverviewBloc>().add(
+                        const LoadOverviewStats(),
+                      );
                     },
                     child: const Text('Thử lại'),
                   ),
@@ -63,13 +63,10 @@ class _OverviewPageContent extends StatelessWidget {
                 children: [
                   const Text(
                     'Thống kê tổng quan',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Stats cards grid
                   GridView.count(
                     crossAxisCount: 2,
@@ -87,7 +84,9 @@ class _OverviewPageContent extends StatelessWidget {
                       ),
                       _StatCard(
                         title: 'Doanh thu',
-                        value: NumberFormat.compact(locale: 'vi').format(state.stats.totalRevenue),
+                        value: NumberFormat.compact(
+                          locale: 'vi',
+                        ).format(state.stats.totalRevenue),
                         subtitle: '₫',
                         icon: Icons.attach_money,
                         color: Colors.green,
@@ -142,11 +141,7 @@ class _StatCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 40,
-              color: color,
-            ),
+            Icon(icon, size: 40, color: color),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -177,10 +172,7 @@ class _StatCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],
         ),
@@ -188,4 +180,3 @@ class _StatCard extends StatelessWidget {
     );
   }
 }
-

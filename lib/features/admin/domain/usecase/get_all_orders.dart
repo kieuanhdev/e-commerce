@@ -10,4 +10,3 @@ class GetAllOrdersUseCase {
     return _repository.getAllOrders();
   }
 }
-
