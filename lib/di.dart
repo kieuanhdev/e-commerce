@@ -30,11 +30,13 @@ import 'package:e_commerce/features/products/data/repositories/product_repositor
 import 'package:e_commerce/features/products/domain/repositories/product_repository.dart';
 import 'package:e_commerce/features/admin/presentation/bloc/customers_bloc.dart';
 import 'package:e_commerce/features/admin/presentation/bloc/admin_orders_bloc.dart';
+import 'package:e_commerce/features/admin/presentation/bloc/overview_bloc.dart';
 import 'package:e_commerce/features/admin/domain/usecase/get_all_users.dart';
 import 'package:e_commerce/features/admin/domain/usecase/update_user_status.dart';
 import 'package:e_commerce/features/admin/domain/usecase/create_user_by_admin.dart';
 import 'package:e_commerce/features/admin/domain/usecase/get_all_orders.dart';
 import 'package:e_commerce/features/admin/domain/usecase/update_order_status.dart';
+import 'package:e_commerce/features/admin/domain/usecase/get_overview_stats.dart';
 import 'package:e_commerce/features/orders/data/datasources/order_datasource.dart';
 import 'package:e_commerce/features/orders/data/repository/order_repository_impl.dart';
 import 'package:e_commerce/features/orders/domain/repository/order_repository.dart';
@@ -48,14 +50,16 @@ void initDI() {
   // --- Auth Feature ---
 
   // BLoC
-  sl.registerFactory(() => AuthBloc(
-        loginUseCase: sl(),
-        registerUseCase: sl(),
-        logoutUseCase: sl(),
-        getAuthStateChangesUseCase: sl(),
-        forgotPasswordUseCase: sl(),
-        googleSignInUseCase: sl(),
-      ));
+  sl.registerFactory(
+    () => AuthBloc(
+      loginUseCase: sl(),
+      registerUseCase: sl(),
+      logoutUseCase: sl(),
+      getAuthStateChangesUseCase: sl(),
+      forgotPasswordUseCase: sl(),
+      googleSignInUseCase: sl(),
+    ),
+  );
 
   // --- External (đăng ký trước để dùng cho các dependencies khác) ---
   sl.registerLazySingleton(() => FirebaseAuth.instance);
@@ -68,7 +72,9 @@ void initDI() {
   sl.registerLazySingleton(() => FirebaseAuthDatasource(sl(), sl()));
 
   // --- Repository (inject CloudinaryService cho upload avatar) ---
-  sl.registerLazySingleton<IAuthRepository>(() => AuthRepositoryImpl(sl(), sl()));
+  sl.registerLazySingleton<IAuthRepository>(
+    () => AuthRepositoryImpl(sl(), sl()),
+  );
 
   // --- UseCases (dùng Repository, nên đăng ký sau) ---
   sl.registerLazySingleton(() => LoginUseCase(sl()));
@@ -78,78 +84,95 @@ void initDI() {
   sl.registerLazySingleton(() => ForgotPasswordUseCase(sl()));
   sl.registerLazySingleton(() => GoogleSignInUseCase(sl()));
 
-
   // (Gộp vào AuthBloc) Bỏ đăng ký ForgotPasswordBloc
-  
+
   // --- Settings UseCases (dùng chung IAuthRepository) ---
   sl.registerFactory(() => GetCurrentUserUseCase(sl()));
   sl.registerFactory(() => UpdateUserSettingsUseCase(sl()));
   sl.registerFactory(() => ChangePasswordUseCase(sl()));
   sl.registerFactory(() => UploadAvatarImageUseCase(sl()));
-  
+
   // --- Settings Bloc ---
-  sl.registerFactory(() => SettingsBloc(
-    getCurrentUser: sl(),
-    updateUserSettings: sl(),
-    changePasswordUseCase: sl(),
-    uploadAvatarImageUseCase: sl(),
-  ));
+  sl.registerFactory(
+    () => SettingsBloc(
+      getCurrentUser: sl(),
+      updateUserSettings: sl(),
+      changePasswordUseCase: sl(),
+      uploadAvatarImageUseCase: sl(),
+    ),
+  );
 
   // --- Bag Feature ---
-  
+
   // Product Repository (dùng chung với products feature)
-  sl.registerLazySingleton<ProductRepository>(() => ProductRepositoryImpl(ProductRemoteDataSourceImpl()));
-  
+  sl.registerLazySingleton<ProductRepository>(
+    () => ProductRepositoryImpl(ProductRemoteDataSourceImpl()),
+  );
+
   // Bag Datasource (sử dụng FirebaseRemoteDS internally, không cần inject FirebaseFirestore)
-  sl.registerLazySingleton<BagRemoteDataSource>(() => BagRemoteDataSourceImpl());
-  
+  sl.registerLazySingleton<BagRemoteDataSource>(
+    () => BagRemoteDataSourceImpl(),
+  );
+
   // Bag Repository
   sl.registerLazySingleton<IBagRepository>(() => BagRepositoryImpl(sl()));
-  
+
   // Bag UseCases
   sl.registerFactory(() => GetCartItemsWithProductsUseCase(sl(), sl()));
   sl.registerFactory(() => AddToCartUseCase(sl()));
   sl.registerFactory(() => RemoveFromCartUseCase(sl()));
   sl.registerFactory(() => UpdateCartItemQuantityUseCase(sl()));
-  
+
   // Bag Bloc
-  sl.registerFactory(() => BagBloc(
-    getCartItemsUseCase: sl(),
-    addToCartUseCase: sl(),
-    removeFromCartUseCase: sl(),
-    updateQuantityUseCase: sl(),
-  ));
-  
+  sl.registerFactory(
+    () => BagBloc(
+      getCartItemsUseCase: sl(),
+      addToCartUseCase: sl(),
+      removeFromCartUseCase: sl(),
+      updateQuantityUseCase: sl(),
+    ),
+  );
+
   // --- Admin Feature ---
-  
+
   // Admin UseCases
   sl.registerFactory(() => GetAllUsersUseCase(sl()));
   sl.registerFactory(() => UpdateUserStatusUseCase(sl()));
   sl.registerFactory(() => CreateUserByAdminUseCase(sl()));
   sl.registerFactory(() => GetAllOrdersUseCase(sl()));
   sl.registerFactory(() => UpdateOrderStatusUseCase(sl()));
-  
+  sl.registerFactory(() => GetOverviewStatsUseCase(sl(), sl(), sl()));
+
   // Customers Bloc
-  sl.registerFactory(() => CustomersBloc(
-    getAllUsersUseCase: sl(),
-    updateUserStatusUseCase: sl(),
-    createUserByAdminUseCase: sl(),
-  ));
-  
+  sl.registerFactory(
+    () => CustomersBloc(
+      getAllUsersUseCase: sl(),
+      updateUserStatusUseCase: sl(),
+      createUserByAdminUseCase: sl(),
+    ),
+  );
+
   // Admin Orders Bloc
-  sl.registerFactory(() => AdminOrdersBloc(
-    getAllOrdersUseCase: sl(),
-    updateOrderStatusUseCase: sl(),
-  ));
+  sl.registerFactory(
+    () => AdminOrdersBloc(
+      getAllOrdersUseCase: sl(),
+      updateOrderStatusUseCase: sl(),
+    ),
+  );
+
+  // Overview Bloc
+  sl.registerFactory(() => OverviewBloc(getOverviewStatsUseCase: sl()));
 
   // --- Orders Feature ---
-  
+
   // Order Datasource
-  sl.registerLazySingleton<OrderRemoteDataSource>(() => OrderRemoteDataSourceImpl());
-  
+  sl.registerLazySingleton<OrderRemoteDataSource>(
+    () => OrderRemoteDataSourceImpl(),
+  );
+
   // Order Repository
   sl.registerLazySingleton<IOrderRepository>(() => OrderRepositoryImpl(sl()));
-  
+
   // Order UseCases
   sl.registerFactory(() => CreateOrderWithReduceStockUseCase(sl()));
   sl.registerFactory(() => GetOrdersByUserIdUseCase(sl()));
