@@ -7,6 +7,7 @@ abstract class OrderRemoteDataSource {
   Future<List<OrderModel>> getOrdersByUserId(String userId);
   Future<OrderModel?> getOrderById(String orderId);
   Future<void> updateOrderStatus(String orderId, String status);
+  Stream<List<OrderModel>> getAllOrders();
 }
 
 class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
@@ -51,6 +52,16 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
   @override
   Future<void> updateOrderStatus(String orderId, String status) async {
     await _ordersCollection.doc(orderId).update({'status': status});
+  }
+
+  @override
+  Stream<List<OrderModel>> getAllOrders() {
+    return _ordersCollection
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => OrderModel.fromFirestore(doc))
+            .toList());
   }
 }
 
