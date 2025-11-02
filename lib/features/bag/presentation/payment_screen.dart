@@ -10,6 +10,7 @@ import 'package:e_commerce/di.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:e_commerce/features/bag/data/datasource/bag_datasource.dart';
+import 'package:e_commerce/features/products/domain/services/product_cache_service.dart';
 
 class PaymentScreen extends StatefulWidget {
   final List<CartItemWithProduct> cartItems;
@@ -84,6 +85,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
       // Tạo order và giảm stock
       final createOrderUseCase = sl<CreateOrderWithReduceStockUseCase>();
       final orderId = await createOrderUseCase(order);
+
+      // Xóa cache sản phẩm để refresh dữ liệu mới
+      ProductCacheService.instance.clearCache();
 
       // Xóa giỏ hàng
       final bagDataSource = sl<BagRemoteDataSource>();

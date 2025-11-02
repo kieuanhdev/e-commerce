@@ -11,37 +11,34 @@ class CreateOrderWithReduceStockUseCase {
   );
 
   Future<String> call(Order order) async {
-    // Lấy các product IDs từ order items
-    final productIds = order.items.map((item) => item.productId).toList();
-
     // Thực hiện tất cả trong một Firestore batch write để đảm bảo atomicity
     final batch = FirebaseFirestore.instance.batch();
 
-    // 1. Lấy thông tin sản phẩm và giảm quantity
-    final products = await Future.wait(
-      productIds.map((id) => _productRepository.getProduct(id)),
-    );
+    // 1. Group order items by productId để tính tổng quantity cần giảm cho mỗi product
+    final productQuantityMap = <String, int>{};
+    for (var item in order.items) {
+      productQuantityMap[item.productId] = (productQuantityMap[item.productId] ?? 0) + item.quantity;
+    }
 
-    // Kiểm tra số lượng tồn kho
-    for (var i = 0; i < order.items.length; i++) {
-      final orderItem = order.items[i];
-      final product = products[i];
+    // 2. Fetch products và kiểm tra số lượng tồn kho
+    for (var entry in productQuantityMap.entries) {
+      final product = await _productRepository.getProduct(entry.key);
+      final totalQuantityToReduce = entry.value;
       
-      if (product.quantity < orderItem.quantity) {
+      if (product.quantity < totalQuantityToReduce) {
         throw Exception(
-          'Sản phẩm "${product.name}" không đủ số lượng. Còn lại: ${product.quantity}',
+          'Sản phẩm "${product.name}" không đủ số lượng. Còn lại: ${product.quantity}, cần: $totalQuantityToReduce',
         );
       }
 
       // Giảm quantity của sản phẩm
-      product.quantity -= orderItem.quantity;
-      product.updatedAt = DateTime.now();
+      final newQuantity = product.quantity - totalQuantityToReduce;
       
       // Thêm vào batch update
       batch.update(
         FirebaseFirestore.instance.collection('products').doc(product.id),
         {
-          'quantity': product.quantity,
+          'quantity': newQuantity,
           'updatedAt': FieldValue.serverTimestamp(),
         },
       );
