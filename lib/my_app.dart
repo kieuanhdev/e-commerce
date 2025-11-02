@@ -1,4 +1,5 @@
 import 'package:e_commerce/core/routing/app_go_router.dart';
+import 'package:e_commerce/core/theme/app_theme.dart';
 import 'package:e_commerce/di.dart';
 import 'package:e_commerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,8 @@ class MyApp extends StatelessWidget {
       child: Builder(
         builder: (context) => MaterialApp.router(
           title: 'Shopping Clothes',
-          theme: ThemeData(primarySwatch: Colors.green),
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
           debugShowCheckedModeBanner: false,
           scrollBehavior: const MaterialScrollBehavior().copyWith(
             dragDevices: {

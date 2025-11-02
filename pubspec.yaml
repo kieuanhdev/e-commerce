@@ -51,6 +51,7 @@ dependencies:
   http: ^1.2.2
   image_picker: ^1.1.2
   crypto: ^3.0.5
+  google_fonts: ^6.2.1
 
 
 
