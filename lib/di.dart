@@ -60,6 +60,16 @@ void initDI() {
       googleSignInUseCase: sl(),
     ),
   );
+  sl.registerFactory(
+    () => AuthBloc(
+      loginUseCase: sl(),
+      registerUseCase: sl(),
+      logoutUseCase: sl(),
+      getAuthStateChangesUseCase: sl(),
+      forgotPasswordUseCase: sl(),
+      googleSignInUseCase: sl(),
+    ),
+  );
 
   // --- External (đăng ký trước để dùng cho các dependencies khác) ---
   sl.registerLazySingleton(() => FirebaseAuth.instance);
@@ -72,6 +82,9 @@ void initDI() {
   sl.registerLazySingleton(() => FirebaseAuthDatasource(sl(), sl()));
 
   // --- Repository (inject CloudinaryService cho upload avatar) ---
+  sl.registerLazySingleton<IAuthRepository>(
+    () => AuthRepositoryImpl(sl(), sl()),
+  );
   sl.registerLazySingleton<IAuthRepository>(
     () => AuthRepositoryImpl(sl(), sl()),
   );
@@ -101,6 +114,14 @@ void initDI() {
       uploadAvatarImageUseCase: sl(),
     ),
   );
+  sl.registerFactory(
+    () => SettingsBloc(
+      getCurrentUser: sl(),
+      updateUserSettings: sl(),
+      changePasswordUseCase: sl(),
+      uploadAvatarImageUseCase: sl(),
+    ),
+  );
 
   // --- Bag Feature ---
 
@@ -109,7 +130,18 @@ void initDI() {
     () => ProductRepositoryImpl(ProductRemoteDataSourceImpl()),
   );
 
+  sl.registerLazySingleton<ProductRepository>(
+    () => ProductRepositoryImpl(
+      ProductRemoteDataSourceImpl(),
+      sl(), // CloudinaryService
+    ),
+  );
+
   // Bag Datasource (sử dụng FirebaseRemoteDS internally, không cần inject FirebaseFirestore)
+  sl.registerLazySingleton<BagRemoteDataSource>(
+    () => BagRemoteDataSourceImpl(),
+  );
+
   sl.registerLazySingleton<BagRemoteDataSource>(
     () => BagRemoteDataSourceImpl(),
   );
@@ -124,6 +156,15 @@ void initDI() {
   sl.registerFactory(() => UpdateCartItemQuantityUseCase(sl()));
 
   // Bag Bloc
+  sl.registerFactory(
+    () => BagBloc(
+      getCartItemsUseCase: sl(),
+      addToCartUseCase: sl(),
+      removeFromCartUseCase: sl(),
+      updateQuantityUseCase: sl(),
+    ),
+  );
+
   sl.registerFactory(
     () => BagBloc(
       getCartItemsUseCase: sl(),
@@ -162,10 +203,21 @@ void initDI() {
 
   // Overview Bloc
   sl.registerFactory(() => OverviewBloc(getOverviewStatsUseCase: sl()));
+  sl.registerFactory(
+    () => CustomersBloc(
+      getAllUsersUseCase: sl(),
+      updateUserStatusUseCase: sl(),
+      createUserByAdminUseCase: sl(),
+    ),
+  );
 
   // --- Orders Feature ---
 
   // Order Datasource
+  sl.registerLazySingleton<OrderRemoteDataSource>(
+    () => OrderRemoteDataSourceImpl(),
+  );
+
   sl.registerLazySingleton<OrderRemoteDataSource>(
     () => OrderRemoteDataSourceImpl(),
   );

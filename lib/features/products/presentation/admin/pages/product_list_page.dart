@@ -1,3 +1,4 @@
+import 'package:e_commerce/core/data/cloudinary_service.dart';
 import 'package:e_commerce/features/products/data/datasources/product_remote_datasource.dart';
 import 'package:e_commerce/features/products/data/repositories/product_repository_impl.dart';
 import 'package:e_commerce/features/products/domain/entities/product.dart';
@@ -5,9 +6,9 @@ import 'package:e_commerce/features/products/domain/usecases/add_product.dart';
 import 'package:e_commerce/features/products/domain/usecases/delete_product.dart';
 import 'package:e_commerce/features/products/domain/usecases/get_products.dart';
 import 'package:e_commerce/features/products/domain/usecases/update_product.dart';
+import 'package:e_commerce/features/products/domain/usecases/upload_product_image.dart';
 import 'package:e_commerce/features/products/presentation/admin/pages/product_form_page.dart';
 import 'package:flutter/material.dart';
-
 
 class ProductListPage extends StatefulWidget {
   const ProductListPage({super.key});
@@ -18,12 +19,14 @@ class ProductListPage extends StatefulWidget {
 
 class _ProductListPageState extends State<ProductListPage> {
   late final _remote = ProductRemoteDataSourceImpl();
-  late final _repo = ProductRepositoryImpl(_remote);
+  late final _cloudinary = CloudinaryService();
+  late final _repo = ProductRepositoryImpl(_remote, _cloudinary);
 
   late final _getAllProducts = GetProducts(_repo);
   late final _addProduct = AddProduct(_repo);
   late final _updateProduct = UpdateProduct(_repo);
   late final _deleteProduct = DeleteProduct(_repo);
+  late final _uploadProductImage = UploadProductImage(_repo);
 
   List<Product> _products = [];
   List<Product> _allProducts = [];
@@ -58,6 +61,7 @@ class _ProductListPageState extends State<ProductListPage> {
           product: product,
           addUseCase: _addProduct,
           updateUseCase: _updateProduct,
+          uploadImageUseCase: _uploadProductImage,
         ),
       ),
     );
@@ -243,20 +247,40 @@ class _ProductListPageState extends State<ProductListPage> {
                                       borderRadius: BorderRadius.circular(10),
                                       child: ColorFiltered(
                                         colorFilter: isHidden
-                                            ? const ColorFilter.mode(Colors.black26, BlendMode.darken)
-                                            : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
-                                        child: (p.imageUrl != null && p.imageUrl!.isNotEmpty)
+                                            ? const ColorFilter.mode(
+                                                Colors.black26,
+                                                BlendMode.darken,
+                                              )
+                                            : const ColorFilter.mode(
+                                                Colors.transparent,
+                                                BlendMode.dst,
+                                              ),
+                                        child:
+                                            (p.imageUrl != null &&
+                                                p.imageUrl!.isNotEmpty)
                                             ? Image.network(
                                                 p.imageUrl!,
                                                 fit: BoxFit.cover,
-                                                errorBuilder: (context, error, stackTrace) => Container(
-                                                  color: Colors.grey.shade200,
-                                                  child: const Icon(Icons.broken_image, color: Colors.grey),
-                                                ),
+                                                errorBuilder:
+                                                    (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) => Container(
+                                                      color:
+                                                          Colors.grey.shade200,
+                                                      child: const Icon(
+                                                        Icons.broken_image,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
                                               )
                                             : Container(
                                                 color: Colors.grey.shade200,
-                                                child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                                                child: const Icon(
+                                                  Icons.image_not_supported,
+                                                  color: Colors.grey,
+                                                ),
                                               ),
                                       ),
                                     ),
@@ -265,14 +289,23 @@ class _ProductListPageState extends State<ProductListPage> {
                                         alignment: Alignment.topLeft,
                                         child: Container(
                                           margin: const EdgeInsets.all(6),
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
                                           decoration: BoxDecoration(
                                             color: Colors.black54,
-                                            borderRadius: BorderRadius.circular(6),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
                                           ),
                                           child: const Text(
                                             'ĐÃ ẨN',
-                                            style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600),
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -286,7 +319,9 @@ class _ProductListPageState extends State<ProductListPage> {
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
                                 color: isHidden ? Colors.grey : null,
-                                decoration: isHidden ? TextDecoration.lineThrough : TextDecoration.none,
+                                decoration: isHidden
+                                    ? TextDecoration.lineThrough
+                                    : TextDecoration.none,
                               ),
                             ),
                             subtitle: Column(
@@ -297,25 +332,37 @@ class _ProductListPageState extends State<ProductListPage> {
                                     padding: const EdgeInsets.only(bottom: 2),
                                     child: Text(
                                       'Sản phẩm này đang được ẩn',
-                                      style: TextStyle(color: Colors.orange[800], fontSize: 12, fontStyle: FontStyle.italic),
+                                      style: TextStyle(
+                                        color: Colors.orange[800],
+                                        fontSize: 12,
+                                        fontStyle: FontStyle.italic,
+                                      ),
                                     ),
                                   ),
                                 Text(
                                   'Category: ${p.categoryId ?? '-'}',
-                                  style: TextStyle(color: Colors.grey.shade700, height: 1.3),
+                                  style: TextStyle(
+                                    color: Colors.grey.shade700,
+                                    height: 1.3,
+                                  ),
                                 ),
                                 Text(
                                   p.shortDescription,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    color: isHidden ? Colors.grey : Colors.grey.shade700,
+                                    color: isHidden
+                                        ? Colors.grey
+                                        : Colors.grey.shade700,
                                     fontStyle: FontStyle.italic,
                                   ),
                                 ),
                                 Text(
                                   'Price: \$${p.price.toStringAsFixed(2)} | Qty: ${p.quantity}',
-                                  style: TextStyle(color: Colors.grey.shade800, height: 1.3),
+                                  style: TextStyle(
+                                    color: Colors.grey.shade800,
+                                    height: 1.3,
+                                  ),
                                 ),
                               ],
                             ),
@@ -325,10 +372,14 @@ class _ProductListPageState extends State<ProductListPage> {
                               children: [
                                 IconButton(
                                   icon: Icon(
-                                    p.isVisible ? Icons.visibility_off : Icons.visibility,
+                                    p.isVisible
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
                                     color: Colors.orange,
                                   ),
-                                  tooltip: p.isVisible ? 'Ẩn sản phẩm' : 'Hiển thị sản phẩm',
+                                  tooltip: p.isVisible
+                                      ? 'Ẩn sản phẩm'
+                                      : 'Hiển thị sản phẩm',
                                   onPressed: () => _toggleVisibility(p),
                                 ),
                                 IconButton(

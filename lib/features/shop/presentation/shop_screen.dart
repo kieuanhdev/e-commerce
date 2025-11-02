@@ -1,3 +1,4 @@
+import 'package:e_commerce/core/data/cloudinary_service.dart';
 import 'package:e_commerce/features/products/data/datasources/product_remote_datasource.dart';
 import 'package:e_commerce/features/products/data/repositories/product_repository_impl.dart';
 import 'package:e_commerce/features/products/domain/entities/product.dart';
@@ -19,7 +20,11 @@ class ShopScreen extends StatefulWidget {
 
 class _ShopScreenState extends State<ShopScreen> {
   late final ProductRemoteDataSource _remote = ProductRemoteDataSourceImpl();
-  late final ProductRepositoryImpl _repo = ProductRepositoryImpl(_remote);
+  late final CloudinaryService _cloudinary = CloudinaryService();
+  late final ProductRepositoryImpl _repo = ProductRepositoryImpl(
+    _remote,
+    _cloudinary,
+  );
   late final GetProducts _getAllProducts = GetProducts(_repo);
   final _cacheService = ProductCacheService.instance;
 
@@ -62,21 +67,26 @@ class _ShopScreenState extends State<ShopScreen> {
         }
         // Chỉ refresh background nếu cache đã > 50% thời gian (tức > 2.5 phút)
         // Tránh refresh quá nhiều khi user chuyển màn hình liên tục
-        final cacheAge = _cacheService.lastFetchTime != null 
+        final cacheAge = _cacheService.lastFetchTime != null
             ? DateTime.now().difference(_cacheService.lastFetchTime!)
             : const Duration(minutes: 10);
         if (cacheAge.inMinutes >= 2) {
-          _cacheService.getProducts(_getAllProducts, forceRefresh: true).then((items) {
-            final visible = items.where((p) => p.isVisible == true).toList();
-            if (mounted) {
-              setState(() {
-                _allProducts = visible;
-                _applyFilters();
+          _cacheService
+              .getProducts(_getAllProducts, forceRefresh: true)
+              .then((items) {
+                final visible = items
+                    .where((p) => p.isVisible == true)
+                    .toList();
+                if (mounted) {
+                  setState(() {
+                    _allProducts = visible;
+                    _applyFilters();
+                  });
+                }
+              })
+              .catchError((e) {
+                print('Background refresh failed: $e');
               });
-            }
-          }).catchError((e) {
-            print('Background refresh failed: $e');
-          });
         }
         return;
       }
@@ -87,7 +97,10 @@ class _ShopScreenState extends State<ShopScreen> {
     });
     try {
       // Dùng cache service để tránh load lại nếu đã có cache
-      final items = await _cacheService.getProducts(_getAllProducts, forceRefresh: forceRefresh);
+      final items = await _cacheService.getProducts(
+        _getAllProducts,
+        forceRefresh: forceRefresh,
+      );
       // Chỉ hiển thị sản phẩm đang bật isVisible
       final visible = items.where((p) => p.isVisible == true).toList();
       if (mounted) {
@@ -119,8 +132,11 @@ class _ShopScreenState extends State<ShopScreen> {
     if (_searchQuery.isNotEmpty) {
       final lowerQuery = _searchQuery.toLowerCase();
       filtered = filtered
-          .where((p) => p.name.toLowerCase().contains(lowerQuery) ||
-              (p.shortDescription.toLowerCase().contains(lowerQuery)))
+          .where(
+            (p) =>
+                p.name.toLowerCase().contains(lowerQuery) ||
+                (p.shortDescription.toLowerCase().contains(lowerQuery)),
+          )
           .toList();
     }
 
@@ -165,7 +181,9 @@ class _ShopScreenState extends State<ShopScreen> {
         style: AppTextStyles.text14,
         decoration: InputDecoration(
           hintText: 'Tìm kiếm sản phẩm...',
-          hintStyle: AppTextStyles.text14.copyWith(color: AppColors.placeholder),
+          hintStyle: AppTextStyles.text14.copyWith(
+            color: AppColors.placeholder,
+          ),
           prefixIcon: Icon(Icons.search, color: AppColors.placeholder),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
@@ -209,9 +227,7 @@ class _ShopScreenState extends State<ShopScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.white,
-        border: Border(
-          bottom: BorderSide(color: AppColors.placeholder),
-        ),
+        border: Border(bottom: BorderSide(color: AppColors.placeholder)),
       ),
       child: Row(
         children: [
@@ -263,9 +279,13 @@ class _ShopScreenState extends State<ShopScreen> {
               items: const [
                 DropdownMenuItem(value: 'Mặc định', child: Text('Mặc định')),
                 DropdownMenuItem(
-                    value: 'Giá tăng dần', child: Text('Giá tăng dần')),
+                  value: 'Giá tăng dần',
+                  child: Text('Giá tăng dần'),
+                ),
                 DropdownMenuItem(
-                    value: 'Giá giảm dần', child: Text('Giá giảm dần')),
+                  value: 'Giá giảm dần',
+                  child: Text('Giá giảm dần'),
+                ),
               ],
               onChanged: (value) {
                 if (value != null) {
@@ -285,10 +305,7 @@ class _ShopScreenState extends State<ShopScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cửa hàng'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Cửa hàng'), elevation: 0),
       body: Column(
         children: [
           // Search Bar
@@ -333,73 +350,75 @@ class _ShopScreenState extends State<ShopScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _filteredProducts.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.search_off,
-                                size: 64, color: AppColors.placeholder),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Không tìm thấy sản phẩm nào',
-                              style: AppTextStyles.text16.copyWith(
-                                color: AppColors.placeholder,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm',
-                              style: AppTextStyles.text11.copyWith(
-                                color: AppColors.placeholder,
-                              ),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: 64,
+                          color: AppColors.placeholder,
                         ),
-                      )
-                    : CustomScrollView(
-                        controller: _scrollController,
-                        slivers: [
-                          ProductGridSliver(
-                            itemCount: _filteredProducts.length,
-                            itemBuilder: (context, index) {
-                              final product = _filteredProducts[index];
-                              return ProductCard(
-                                imageUrl: product.imageUrl,
-                                helperText: product.categoryId ?? 'Sản phẩm',
-                                title: product.name,
-                                description: product.shortDescription,
-                                price: product.price,
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => ProductDetailPage(
-                                        productId: product.id,
-                                        title: product.name,
-                                        price: product.price,
-                                        brand: product.categoryId ?? 'Brand',
-                                        description: product.longDescription,
-                                        imageUrls: product.imageUrl != null &&
-                                                product.imageUrl!.isNotEmpty
-                                            ? [product.imageUrl!]
-                                            : const [],
-                                        inStock: product.quantity > 0,
-                                        categoryId: product.categoryId,
-                                        quantity: product.quantity,
-                                        shortDescription: product.shortDescription,
-                                        createdAt: product.createdAt,
-                                        updatedAt: product.updatedAt,
-                                      ),
-                                    ),
-                                  );
-                                },
+                        const SizedBox(height: 16),
+                        Text(
+                          'Không tìm thấy sản phẩm nào',
+                          style: AppTextStyles.text16.copyWith(
+                            color: AppColors.placeholder,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm',
+                          style: AppTextStyles.text11.copyWith(
+                            color: AppColors.placeholder,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : CustomScrollView(
+                    controller: _scrollController,
+                    slivers: [
+                      ProductGridSliver(
+                        itemCount: _filteredProducts.length,
+                        itemBuilder: (context, index) {
+                          final product = _filteredProducts[index];
+                          return ProductCard(
+                            imageUrl: product.imageUrl,
+                            helperText: product.categoryId ?? 'Sản phẩm',
+                            title: product.name,
+                            description: product.shortDescription,
+                            price: product.price,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => ProductDetailPage(
+                                    productId: product.id,
+                                    title: product.name,
+                                    price: product.price,
+                                    brand: product.categoryId ?? 'Brand',
+                                    description: product.longDescription,
+                                    imageUrls:
+                                        product.imageUrl != null &&
+                                            product.imageUrl!.isNotEmpty
+                                        ? [product.imageUrl!]
+                                        : const [],
+                                    inStock: product.quantity > 0,
+                                    categoryId: product.categoryId,
+                                    quantity: product.quantity,
+                                    shortDescription: product.shortDescription,
+                                    createdAt: product.createdAt,
+                                    updatedAt: product.updatedAt,
+                                  ),
+                                ),
                               );
                             },
-                          ),
-                          const SliverToBoxAdapter(
-                            child: SizedBox(height: 16),
-                          ),
-                        ],
+                          );
+                        },
                       ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                    ],
+                  ),
           ),
         ],
       ),

@@ -1,4 +1,5 @@
 import 'package:e_commerce/features/products/domain/entities/product.dart';
+import 'package:image_picker/image_picker.dart';
 
 abstract class ProductRepository {
   Future<List<Product>> getProducts();
@@ -6,4 +7,5 @@ abstract class ProductRepository {
   Future<void> createProduct(Product product);
   Future<void> updateProduct(Product product);
   Future<void> deleteProduct(String id);
+  Future<String> uploadProductImage(XFile imageFile);
 }

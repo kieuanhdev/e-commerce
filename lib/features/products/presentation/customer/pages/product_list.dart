@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:e_commerce/core/data/cloudinary_service.dart';
 import 'package:e_commerce/features/products/data/datasources/product_remote_datasource.dart';
 import 'package:e_commerce/features/products/data/repositories/product_repository_impl.dart';
 import 'package:e_commerce/features/products/domain/entities/product.dart';
@@ -14,7 +15,7 @@ import 'product_detail_page.dart';
 
 class ProductListBody extends StatefulWidget {
   final String searchQuery;
-  
+
   const ProductListBody({super.key, this.searchQuery = ''});
 
   @override
@@ -28,7 +29,11 @@ class _ProductListBodyState extends State<ProductListBody> {
   final GlobalKey _allProductKey = GlobalKey();
 
   late final ProductRemoteDataSource _remote = ProductRemoteDataSourceImpl();
-  late final ProductRepositoryImpl _repo = ProductRepositoryImpl(_remote);
+  late final CloudinaryService _cloudinary = CloudinaryService();
+  late final ProductRepositoryImpl _repo = ProductRepositoryImpl(
+    _remote,
+    _cloudinary,
+  );
   late final GetProducts _getAllProducts = GetProducts(_repo);
   final _cacheService = ProductCacheService.instance;
 
@@ -36,7 +41,8 @@ class _ProductListBodyState extends State<ProductListBody> {
   List<Product> _allVisibleProducts = [];
   List<Product> _visibleProducts = [];
 
-  int get pageCount => (_visibleProducts.length / itemsPerPage).ceil().clamp(1, 9999);
+  int get pageCount =>
+      (_visibleProducts.length / itemsPerPage).ceil().clamp(1, 9999);
 
   @override
   void initState() {
@@ -73,21 +79,26 @@ class _ProductListBodyState extends State<ProductListBody> {
         }
         // Chỉ refresh background nếu cache đã > 50% thời gian (tức > 2.5 phút)
         // Tránh refresh quá nhiều khi user chuyển màn hình liên tục
-        final cacheAge = _cacheService.lastFetchTime != null 
+        final cacheAge = _cacheService.lastFetchTime != null
             ? DateTime.now().difference(_cacheService.lastFetchTime!)
             : const Duration(minutes: 10);
         if (cacheAge.inMinutes >= 2) {
-          _cacheService.getProducts(_getAllProducts, forceRefresh: true).then((items) {
-            final visible = items.where((p) => p.isVisible == true).toList();
-            if (mounted) {
-              setState(() {
-                _allVisibleProducts = visible;
-                _applySearch();
+          _cacheService
+              .getProducts(_getAllProducts, forceRefresh: true)
+              .then((items) {
+                final visible = items
+                    .where((p) => p.isVisible == true)
+                    .toList();
+                if (mounted) {
+                  setState(() {
+                    _allVisibleProducts = visible;
+                    _applySearch();
+                  });
+                }
+              })
+              .catchError((e) {
+                print('Background refresh failed: $e');
               });
-            }
-          }).catchError((e) {
-            print('Background refresh failed: $e');
-          });
         }
         return;
       }
@@ -98,7 +109,10 @@ class _ProductListBodyState extends State<ProductListBody> {
     });
     try {
       // Dùng cache service để tránh load lại nếu đã có cache
-      final items = await _cacheService.getProducts(_getAllProducts, forceRefresh: forceRefresh);
+      final items = await _cacheService.getProducts(
+        _getAllProducts,
+        forceRefresh: forceRefresh,
+      );
       // Chỉ hiển thị sản phẩm đang bật isVisible
       final visible = items.where((p) => p.isVisible == true).toList();
       if (mounted) {
@@ -164,10 +178,7 @@ class _ProductListBodyState extends State<ProductListBody> {
         const SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.fromLTRB(12, 12, 12, 8),
-            child: BannerCarousel(
-              title: 'Heading 3',
-              height: 160,
-            ),
+            child: BannerCarousel(title: 'Heading 3', height: 160),
           ),
         ),
         const SliverToBoxAdapter(
@@ -182,10 +193,7 @@ class _ProductListBodyState extends State<ProductListBody> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: const Text(
               'Tất cả sản phẩm',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -216,7 +224,9 @@ class _ProductListBodyState extends State<ProductListBody> {
                         price: product.price,
                         brand: 'Thương hiệu',
                         description: product.longDescription,
-                        imageUrls: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                        imageUrls:
+                            product.imageUrl != null &&
+                                product.imageUrl!.isNotEmpty
                             ? [product.imageUrl!]
                             : const [],
                         inStock: (product.quantity) > 0,
