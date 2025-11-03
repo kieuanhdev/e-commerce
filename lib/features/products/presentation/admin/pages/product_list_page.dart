@@ -1,4 +1,7 @@
 import 'package:e_commerce/core/data/cloudinary_service.dart';
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
+import 'package:e_commerce/core/theme/app_sizes.dart';
 import 'package:e_commerce/features/products/data/datasources/product_remote_datasource.dart';
 import 'package:e_commerce/features/products/data/repositories/product_repository_impl.dart';
 import 'package:e_commerce/features/products/domain/entities/product.dart';
@@ -137,12 +140,20 @@ class _ProductListPageState extends State<ProductListPage> {
       labelText: label,
       prefixIcon: icon != null ? Icon(icon) : null,
       filled: true,
-      fillColor: Colors.grey.shade100,
+      fillColor: AppColors.white,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
+        borderRadius: BorderRadius.circular(AppSizes.radiusMD),
+        borderSide: const BorderSide(color: AppColors.placeholder),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSizes.radiusMD),
+        borderSide: const BorderSide(color: AppColors.placeholder),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSizes.radiusMD),
+        borderSide: const BorderSide(color: AppColors.primary),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMD, vertical: 10),
     );
   }
 
@@ -150,32 +161,24 @@ class _ProductListPageState extends State<ProductListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product Manager'),
+        title: const Text('Quản lý Sản phẩm'),
         centerTitle: true,
-        backgroundColor: Colors.blueAccent,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: _loadProducts,
-          ),
-        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openForm(),
-        label: const Text('Add Product'),
+        label: const Text('Thêm sản phẩm'),
         icon: const Icon(Icons.add_rounded),
-        backgroundColor: Colors.blueAccent,
       ),
       body: Container(
-        color: Colors.grey.shade50,
+        color: AppColors.background,
         child: Column(
           children: [
             // Search Field
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              padding: const EdgeInsets.fromLTRB(AppSizes.paddingMD, AppSizes.paddingMD, AppSizes.paddingMD, AppSizes.spacingXS),
               child: TextField(
                 decoration: _inputDecoration(
-                  'Search products',
+                  'Tìm kiếm sản phẩm...',
                   icon: Icons.search,
                 ),
                 onChanged: _onSearchChanged,
@@ -184,17 +187,17 @@ class _ProductListPageState extends State<ProductListPage> {
 
             // Filter Dropdown
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+              padding: const EdgeInsets.fromLTRB(AppSizes.paddingMD, AppSizes.spacingXS, AppSizes.paddingMD, AppSizes.spacingMD),
               child: DropdownButtonFormField<String>(
                 decoration: _inputDecoration(
-                  'Filter by category',
+                  'Lọc theo danh mục',
                   icon: Icons.category,
                 ),
                 initialValue: _selectedCategory,
                 items: [
                   const DropdownMenuItem<String>(
                     value: 'All',
-                    child: Text('All Categories'),
+                    child: Text('Tất cả danh mục'),
                   ),
                   ..._allProducts
                       .map((p) => p.categoryId)
@@ -212,29 +215,29 @@ class _ProductListPageState extends State<ProductListPage> {
 
             Expanded(
               child: _products.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
-                        'No products found 💤',
-                        style: TextStyle(fontSize: 16),
+                        'Không tìm thấy sản phẩm nào 💤',
+                        style: AppTextStyles.text16.copyWith(color: AppColors.placeholder),
                       ),
                     )
                   : ListView.builder(
                       physics: const BouncingScrollPhysics(),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
+                        horizontal: AppSizes.spacingMD,
+                        vertical: AppSizes.spacingSM,
                       ),
                       itemCount: _products.length,
                       itemBuilder: (context, index) {
                         final p = _products[index];
                         final bool isHidden = !p.isVisible;
                         return Card(
-                          color: isHidden ? Colors.grey[100] : Colors.white,
+                          color: isHidden ? AppColors.background : AppColors.white,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(AppSizes.radiusLG),
                           ),
-                          margin: const EdgeInsets.symmetric(vertical: 6),
-                          elevation: 3,
+                          elevation: AppSizes.cardElevation,
+                          margin: const EdgeInsets.only(bottom: AppSizes.spacingMD),
                           child: ListTile(
                             leading: SizedBox(
                               width: 120,
@@ -244,7 +247,7 @@ class _ProductListPageState extends State<ProductListPage> {
                                   fit: StackFit.expand,
                                   children: [
                                     ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(AppSizes.radiusSM),
                                       child: ColorFiltered(
                                         colorFilter: isHidden
                                             ? const ColorFilter.mode(
@@ -267,19 +270,18 @@ class _ProductListPageState extends State<ProductListPage> {
                                                       error,
                                                       stackTrace,
                                                     ) => Container(
-                                                      color:
-                                                          Colors.grey.shade200,
+                                                      color: AppColors.background,
                                                       child: const Icon(
                                                         Icons.broken_image,
-                                                        color: Colors.grey,
+                                                        color: AppColors.placeholder,
                                                       ),
                                                     ),
                                               )
                                             : Container(
-                                                color: Colors.grey.shade200,
+                                                color: AppColors.background,
                                                 child: const Icon(
                                                   Icons.image_not_supported,
-                                                  color: Colors.grey,
+                                                  color: AppColors.placeholder,
                                                 ),
                                               ),
                                       ),
@@ -288,21 +290,21 @@ class _ProductListPageState extends State<ProductListPage> {
                                       Align(
                                         alignment: Alignment.topLeft,
                                         child: Container(
-                                          margin: const EdgeInsets.all(6),
+                                          margin: const EdgeInsets.all(AppSizes.spacingMD),
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 4,
+                                            horizontal: AppSizes.spacingSM,
+                                            vertical: AppSizes.spacingXS,
                                           ),
                                           decoration: BoxDecoration(
                                             color: Colors.black54,
                                             borderRadius: BorderRadius.circular(
-                                              6,
+                                              AppSizes.radiusXS,
                                             ),
                                           ),
                                           child: const Text(
                                             'ĐÃ ẨN',
                                             style: TextStyle(
-                                              color: Colors.white,
+                                              color: AppColors.white,
                                               fontSize: 10,
                                               fontWeight: FontWeight.w600,
                                             ),
@@ -315,10 +317,9 @@ class _ProductListPageState extends State<ProductListPage> {
                             ),
                             title: Text(
                               p.name,
-                              style: TextStyle(
+                              style: AppTextStyles.text16.copyWith(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                color: isHidden ? Colors.grey : null,
+                                color: isHidden ? AppColors.placeholder : null,
                                 decoration: isHidden
                                     ? TextDecoration.lineThrough
                                     : TextDecoration.none,
@@ -332,17 +333,16 @@ class _ProductListPageState extends State<ProductListPage> {
                                     padding: const EdgeInsets.only(bottom: 2),
                                     child: Text(
                                       'Sản phẩm này đang được ẩn',
-                                      style: TextStyle(
+                                      style: AppTextStyles.text11.copyWith(
                                         color: Colors.orange[800],
-                                        fontSize: 12,
                                         fontStyle: FontStyle.italic,
                                       ),
                                     ),
                                   ),
                                 Text(
-                                  'Category: ${p.categoryId ?? '-'}',
-                                  style: TextStyle(
-                                    color: Colors.grey.shade700,
+                                  'Danh mục: ${p.categoryId ?? '-'}',
+                                  style: AppTextStyles.text14.copyWith(
+                                    color: AppColors.placeholder,
                                     height: 1.3,
                                   ),
                                 ),
@@ -350,17 +350,17 @@ class _ProductListPageState extends State<ProductListPage> {
                                   p.shortDescription,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
+                                  style: AppTextStyles.text14.copyWith(
                                     color: isHidden
-                                        ? Colors.grey
-                                        : Colors.grey.shade700,
+                                        ? AppColors.placeholder
+                                        : AppColors.placeholder,
                                     fontStyle: FontStyle.italic,
                                   ),
                                 ),
                                 Text(
-                                  'Price: \$${p.price.toStringAsFixed(2)} | Qty: ${p.quantity}',
-                                  style: TextStyle(
-                                    color: Colors.grey.shade800,
+                                  'Giá: \$${p.price.toStringAsFixed(2)} | SL: ${p.quantity}',
+                                  style: AppTextStyles.text14.copyWith(
+                                    color: AppColors.placeholder,
                                     height: 1.3,
                                   ),
                                 ),
@@ -385,17 +385,17 @@ class _ProductListPageState extends State<ProductListPage> {
                                 IconButton(
                                   icon: const Icon(
                                     Icons.edit_rounded,
-                                    color: Colors.blueAccent,
+                                    color: AppColors.primary,
                                   ),
-                                  tooltip: 'Edit',
+                                  tooltip: 'Chỉnh sửa',
                                   onPressed: () => _openForm(p),
                                 ),
                                 IconButton(
                                   icon: const Icon(
                                     Icons.delete_rounded,
-                                    color: Colors.redAccent,
+                                    color: AppColors.error,
                                   ),
-                                  tooltip: 'Delete',
+                                  tooltip: 'Xóa',
                                   onPressed: () => _delete(p.id),
                                 ),
                               ],

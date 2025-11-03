@@ -1,5 +1,8 @@
 import 'dart:typed_data';
 
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
+import 'package:e_commerce/core/theme/app_sizes.dart';
 import 'package:e_commerce/features/products/domain/entities/product.dart';
 import 'package:e_commerce/features/products/domain/usecases/add_product.dart';
 import 'package:e_commerce/features/products/domain/usecases/update_product.dart';
@@ -105,7 +108,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Lỗi khi chọn ảnh: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -153,9 +156,10 @@ class _ProductFormPageState extends State<ProductFormPage> {
           SnackBar(
             content: Text(
               widget.product == null
-                  ? 'Product added successfully 🎉'
-                  : 'Product updated successfully ✅',
+                  ? 'Đã thêm sản phẩm thành công 🎉'
+                  : 'Đã cập nhật sản phẩm thành công ✅',
             ),
+            backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -166,7 +170,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Lỗi: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -185,12 +189,20 @@ class _ProductFormPageState extends State<ProductFormPage> {
       labelText: label,
       prefixIcon: icon != null ? Icon(icon) : null,
       filled: true,
-      fillColor: Colors.grey.shade100,
+      fillColor: AppColors.white,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
+        borderRadius: BorderRadius.circular(AppSizes.radiusMD),
+        borderSide: const BorderSide(color: AppColors.placeholder),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSizes.radiusMD),
+        borderSide: const BorderSide(color: AppColors.placeholder),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSizes.radiusMD),
+        borderSide: const BorderSide(color: AppColors.primary),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMD, vertical: AppSizes.spacingMD),
     );
   }
 
@@ -201,15 +213,14 @@ class _ProductFormPageState extends State<ProductFormPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          isEdit ? 'Edit Product' : 'Add Product',
+          isEdit ? 'Chỉnh sửa Sản phẩm' : 'Thêm Sản phẩm',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        backgroundColor: Colors.blueAccent,
       ),
       body: Container(
-        color: Colors.grey.shade50,
-        padding: const EdgeInsets.all(20),
+        color: AppColors.background,
+        padding: const EdgeInsets.all(AppSizes.paddingLG),
         child: Form(
           key: _formKey,
           child: ListView(
@@ -217,38 +228,38 @@ class _ProductFormPageState extends State<ProductFormPage> {
             children: [
               TextFormField(
                 initialValue: _name,
-                decoration: _inputDecoration('Product Name', icon: Icons.label),
-                validator: (v) => v!.isEmpty ? 'Enter product name' : null,
+                decoration: _inputDecoration('Tên sản phẩm', icon: Icons.label),
+                validator: (v) => v!.isEmpty ? 'Nhập tên sản phẩm' : null,
                 onSaved: (v) => _name = v!.trim(),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSizes.spacingMD),
               TextFormField(
                 initialValue: _shortDescription,
                 decoration: _inputDecoration(
-                  'Short Description',
+                  'Mô tả ngắn',
                   icon: Icons.notes,
                 ),
                 maxLines: 2,
                 validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Enter short description'
+                    ? 'Nhập mô tả ngắn'
                     : null,
                 onSaved: (v) => _shortDescription = v!.trim(),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSizes.spacingMD),
               TextFormField(
                 initialValue: _longDescription,
                 decoration: _inputDecoration(
-                  'Long Description',
+                  'Mô tả chi tiết',
                   icon: Icons.description,
                 ),
                 maxLines: 4,
                 onSaved: (v) => _longDescription = v!.trim(),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSizes.spacingMD),
               TextFormField(
                 initialValue: _categoryId ?? '',
                 decoration: _inputDecoration(
-                  'Category ID',
+                  'ID Danh mục',
                   icon: Icons.category,
                 ),
                 onSaved: (v) {
@@ -256,54 +267,54 @@ class _ProductFormPageState extends State<ProductFormPage> {
                   _categoryId = val.isEmpty ? null : val;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSizes.spacingMD),
               TextFormField(
                 initialValue: _price == 0 ? '' : _price.toString(),
                 decoration: _inputDecoration(
-                  'Price',
+                  'Giá',
                   icon: Icons.monetization_on,
                 ),
                 keyboardType: TextInputType.number,
-                validator: (v) => v!.isEmpty ? 'Enter price' : null,
+                validator: (v) => v!.isEmpty ? 'Nhập giá' : null,
                 onSaved: (v) => _price = double.parse(v!),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSizes.spacingMD),
               TextFormField(
                 initialValue: _quantity == 0 ? '' : _quantity.toString(),
-                decoration: _inputDecoration('Quantity', icon: Icons.numbers),
+                decoration: _inputDecoration('Số lượng', icon: Icons.numbers),
                 keyboardType: TextInputType.number,
-                validator: (v) => v!.isEmpty ? 'Enter quantity' : null,
+                validator: (v) => v!.isEmpty ? 'Nhập số lượng' : null,
                 onSaved: (v) => _quantity = int.parse(v!),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSizes.spacingMD),
               SwitchListTile(
-                title: const Text('Visible'),
+                title: const Text('Hiển thị sản phẩm'),
                 value: _isVisible,
                 onChanged: (v) => setState(() => _isVisible = v),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSizes.spacingSM),
               TextFormField(
                 initialValue: _lowStockThreshold.toString(),
                 decoration: _inputDecoration(
-                  'Low stock threshold',
+                  'Ngưỡng cảnh báo tồn kho thấp',
                   icon: Icons.warning,
                 ),
                 keyboardType: TextInputType.number,
                 validator: (v) {
                   final val = int.tryParse((v ?? '').trim());
-                  if (val == null || val <= 0) return 'Enter a positive number';
+                  if (val == null || val <= 0) return 'Nhập số dương';
                   return null;
                 },
                 onSaved: (v) =>
                     _lowStockThreshold = int.tryParse(v ?? '') ?? 10,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSizes.spacingLG),
               // Image section
-              const Text(
+              Text(
                 'Ảnh sản phẩm',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: AppTextStyles.text14.copyWith(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSizes.spacingMD),
               Center(
                 child: Column(
                   children: [
@@ -313,13 +324,13 @@ class _ProductFormPageState extends State<ProductFormPage> {
                         width: 200,
                         height: 200,
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey[400]!),
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(AppSizes.radiusMD),
+                          border: Border.all(color: AppColors.placeholder),
                         ),
                         child: _previewImageBytes != null
                             ? ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(AppSizes.radiusMD),
                                 child: Image.memory(
                                   _previewImageBytes!,
                                   fit: BoxFit.cover,
@@ -327,7 +338,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
                               )
                             : (_imageUrl != null && _imageUrl!.isNotEmpty)
                             ? ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(AppSizes.radiusMD),
                                 child: Image.network(
                                   _imageUrl!,
                                   fit: BoxFit.cover,
@@ -335,7 +346,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
                                       const Icon(
                                         Icons.image,
                                         size: 64,
-                                        color: Colors.grey,
+                                        color: AppColors.placeholder,
                                       ),
                                 ),
                               )
@@ -345,18 +356,18 @@ class _ProductFormPageState extends State<ProductFormPage> {
                                   Icon(
                                     Icons.add_photo_alternate,
                                     size: 64,
-                                    color: Colors.grey,
+                                    color: AppColors.placeholder,
                                   ),
-                                  SizedBox(height: 8),
+                                  SizedBox(height: AppSizes.spacingSM),
                                   Text(
                                     'Chọn ảnh sản phẩm',
-                                    style: TextStyle(color: Colors.grey),
+                                    style: TextStyle(color: AppColors.placeholder),
                                   ),
                                 ],
                               ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSizes.spacingSM),
                     TextButton.icon(
                       onPressed: _pickImage,
                       icon: const Icon(Icons.photo_library),
@@ -370,7 +381,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: AppSizes.spacingXL),
               ElevatedButton.icon(
                 onPressed: _isUploading ? null : _save,
                 icon: _isUploading
@@ -380,7 +391,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
+                            AppColors.white,
                           ),
                         ),
                       )
@@ -390,19 +401,11 @@ class _ProductFormPageState extends State<ProductFormPage> {
                 label: Text(
                   _isUploading
                       ? 'Đang xử lý...'
-                      : (isEdit ? 'Update Product' : 'Add Product'),
+                      : (isEdit ? 'Cập nhật Sản phẩm' : 'Thêm Sản phẩm'),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingMD),
+                  textStyle: AppTextStyles.text16.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
             ],

@@ -1,3 +1,6 @@
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
+import 'package:e_commerce/core/theme/app_sizes.dart';
 import 'package:e_commerce/di.dart';
 import 'package:e_commerce/features/admin/presentation/bloc/overview_bloc.dart';
 import 'package:flutter/material.dart';
@@ -34,14 +37,14 @@ class _OverviewPageContent extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
+                  const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+                  const SizedBox(height: AppSizes.spacingMD),
                   Text(
                     state.message,
-                    style: const TextStyle(color: Colors.red),
+                    style: AppTextStyles.text14.copyWith(color: AppColors.error),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSizes.spacingMD),
                   ElevatedButton(
                     onPressed: () {
                       context.read<OverviewBloc>().add(
@@ -57,19 +60,17 @@ class _OverviewPageContent extends StatelessWidget {
 
           if (state is OverviewLoaded) {
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSizes.paddingMD),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                 
-
                   // Stats cards grid
                   GridView.count(
                     crossAxisCount: 2,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
+                    crossAxisSpacing: AppSizes.spacingMD,
+                    mainAxisSpacing: AppSizes.spacingMD,
                     childAspectRatio: 1.2,
                     children: [
                       _StatCard(
@@ -85,19 +86,19 @@ class _OverviewPageContent extends StatelessWidget {
                         ).format(state.stats.totalRevenue),
                         subtitle: '₫',
                         icon: Icons.attach_money,
-                        color: Colors.green,
+                        color: AppColors.success,
                       ),
                       _StatCard(
                         title: 'Khách hàng',
                         value: state.stats.totalCustomers.toString(),
                         icon: Icons.people,
-                        color: Colors.orange,
+                        color: AppColors.saleHot,
                       ),
                       _StatCard(
                         title: 'Sản phẩm',
                         value: state.stats.totalProducts.toString(),
                         icon: Icons.inventory,
-                        color: Colors.purple,
+                        color: AppColors.primary,
                       ),
                     ],
                   ),
@@ -131,22 +132,21 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
+      elevation: AppSizes.cardElevation,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSizes.paddingMD),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 40, color: color),
-            const SizedBox(height: 12),
+            Icon(icon, size: AppSizes.iconXL, color: color),
+            const SizedBox(height: AppSizes.spacingMD),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   value,
-                  style: TextStyle(
-                    fontSize: 28,
+                  style: AppTextStyles.headline3.copyWith(
                     fontWeight: FontWeight.bold,
                     color: color,
                   ),
@@ -156,8 +156,7 @@ class _StatCard extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Text(
                       subtitle!,
-                      style: TextStyle(
-                        fontSize: 16,
+                      style: AppTextStyles.text16.copyWith(
                         fontWeight: FontWeight.bold,
                         color: color,
                       ),
@@ -165,10 +164,11 @@ class _StatCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSizes.spacingXS),
             Text(
               title,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              style: AppTextStyles.text14.copyWith(color: AppColors.placeholder),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

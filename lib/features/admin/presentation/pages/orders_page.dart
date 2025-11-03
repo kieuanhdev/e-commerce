@@ -1,3 +1,6 @@
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
+import 'package:e_commerce/core/theme/app_sizes.dart';
 import 'package:e_commerce/di.dart';
 import 'package:e_commerce/features/admin/presentation/bloc/admin_orders_bloc.dart';
 import 'package:e_commerce/features/orders/domain/entities/order.dart';
@@ -32,7 +35,7 @@ class _OrdersPageContent extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.error,
               ),
             );
           }
@@ -47,14 +50,14 @@ class _OrdersPageContent extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
+                  const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+                  const SizedBox(height: AppSizes.spacingMD),
                   Text(
                     state.message,
-                    style: const TextStyle(color: Colors.red),
+                    style: AppTextStyles.text14.copyWith(color: AppColors.error),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSizes.spacingMD),
                   ElevatedButton(
                     onPressed: () {
                       context.read<AdminOrdersBloc>().add(const LoadAllOrders());
@@ -68,13 +71,16 @@ class _OrdersPageContent extends StatelessWidget {
 
           if (state is AdminOrdersLoaded) {
             if (state.orders.isEmpty) {
-              return const Center(
-                child: Text('Chưa có đơn hàng nào'),
+              return Center(
+                child: Text(
+                  'Chưa có đơn hàng nào',
+                  style: AppTextStyles.text16.copyWith(color: AppColors.placeholder),
+                ),
               );
             }
 
             return ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSizes.paddingMD),
               itemCount: state.orders.length,
               itemBuilder: (context, index) {
                 final order = state.orders[index];
@@ -100,9 +106,9 @@ class _OrderCard extends StatelessWidget {
       case OrderStatus.processing:
         return Colors.orange;
       case OrderStatus.delivery:
-        return Colors.green;
+        return AppColors.success;
       case OrderStatus.cancelled:
-        return Colors.red;
+        return AppColors.error;
     }
   }
 
@@ -120,9 +126,10 @@ class _OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      elevation: AppSizes.cardElevation,
+      margin: const EdgeInsets.only(bottom: AppSizes.spacingMD),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSizes.paddingMD),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -132,53 +139,51 @@ class _OrderCard extends StatelessWidget {
               children: [
                 Text(
                   'Đơn hàng #${order.trackingNumber}',
-                  style: const TextStyle(
+                  style: AppTextStyles.text16.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
                   ),
                 ),
                 Text(
                   DateFormat('dd/MM/yyyy').format(order.createdAt),
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
+                  style: AppTextStyles.text11.copyWith(
+                    color: AppColors.placeholder,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSizes.spacingMD),
             
             // Customer info
             Text(
               order.customerName,
-              style: const TextStyle(fontSize: 14),
+              style: AppTextStyles.text14,
             ),
             Text(
               order.customerEmail,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
+              style: AppTextStyles.text11.copyWith(
+                color: AppColors.placeholder,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSizes.spacingSM),
             
             // Total amount
             Text(
               'Tổng: ${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(order.totalAmount)}',
-              style: const TextStyle(
+              style: AppTextStyles.text14.copyWith(
                 fontWeight: FontWeight.bold,
-                fontSize: 15,
-                color: Colors.red,
+                color: AppColors.saleHot,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSizes.spacingMD),
             
             // Status dropdown
             Row(
               children: [
-                const Text(
+                Text(
                   'Trạng thái: ',
-                  style: TextStyle(fontWeight: FontWeight.w500),
+                  style: AppTextStyles.text14.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 Expanded(
                   child: DropdownButton<OrderStatus>(
@@ -197,7 +202,7 @@ class _OrderCard extends StatelessWidget {
                                 shape: BoxShape.circle,
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: AppSizes.spacingSM),
                             Text(_getStatusText(status)),
                           ],
                         ),
@@ -238,9 +243,10 @@ class _OrderCard extends StatelessWidget {
                   );
               Navigator.pop(dialogContext);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Đã cập nhật trạng thái'),
-                  duration: Duration(seconds: 2),
+                SnackBar(
+                  content: const Text('Đã cập nhật trạng thái'),
+                  duration: const Duration(seconds: 2),
+                  backgroundColor: AppColors.success,
                 ),
               );
             },

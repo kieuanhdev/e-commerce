@@ -1,5 +1,9 @@
+import 'package:e_commerce/core/theme/app_colors.dart';
+import 'package:e_commerce/core/theme/app_text_styles.dart';
+import 'package:e_commerce/core/theme/app_sizes.dart';
 import 'package:e_commerce/di.dart';
 import 'package:e_commerce/features/admin/presentation/bloc/customers_bloc.dart';
+import 'package:e_commerce/features/admin/presentation/pages/user_form_page.dart';
 import 'package:e_commerce/features/auth/domain/entities/app_user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -46,18 +50,31 @@ class _CustomersPageContentState extends State<_CustomersPageContent> {
     }).toList();
   }
 
+  Future<void> _openUserForm() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider<CustomersBloc>.value(
+          value: context.read<CustomersBloc>(),
+          child: const UserFormPage(),
+        ),
+      ),
+    );
+    if (result == true) {
+      context.read<CustomersBloc>().add(const LoadUsers());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quản lý Khách hàng'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showAddUserDialog(context),
-            tooltip: 'Thêm người dùng mới',
-          ),
-        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _openUserForm,
+        label: const Text('Thêm người dùng'),
+        icon: const Icon(Icons.add_rounded),
       ),
       body: BlocConsumer<CustomersBloc, CustomersState>(
         listener: (context, state) {
@@ -65,7 +82,7 @@ class _CustomersPageContentState extends State<_CustomersPageContent> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.error,
               ),
             );
           }
@@ -80,14 +97,14 @@ class _CustomersPageContentState extends State<_CustomersPageContent> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
+                  const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+                  const SizedBox(height: AppSizes.spacingMD),
                   Text(
                     state.message,
-                    style: const TextStyle(color: Colors.red),
+                    style: AppTextStyles.text14.copyWith(color: AppColors.error),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSizes.spacingMD),
                   ElevatedButton(
                     onPressed: () {
                       context.read<CustomersBloc>().add(const LoadUsers());
@@ -105,9 +122,12 @@ class _CustomersPageContentState extends State<_CustomersPageContent> {
                 children: [
                   // Search bar
                   _buildSearchBar(),
-                  const Expanded(
+                  Expanded(
                     child: Center(
-                      child: Text('Chưa có người dùng nào'),
+                      child: Text(
+                        'Chưa có người dùng nào',
+                        style: AppTextStyles.text16.copyWith(color: AppColors.placeholder),
+                      ),
                     ),
                   ),
                 ],
@@ -122,8 +142,8 @@ class _CustomersPageContentState extends State<_CustomersPageContent> {
                 _buildSearchBar(),
                 // Stats bar
                 Container(
-                  padding: const EdgeInsets.all(16),
-                  color: Colors.grey[200],
+                  padding: const EdgeInsets.all(AppSizes.paddingMD),
+                  color: AppColors.background,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -140,7 +160,7 @@ class _CustomersPageContentState extends State<_CustomersPageContent> {
                             .length
                             .toString(),
                         icon: Icons.check_circle,
-                        color: Colors.green,
+                        color: AppColors.success,
                       ),
                       _StatCard(
                         label: 'Đã khóa',
@@ -149,7 +169,7 @@ class _CustomersPageContentState extends State<_CustomersPageContent> {
                             .length
                             .toString(),
                         icon: Icons.lock,
-                        color: Colors.red,
+                        color: AppColors.error,
                       ),
                     ],
                   ),
@@ -158,17 +178,16 @@ class _CustomersPageContentState extends State<_CustomersPageContent> {
                 if (_searchQuery.isNotEmpty)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
-                    color: Colors.blue[50],
+                        horizontal: AppSizes.paddingMD, vertical: AppSizes.spacingSM),
+                    color: AppColors.background,
                     child: Row(
                       children: [
-                        Icon(Icons.search, size: 16, color: Colors.blue[700]),
-                        const SizedBox(width: 8),
+                        Icon(Icons.search, size: 16, color: AppColors.primary),
+                        const SizedBox(width: AppSizes.spacingSM),
                         Text(
                           'Tìm thấy ${filteredUsers.length} kết quả cho "$_searchQuery"',
-                          style: TextStyle(
-                            color: Colors.blue[700],
-                            fontSize: 12,
+                          style: AppTextStyles.text11.copyWith(
+                            color: AppColors.primary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -183,28 +202,26 @@ class _CustomersPageContentState extends State<_CustomersPageContent> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.search_off,
-                                  size: 64, color: Colors.grey[400]),
-                              const SizedBox(height: 16),
+                                  size: 64, color: AppColors.placeholder),
+                              const SizedBox(height: AppSizes.spacingMD),
                               Text(
                                 'Không tìm thấy người dùng nào',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 16,
+                                style: AppTextStyles.text16.copyWith(
+                                  color: AppColors.placeholder,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: AppSizes.spacingSM),
                               Text(
                                 'Thử tìm kiếm với từ khóa khác',
-                                style: TextStyle(
-                                  color: Colors.grey[500],
-                                  fontSize: 12,
+                                style: AppTextStyles.text11.copyWith(
+                                  color: AppColors.placeholder,
                                 ),
                               ),
                             ],
                           ),
                         )
                       : ListView.builder(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(AppSizes.spacingSM),
                           itemCount: filteredUsers.length,
                           itemBuilder: (context, index) {
                             final user = filteredUsers[index];
@@ -224,12 +241,12 @@ class _CustomersPageContentState extends State<_CustomersPageContent> {
 
   Widget _buildSearchBar() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSizes.paddingMD),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: AppColors.shadow,
             spreadRadius: 1,
             blurRadius: 3,
             offset: const Offset(0, 2),
@@ -253,19 +270,19 @@ class _CustomersPageContentState extends State<_CustomersPageContent> {
                 )
               : null,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[300]!),
+            borderRadius: BorderRadius.circular(AppSizes.radiusMD),
+            borderSide: const BorderSide(color: AppColors.placeholder),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[300]!),
+            borderRadius: BorderRadius.circular(AppSizes.radiusMD),
+            borderSide: const BorderSide(color: AppColors.placeholder),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.blue[300]!),
+            borderRadius: BorderRadius.circular(AppSizes.radiusMD),
+            borderSide: const BorderSide(color: AppColors.primary),
           ),
           filled: true,
-          fillColor: Colors.grey[50],
+          fillColor: AppColors.white,
         ),
         onChanged: (value) {
           setState(() {
@@ -276,119 +293,6 @@ class _CustomersPageContentState extends State<_CustomersPageContent> {
     );
   }
 
-  void _showAddUserDialog(BuildContext context) {
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
-    final nameController = TextEditingController();
-    final phoneController = TextEditingController();
-    String selectedRole = 'customer';
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Thêm người dùng mới'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Tên hiển thị *',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email *',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: passwordController,
-                decoration: const InputDecoration(
-                  labelText: 'Mật khẩu *',
-                  border: OutlineInputBorder(),
-                  helperText: 'Tối thiểu 6 ký tự',
-                ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'Số điện thoại (tùy chọn)',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: selectedRole,
-                decoration: const InputDecoration(
-                  labelText: 'Vai trò',
-                  border: OutlineInputBorder(),
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'customer', child: Text('Khách hàng')),
-                  DropdownMenuItem(value: 'admin', child: Text('Quản trị viên')),
-                ],
-                onChanged: (value) {
-                  if (value != null) selectedRole = value;
-                },
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (nameController.text.trim().isEmpty ||
-                  emailController.text.trim().isEmpty ||
-                  passwordController.text.length < 6) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Vui lòng điền đầy đủ thông tin'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
-
-              context.read<CustomersBloc>().add(
-                    CreateUser(
-                      email: emailController.text.trim(),
-                      password: passwordController.text,
-                      displayName: nameController.text.trim(),
-                      phoneNumber: phoneController.text.trim().isEmpty
-                          ? null
-                          : phoneController.text.trim(),
-                      role: selectedRole,
-                    ),
-                  );
-
-              Navigator.pop(dialogContext);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Đang tạo người dùng...'),
-                  backgroundColor: Colors.blue,
-                ),
-              );
-            },
-            child: const Text('Tạo'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _UserCard extends StatelessWidget {
@@ -399,25 +303,26 @@ class _UserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      elevation: AppSizes.cardElevation,
+      margin: const EdgeInsets.symmetric(horizontal: AppSizes.spacingSM, vertical: AppSizes.spacingXS),
       child: ListTile(
         leading: CircleAvatar(
           backgroundImage: user.avatarUrl != null
               ? NetworkImage(user.avatarUrl!)
               : null,
-          backgroundColor: user.isDisabled ? Colors.grey : Colors.blue,
+          backgroundColor: user.isDisabled ? AppColors.placeholder : AppColors.primary,
           child: user.avatarUrl == null
               ? Text(
                   user.displayName?.isNotEmpty == true
                       ? user.displayName![0].toUpperCase()
                       : user.email[0].toUpperCase(),
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: AppColors.white),
                 )
               : null,
         ),
         title: Text(
           user.displayName ?? user.email,
-          style: TextStyle(
+          style: AppTextStyles.text16.copyWith(
             fontWeight: FontWeight.bold,
             decoration: user.isDisabled
                 ? TextDecoration.lineThrough
@@ -427,39 +332,37 @@ class _UserCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(user.email),
-            if (user.phoneNumber != null) Text(user.phoneNumber!),
-            const SizedBox(height: 4),
+            Text(user.email, style: AppTextStyles.text14),
+            if (user.phoneNumber != null) Text(user.phoneNumber!, style: AppTextStyles.text14),
+            const SizedBox(height: AppSizes.spacingXS),
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingSM, vertical: 2),
                   decoration: BoxDecoration(
                     color: user.role == 'admin' ? Colors.purple[100] : Colors.blue[100],
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusMD),
                   ),
                   child: Text(
                     user.role == 'admin' ? 'Admin' : 'Khách hàng',
-                    style: TextStyle(
-                      fontSize: 12,
+                    style: AppTextStyles.text11.copyWith(
                       color: user.role == 'admin' ? Colors.purple[900] : Colors.blue[900],
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSizes.spacingSM),
                 if (user.isDisabled)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingSM, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.red[100],
-                      borderRadius: BorderRadius.circular(12),
+                      color: AppColors.error.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusMD),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Đã khóa',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.red,
+                      style: AppTextStyles.text11.copyWith(
+                        color: AppColors.error,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -468,14 +371,14 @@ class _UserCard extends StatelessWidget {
             ),
             Text(
               'Ngày tạo: ${DateFormat('dd/MM/yyyy HH:mm').format(user.createdAt)}',
-              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+              style: AppTextStyles.text11.copyWith(color: AppColors.placeholder),
             ),
           ],
         ),
         trailing: IconButton(
           icon: Icon(
             user.isDisabled ? Icons.lock_open : Icons.lock,
-            color: user.isDisabled ? Colors.green : Colors.red,
+            color: user.isDisabled ? AppColors.success : AppColors.error,
           ),
           onPressed: () {
             _showToggleStatusDialog(context, user);
@@ -501,7 +404,7 @@ class _UserCard extends StatelessWidget {
             onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Hủy'),
           ),
-          ElevatedButton(
+            ElevatedButton(
             onPressed: () {
               context.read<CustomersBloc>().add(ToggleUserStatus(user.id));
               Navigator.pop(dialogContext);
@@ -512,12 +415,12 @@ class _UserCard extends StatelessWidget {
                         ? 'Đang mở khóa tài khoản...'
                         : 'Đang khóa tài khoản...',
                   ),
-                  backgroundColor: Colors.blue,
+                  backgroundColor: AppColors.primary,
                 ),
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: user.isDisabled ? Colors.green : Colors.red,
+              backgroundColor: user.isDisabled ? AppColors.success : AppColors.error,
             ),
             child: Text(user.isDisabled ? 'Mở khóa' : 'Khóa'),
           ),
@@ -544,19 +447,18 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: color, size: 32),
-        const SizedBox(height: 4),
+        Icon(icon, color: color, size: AppSizes.iconLG),
+        const SizedBox(height: AppSizes.spacingXS),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 24,
+          style: AppTextStyles.headline3.copyWith(
             fontWeight: FontWeight.bold,
             color: color,
           ),
         ),
         Text(
           label,
-          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          style: AppTextStyles.text11.copyWith(color: AppColors.placeholder),
         ),
       ],
     );
