@@ -396,14 +396,12 @@ class _ShopScreenState extends State<ShopScreen> {
                                     productId: product.id,
                                     title: product.name,
                                     price: product.price,
-                                    brand: product.categoryId ?? 'Brand',
                                     description: product.longDescription,
                                     imageUrls:
                                         product.imageUrl != null &&
                                             product.imageUrl!.isNotEmpty
                                         ? [product.imageUrl!]
                                         : const [],
-                                    inStock: product.quantity > 0,
                                     categoryId: product.categoryId,
                                     quantity: product.quantity,
                                     shortDescription: product.shortDescription,

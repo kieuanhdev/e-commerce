@@ -145,17 +145,12 @@ class AuthRepositoryImpl implements IAuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateUserStatus(String userId, bool isDisabled) async {
-    try {
-      await dataSource.updateUserStatus(userId, isDisabled);
-      return const Right(null);
-    } catch (e) {
-      return Left(Failure(e.toString()));
-    }
+  Future<void> updateUserStatus(String userId, bool isDisabled) async {
+    await dataSource.updateUserStatus(userId, isDisabled);
   }
 
   @override
-  Future<Either<Failure, AppUser>> createUserByAdmin({
+  Future<AppUser> createUserByAdmin({
     required String email,
     required String password,
     required String displayName,
@@ -170,12 +165,12 @@ class AuthRepositoryImpl implements IAuthRepository {
         phoneNumber: phoneNumber,
         role: role,
       );
-      return Right(userModel);
+      return userModel;
     } on firebase.FirebaseAuthException catch (e) {
       final message = _mapFirebaseError(e, isRegister: true);
-      return Left(Failure(message));
+      throw Exception(message);
     } catch (e) {
-      return Left(Failure(e.toString()));
+      throw Exception(e.toString());
     }
   }
   

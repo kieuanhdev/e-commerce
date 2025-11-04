@@ -5,18 +5,14 @@ import '../widgets/buy_now_sheet.dart';
 import 'package:e_commerce/core/theme/app_colors.dart';
 import 'package:e_commerce/core/theme/app_text_styles.dart';
 
-class ProductDetailPage extends StatefulWidget {
+class ProductDetailPage extends StatelessWidget {
   const ProductDetailPage({
     super.key,
     required this.productId,
     required this.title,
     required this.price,
-    this.brand = '',
     this.description,
     this.imageUrls = const [],
-    this.rating = 0.0,
-    this.reviewCount = 0,
-    this.inStock = false,
     this.categoryId,
     this.quantity = 0,
     this.shortDescription,
@@ -27,27 +23,16 @@ class ProductDetailPage extends StatefulWidget {
   final String productId;
   final String title;
   final num price;
-  final String brand;
   final String? description;
   final String? shortDescription;
   final List<String> imageUrls;
-  final double rating;
-  final int reviewCount;
-  final bool inStock;
   final String? categoryId;
   final int quantity;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
   @override
-  State<ProductDetailPage> createState() => _ProductDetailPageState();
-}
-
-class _ProductDetailPageState extends State<ProductDetailPage> {
-
-  @override
   Widget build(BuildContext context) {
-    final images = widget.imageUrls;
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBar(
@@ -64,7 +49,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: ProductImageCarousel(imageUrls: images),
+                child: ProductImageCarousel(imageUrls: imageUrls),
               ),
             ),
             SliverToBoxAdapter(
@@ -74,20 +59,20 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Category
-                    if (widget.categoryId != null && widget.categoryId!.isNotEmpty)
+                    if (categoryId != null && categoryId!.isNotEmpty)
                       Text(
-                        widget.categoryId!.toUpperCase(),
+                        categoryId!.toUpperCase(),
                         style: AppTextStyles.text11.copyWith(
                           color: AppColors.placeholder,
                           letterSpacing: 1,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                    if (widget.categoryId != null && widget.categoryId!.isNotEmpty)
+                    if (categoryId != null && categoryId!.isNotEmpty)
                       const SizedBox(height: 8),
                     // Product Name
                     Text(
-                      widget.title,
+                      title,
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
@@ -97,7 +82,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     const SizedBox(height: 16),
                     // Price
                     Text(
-                      '${NumberFormat.decimalPattern('vi_VN').format(widget.price)} VND',
+                      '${NumberFormat.decimalPattern('vi_VN').format(price)} VND',
                       style: AppTextStyles.headline2.copyWith(
                         fontWeight: FontWeight.w800,
                         color: AppColors.primary,
@@ -107,7 +92,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     const Divider(height: 1),
                     const SizedBox(height: 16),
                     // Short Description
-                    if (widget.shortDescription != null && widget.shortDescription!.isNotEmpty) ...[
+                    if (shortDescription != null && shortDescription!.isNotEmpty) ...[
                       Text(
                         'Mô tả ngắn',
                         style: AppTextStyles.text16.copyWith(
@@ -117,7 +102,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        widget.shortDescription!,
+                        shortDescription!,
                         style: AppTextStyles.text14.copyWith(
                           color: AppColors.text.withOpacity(0.87),
                           height: 1.5,
@@ -135,7 +120,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      widget.description ?? 'Không có mô tả',
+                      description ?? 'Không có mô tả',
                       style: AppTextStyles.text14.copyWith(
                         color: AppColors.text.withOpacity(0.87),
                         height: 1.5,
@@ -148,22 +133,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     _buildInfoRow(
                       icon: Icons.inventory_2_outlined,
                       label: 'Số lượng tồn kho',
-                      value: widget.quantity.toString(),
-                      color: widget.quantity > 0 ? AppColors.success : AppColors.saleHot,
+                      value: quantity.toString(),
+                      color: quantity > 0 ? AppColors.success : AppColors.saleHot,
                     ),
                     const SizedBox(height: 12),
-                    if (widget.createdAt != null)
+                    if (createdAt != null)
                       _buildInfoRow(
                         icon: Icons.calendar_today_outlined,
                         label: 'Ngày tạo',
-                        value: DateFormat('dd/MM/yyyy').format(widget.createdAt!),
+                        value: DateFormat('dd/MM/yyyy').format(createdAt!),
                       ),
-                    if (widget.createdAt != null) const SizedBox(height: 12),
-                    if (widget.updatedAt != null)
+                    if (createdAt != null) const SizedBox(height: 12),
+                    if (updatedAt != null)
                       _buildInfoRow(
                         icon: Icons.update_outlined,
                         label: 'Cập nhật lần cuối',
-                        value: DateFormat('dd/MM/yyyy HH:mm').format(widget.updatedAt!),
+                        value: DateFormat('dd/MM/yyyy HH:mm').format(updatedAt!),
                       ),
                   ],
                 ),
@@ -190,7 +175,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${NumberFormat.decimalPattern('vi_VN').format(widget.price)} VND',
+                        '${NumberFormat.decimalPattern('vi_VN').format(price)} VND',
                         style: AppTextStyles.headline3.copyWith(color: AppColors.white, fontWeight: FontWeight.w800),
                       ),
                       Text('Đơn giá', style: AppTextStyles.text11.copyWith(color: AppColors.white.withOpacity(0.7))),
@@ -212,9 +197,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                       ),
                       builder: (ctx) => BuyNowSheet(
-                        productId: widget.productId,
-                        title: widget.title,
-                        unitPrice: widget.price.toDouble(),
+                        productId: productId,
+                        title: title,
+                        unitPrice: price.toDouble(),
                       ),
                     );
                   },

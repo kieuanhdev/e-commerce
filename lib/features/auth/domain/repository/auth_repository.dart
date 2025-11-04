@@ -44,10 +44,10 @@ abstract class IAuthRepository {
   Stream<List<AppUser>> getAllUsers();
 
   /// Cập nhật trạng thái khóa/mở khóa tài khoản (cho admin)
-  Future<Either<Failure, void>> updateUserStatus(String userId, bool isDisabled);
+  Future<void> updateUserStatus(String userId, bool isDisabled);
 
   /// Tạo user mới bởi admin
-  Future<Either<Failure, AppUser>> createUserByAdmin({
+  Future<AppUser> createUserByAdmin({
     required String email,
     required String password,
     required String displayName,

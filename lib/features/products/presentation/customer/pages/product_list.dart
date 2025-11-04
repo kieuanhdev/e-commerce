@@ -222,14 +222,12 @@ class _ProductListBodyState extends State<ProductListBody> {
                         productId: product.id,
                         title: product.name,
                         price: product.price,
-                        brand: 'Thương hiệu',
                         description: product.longDescription,
                         imageUrls:
                             product.imageUrl != null &&
                                 product.imageUrl!.isNotEmpty
                             ? [product.imageUrl!]
                             : const [],
-                        inStock: (product.quantity) > 0,
                         categoryId: product.categoryId,
                         quantity: product.quantity,
                         shortDescription: product.shortDescription,

@@ -1,5 +1,3 @@
-import 'package:dartz/dartz.dart';
-import 'package:e_commerce/core/utils/failure.dart';
 import 'package:e_commerce/features/auth/domain/repository/auth_repository.dart';
 
 class UpdateUserStatusUseCase {
@@ -7,8 +5,8 @@ class UpdateUserStatusUseCase {
 
   UpdateUserStatusUseCase(this._repository);
 
-  Future<Either<Failure, void>> call(String userId, bool isDisabled) {
-    return _repository.updateUserStatus(userId, isDisabled);
+  Future<void> call(String userId, bool isDisabled) async {
+    await _repository.updateUserStatus(userId, isDisabled);
   }
 }
 

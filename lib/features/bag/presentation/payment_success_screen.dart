@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:e_commerce/core/routing/app_routers.dart';
 import 'package:e_commerce/core/theme/app_colors.dart';
 import 'package:e_commerce/core/theme/app_text_styles.dart';
@@ -26,18 +27,22 @@ class PaymentSuccessScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Success Icon
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: AppColors.success,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.check,
-                  size: 60,
-                  color: AppColors.white,
+              // Success Animation
+              SizedBox(
+                width: 150,
+                height: 150,
+                child: Lottie.asset(
+                  'animations/Shopping.json',
+                  fit: BoxFit.contain,
+                  repeat: false,
+                  animate: true,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(
+                      Icons.check_circle,
+                      size: 100,
+                      color: AppColors.success,
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 24),

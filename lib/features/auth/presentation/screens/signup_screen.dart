@@ -54,109 +54,111 @@ class _SignUpScreenState extends State<SignUpScreen> {
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-              Row(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+                  const SizedBox(height: 20),
+                  // Tiêu đề
+                  const Center(
+                    child: Text(
+                      "Đăng ký",
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                  const Text(
-                    "Đăng ký",
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  const SizedBox(height: 20),
+
+                  AuthTextField(
+                    label: 'Họ và tên',
+                    controller: nameController,
+                    isValid: isNameValid,
+                    onChanged: (v) =>
+                        setState(() => isNameValid = v.trim().isNotEmpty),
                   ),
+                  const SizedBox(height: 16),
+
+                  AuthTextField(
+                    label: 'Email',
+                    controller: emailController,
+                    isValid: isEmailValid,
+                    onChanged: (v) =>
+                        setState(() => isEmailValid = v.contains('@')),
+                  ),
+                  const SizedBox(height: 16),
+
+                  AuthTextField(
+                    label: 'Mật khẩu',
+                    controller: passwordController,
+                    obscureText: isPasswordObscured,
+                    isValid: isPasswordValid,
+                    showValidationIcon: false,
+                    errorText: isPasswordValid ? null : 'Mật khẩu phải có ít nhất 6 ký tự',
+                    suffixIcon: IconButton(
+                      icon: Icon(isPasswordObscured ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () => setState(() => isPasswordObscured = !isPasswordObscured),
+                    ),
+                    onChanged: (v) => setState(() {
+                      isPasswordValid = v.length >= 6;
+                      // Do not validate confirm here; only validate when user edits confirm field
+                    }),
+                  ),
+                  const SizedBox(height: 16),
+
+                  AuthTextField(
+                    label: 'Nhập lại mật khẩu',
+                    controller: confirmPasswordController,
+                    obscureText: isConfirmObscured,
+                    isValid: isConfirmPasswordValid,
+                    showValidationIcon: false,
+                    errorText: hasInteractedWithConfirm && !isConfirmPasswordValid ? 'Mật khẩu không khớp' : null,
+                    suffixIcon: IconButton(
+                      icon: Icon(isConfirmObscured ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () => setState(() => isConfirmObscured = !isConfirmObscured),
+                    ),
+                    onChanged: (v) => setState(() {
+                      hasInteractedWithConfirm = true;
+                      isConfirmPasswordValid = v == passwordController.text && isPasswordValid;
+                    }),
+                  ),
+                  const SizedBox(height: 16),
+
+                  AuthTextField(
+                    label: 'Số điện thoại (Tùy chọn)',
+                    controller: phoneController,
+                    isValid: isPhoneValid,
+                    onChanged: (v) =>
+                        setState(() => isPhoneValid = v.isEmpty || v.length >= 10),
+                  ),
+                  const SizedBox(height: 10),
+
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: () {
+                        context.push('/login');
+                      },
+                      icon: const Icon(Icons.arrow_forward, size: 16),
+                      label: const Text("Đăng nhập"),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      return AuthButton(
+                        text: state is AuthLoading ? "Đang đăng ký..." : "Đăng ký",
+                        onPressed: state is AuthLoading ? null : _handleSignUp,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 40),
+                  const SocialButtonRow(),
+                  const SizedBox(height: 20),
                 ],
               ),
-              const SizedBox(height: 40),
-
-              AuthTextField(
-                label: 'Họ và tên',
-                controller: nameController,
-                isValid: isNameValid,
-                onChanged: (v) =>
-                    setState(() => isNameValid = v.trim().isNotEmpty),
-              ),
-              const SizedBox(height: 16),
-
-              AuthTextField(
-                label: 'Email',
-                controller: emailController,
-                isValid: isEmailValid,
-                onChanged: (v) =>
-                    setState(() => isEmailValid = v.contains('@')),
-              ),
-              const SizedBox(height: 16),
-
-              AuthTextField(
-                label: 'Mật khẩu',
-                controller: passwordController,
-                obscureText: isPasswordObscured,
-                isValid: isPasswordValid,
-                showValidationIcon: false,
-                errorText: isPasswordValid ? null : 'Mật khẩu phải có ít nhất 6 ký tự',
-                suffixIcon: IconButton(
-                  icon: Icon(isPasswordObscured ? Icons.visibility_off : Icons.visibility),
-                  onPressed: () => setState(() => isPasswordObscured = !isPasswordObscured),
-                ),
-                onChanged: (v) => setState(() {
-                  isPasswordValid = v.length >= 6;
-                  // Do not validate confirm here; only validate when user edits confirm field
-                }),
-              ),
-              const SizedBox(height: 16),
-
-              AuthTextField(
-                label: 'Nhập lại mật khẩu',
-                controller: confirmPasswordController,
-                obscureText: isConfirmObscured,
-                isValid: isConfirmPasswordValid,
-                showValidationIcon: false,
-                errorText: hasInteractedWithConfirm && !isConfirmPasswordValid ? 'Mật khẩu không khớp' : null,
-                suffixIcon: IconButton(
-                  icon: Icon(isConfirmObscured ? Icons.visibility_off : Icons.visibility),
-                  onPressed: () => setState(() => isConfirmObscured = !isConfirmObscured),
-                ),
-                onChanged: (v) => setState(() {
-                  hasInteractedWithConfirm = true;
-                  isConfirmPasswordValid = v == passwordController.text && isPasswordValid;
-                }),
-              ),
-              const SizedBox(height: 16),
-
-              AuthTextField(
-                label: 'Số điện thoại (Tùy chọn)',
-                controller: phoneController,
-                isValid: isPhoneValid,
-                onChanged: (v) =>
-                    setState(() => isPhoneValid = v.isEmpty || v.length >= 10),
-              ),
-              const SizedBox(height: 10),
-
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  onPressed: () {
-                    context.push('/login');
-                  },
-                  icon: const Icon(Icons.arrow_forward, size: 16),
-                  label: const Text("Đăng nhập"),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              BlocBuilder<AuthBloc, AuthState>(
-                builder: (context, state) {
-                  return AuthButton(
-                    text: state is AuthLoading ? "Đang đăng ký..." : "Đăng ký",
-                    onPressed: state is AuthLoading ? null : _handleSignUp,
-                  );
-                },
-              ),
-              const SizedBox(height: 40),
-              const SocialButtonRow(),
-              ],
             ),
           ),
         ),

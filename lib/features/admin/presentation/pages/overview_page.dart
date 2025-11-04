@@ -1,114 +1,153 @@
+import 'dart:async';
+
 import 'package:e_commerce/core/theme/app_colors.dart';
 import 'package:e_commerce/core/theme/app_text_styles.dart';
 import 'package:e_commerce/core/theme/app_sizes.dart';
 import 'package:e_commerce/di.dart';
-import 'package:e_commerce/features/admin/presentation/bloc/overview_bloc.dart';
+import 'package:e_commerce/features/admin/domain/usecase/get_overview_stats.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-class AdminOverviewPage extends StatelessWidget {
+class AdminOverviewPage extends StatefulWidget {
   const AdminOverviewPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => sl<OverviewBloc>()..add(const LoadOverviewStats()),
-      child: const _OverviewPageContent(),
-    );
-  }
+  State<AdminOverviewPage> createState() => _AdminOverviewPageState();
 }
 
-class _OverviewPageContent extends StatelessWidget {
-  const _OverviewPageContent();
+class _AdminOverviewPageState extends State<AdminOverviewPage> {
+  StreamSubscription<OverviewStats>? _statsSubscription;
+  OverviewStats? _stats;
+  bool _isLoading = true;
+  String? _error;
+
+  final _getOverviewStatsUseCase = sl<GetOverviewStatsUseCase>();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  void _loadStats() {
+    _statsSubscription?.cancel();
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    _statsSubscription = _getOverviewStatsUseCase().listen(
+      (stats) {
+        if (mounted) {
+          setState(() {
+            _stats = stats;
+            _isLoading = false;
+          });
+        }
+      },
+      onError: (error) {
+        if (mounted) {
+          setState(() {
+            _error = error.toString();
+            _isLoading = false;
+          });
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _statsSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Tổng quan')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_error != null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Tổng quan')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+              const SizedBox(height: AppSizes.spacingMD),
+              Text(
+                _error!,
+                style: AppTextStyles.text14.copyWith(color: AppColors.error),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSizes.spacingMD),
+              ElevatedButton(
+                onPressed: _loadStats,
+                child: const Text('Thử lại'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_stats == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Tổng quan')),
+        body: const Center(child: Text('Không có dữ liệu')),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Tổng quan')),
-      body: BlocBuilder<OverviewBloc, OverviewState>(
-        builder: (context, state) {
-          if (state is OverviewInitial || state is OverviewLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (state is OverviewError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: AppColors.error),
-                  const SizedBox(height: AppSizes.spacingMD),
-                  Text(
-                    state.message,
-                    style: AppTextStyles.text14.copyWith(color: AppColors.error),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSizes.spacingMD),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<OverviewBloc>().add(
-                        const LoadOverviewStats(),
-                      );
-                    },
-                    child: const Text('Thử lại'),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          if (state is OverviewLoaded) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSizes.paddingMD),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Stats cards grid
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisSpacing: AppSizes.spacingMD,
-                    mainAxisSpacing: AppSizes.spacingMD,
-                    childAspectRatio: 1.2,
-                    children: [
-                      _StatCard(
-                        title: 'Đơn hàng',
-                        value: state.stats.totalOrders.toString(),
-                        icon: Icons.shopping_cart,
-                        color: Colors.blue,
-                      ),
-                      _StatCard(
-                        title: 'Doanh thu',
-                        value: NumberFormat.compact(
-                          locale: 'vi',
-                        ).format(state.stats.totalRevenue),
-                        subtitle: '₫',
-                        icon: Icons.attach_money,
-                        color: AppColors.success,
-                      ),
-                      _StatCard(
-                        title: 'Khách hàng',
-                        value: state.stats.totalCustomers.toString(),
-                        icon: Icons.people,
-                        color: AppColors.saleHot,
-                      ),
-                      _StatCard(
-                        title: 'Sản phẩm',
-                        value: state.stats.totalProducts.toString(),
-                        icon: Icons.inventory,
-                        color: AppColors.primary,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return const SizedBox.shrink();
-        },
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSizes.paddingMD),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Stats cards grid
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisSpacing: AppSizes.spacingMD,
+              mainAxisSpacing: AppSizes.spacingMD,
+              childAspectRatio: 1.2,
+              children: [
+                _StatCard(
+                  title: 'Đơn hàng',
+                  value: _stats!.totalOrders.toString(),
+                  icon: Icons.shopping_cart,
+                  color: Colors.blue,
+                ),
+                _StatCard(
+                  title: 'Doanh thu',
+                  value: NumberFormat.compact(locale: 'vi').format(_stats!.totalRevenue),
+                  subtitle: '₫',
+                  icon: Icons.attach_money,
+                  color: AppColors.success,
+                ),
+                _StatCard(
+                  title: 'Khách hàng',
+                  value: _stats!.totalCustomers.toString(),
+                  icon: Icons.people,
+                  color: AppColors.saleHot,
+                ),
+                _StatCard(
+                  title: 'Sản phẩm',
+                  value: _stats!.totalProducts.toString(),
+                  icon: Icons.inventory,
+                  color: AppColors.primary,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

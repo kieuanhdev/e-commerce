@@ -83,14 +83,12 @@ class PopularProductsSection extends StatelessWidget {
                                   productId: p.id,
                                   title: p.name,
                                   price: p.price,
-                                  brand: 'Thương hiệu',
                                   description: p.longDescription,
                                   imageUrls:
                                       p.imageUrl != null &&
                                           p.imageUrl!.isNotEmpty
                                       ? [p.imageUrl!]
                                       : const [],
-                                  inStock: (p.quantity) > 0,
                                   categoryId: p.categoryId,
                                   quantity: p.quantity,
                                   shortDescription: p.shortDescription,

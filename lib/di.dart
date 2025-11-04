@@ -28,9 +28,6 @@ import 'package:e_commerce/features/bag/presentation/bloc/bag_bloc.dart';
 import 'package:e_commerce/features/products/data/datasources/product_remote_datasource.dart';
 import 'package:e_commerce/features/products/data/repositories/product_repository_impl.dart';
 import 'package:e_commerce/features/products/domain/repositories/product_repository.dart';
-import 'package:e_commerce/features/admin/presentation/bloc/customers_bloc.dart';
-import 'package:e_commerce/features/admin/presentation/bloc/admin_orders_bloc.dart';
-import 'package:e_commerce/features/admin/presentation/bloc/overview_bloc.dart';
 import 'package:e_commerce/features/admin/domain/usecase/get_all_users.dart';
 import 'package:e_commerce/features/admin/domain/usecase/update_user_status.dart';
 import 'package:e_commerce/features/admin/domain/usecase/create_user_by_admin.dart';
@@ -43,6 +40,11 @@ import 'package:e_commerce/features/orders/domain/repository/order_repository.da
 import 'package:e_commerce/features/orders/domain/usecases/create_order_with_reduce_stock.dart';
 import 'package:e_commerce/features/orders/domain/usecases/get_orders_by_user_id.dart';
 import 'package:e_commerce/features/orders/domain/usecases/get_order_by_id.dart';
+import 'package:e_commerce/features/products/domain/usecases/get_products.dart';
+import 'package:e_commerce/features/products/domain/usecases/add_product.dart';
+import 'package:e_commerce/features/products/domain/usecases/update_product.dart';
+import 'package:e_commerce/features/products/domain/usecases/delete_product.dart';
+import 'package:e_commerce/features/products/domain/usecases/upload_product_image.dart';
 
 final sl = GetIt.instance;
 
@@ -112,6 +114,14 @@ void initDI() {
     ),
   );
 
+  // --- Products UseCases ---
+  // Expose use cases for admin pages and others via DI
+  sl.registerLazySingleton(() => GetProducts(sl()));
+  sl.registerLazySingleton(() => AddProduct(sl()));
+  sl.registerLazySingleton(() => UpdateProduct(sl()));
+  sl.registerLazySingleton(() => DeleteProduct(sl()));
+  sl.registerLazySingleton(() => UploadProductImage(sl()));
+
   // Bag Datasource (sử dụng FirebaseRemoteDS internally, không cần inject FirebaseFirestore)
   sl.registerLazySingleton<BagRemoteDataSource>(
     () => BagRemoteDataSourceImpl(),
@@ -145,26 +155,6 @@ void initDI() {
   sl.registerFactory(() => GetAllOrdersUseCase(sl()));
   sl.registerFactory(() => UpdateOrderStatusUseCase(sl()));
   sl.registerFactory(() => GetOverviewStatsUseCase(sl(), sl(), sl()));
-
-  // Customers Bloc
-  sl.registerFactory(
-    () => CustomersBloc(
-      getAllUsersUseCase: sl(),
-      updateUserStatusUseCase: sl(),
-      createUserByAdminUseCase: sl(),
-    ),
-  );
-
-  // Admin Orders Bloc
-  sl.registerFactory(
-    () => AdminOrdersBloc(
-      getAllOrdersUseCase: sl(),
-      updateOrderStatusUseCase: sl(),
-    ),
-  );
-
-  // Overview Bloc
-  sl.registerFactory(() => OverviewBloc(getOverviewStatsUseCase: sl()));
 
   // --- Orders Feature ---
 

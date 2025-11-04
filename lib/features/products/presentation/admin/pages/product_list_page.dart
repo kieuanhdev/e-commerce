@@ -1,9 +1,7 @@
-import 'package:e_commerce/core/data/cloudinary_service.dart';
+import 'package:e_commerce/di.dart';
 import 'package:e_commerce/core/theme/app_colors.dart';
 import 'package:e_commerce/core/theme/app_text_styles.dart';
 import 'package:e_commerce/core/theme/app_sizes.dart';
-import 'package:e_commerce/features/products/data/datasources/product_remote_datasource.dart';
-import 'package:e_commerce/features/products/data/repositories/product_repository_impl.dart';
 import 'package:e_commerce/features/products/domain/entities/product.dart';
 import 'package:e_commerce/features/products/domain/usecases/add_product.dart';
 import 'package:e_commerce/features/products/domain/usecases/delete_product.dart';
@@ -21,15 +19,11 @@ class ProductListPage extends StatefulWidget {
 }
 
 class _ProductListPageState extends State<ProductListPage> {
-  late final _remote = ProductRemoteDataSourceImpl();
-  late final _cloudinary = CloudinaryService();
-  late final _repo = ProductRepositoryImpl(_remote, _cloudinary);
-
-  late final _getAllProducts = GetProducts(_repo);
-  late final _addProduct = AddProduct(_repo);
-  late final _updateProduct = UpdateProduct(_repo);
-  late final _deleteProduct = DeleteProduct(_repo);
-  late final _uploadProductImage = UploadProductImage(_repo);
+  late final _getAllProducts = sl<GetProducts>();
+  late final _addProduct = sl<AddProduct>();
+  late final _updateProduct = sl<UpdateProduct>();
+  late final _deleteProduct = sl<DeleteProduct>();
+  late final _uploadProductImage = sl<UploadProductImage>();
 
   List<Product> _products = [];
   List<Product> _allProducts = [];

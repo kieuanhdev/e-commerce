@@ -24,7 +24,7 @@ class BuyNowSheet extends StatefulWidget {
 }
 
 class _BuyNowSheetState extends State<BuyNowSheet> {
-  int quantity = 2;
+  int quantity = 1;
   double get total => widget.unitPrice * quantity;
 
   @override
