@@ -66,27 +66,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   void _onLoginRequested(
       AuthLoginRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    final result = await _loginUseCase(event.email, event.password);
-    result.fold(
-      (failure) => emit(AuthFailure(failure.message)),
-      (user) => emit(AuthAuthenticated(user)),
-    );
+    try {
+      final user = await _loginUseCase(event.email, event.password);
+      emit(AuthAuthenticated(user));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
   }
 
   // ĐÃ CẬP NHẬT: Handler cho đăng ký
   void _onRegisterRequested(
       AuthRegisterRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    final result = await _registerUseCase(
-      email: event.email,
-      password: event.password,
-      displayName: event.displayName,
-      phoneNumber: event.phoneNumber,
-    );
-    result.fold(
-      (failure) => emit(AuthFailure(failure.message)),
-      (user) => emit(AuthAuthenticated(user)),
-    );
+    try {
+      final user = await _registerUseCase(
+        email: event.email,
+        password: event.password,
+        displayName: event.displayName,
+        phoneNumber: event.phoneNumber,
+      );
+      emit(AuthAuthenticated(user));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
   }
 
   void _onLogoutRequested(
@@ -100,11 +102,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthForgotPasswordLoading());
-    final result = await _forgotPasswordUseCase(event.email);
-    result.fold(
-      (failure) => emit(AuthFailure(failure.message)),
-      (_) => emit(AuthForgotPasswordSuccess()),
-    );
+    try {
+      await _forgotPasswordUseCase(event.email);
+      emit(AuthForgotPasswordSuccess());
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
   }
 
   Future<void> _onGoogleSignInRequested(
@@ -112,10 +115,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-    final result = await _googleSignInUseCase();
-    result.fold(
-      (failure) => emit(AuthFailure(failure.message)),
-      (user) => emit(AuthAuthenticated(user)),
-    );
+    try {
+      final user = await _googleSignInUseCase();
+      emit(AuthAuthenticated(user));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
   }
 }

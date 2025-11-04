@@ -90,14 +90,11 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
     on<ChangePasswordRequested>((event, emit) async {
       try {
-        final result = await changePasswordUseCase(
+        await changePasswordUseCase(
           currentPassword: event.currentPassword,
           newPassword: event.newPassword,
         );
-        result.fold(
-          (l) => emit(SettingsError(l.message)),
-          (r) => emit(const SettingsUpdated('Đổi mật khẩu thành công!')),
-        );
+        emit(const SettingsUpdated('Đổi mật khẩu thành công!'));
       } catch (e) {
         emit(SettingsError(e.toString()));
       }

@@ -101,15 +101,19 @@ class _MyOrderScreenState extends State<MyOrderScreen>
         centerTitle: false,
         backgroundColor: AppColors.white,
         elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: _loadOrders,
-            icon: Icon(Icons.refresh, color: AppColors.text),
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(44),
-          child: _SegmentedTabBar(controller: _tabController),
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: AppColors.text,
+          indicatorColor: AppColors.primary,
+          labelStyle: AppTextStyles.text14.copyWith(fontWeight: FontWeight.w600),
+          unselectedLabelStyle:
+              AppTextStyles.text14.copyWith(fontWeight: FontWeight.w500),
+          tabs: const [
+            Tab(text: 'Đang giao'),
+            Tab(text: 'Đang xử lý'),
+            Tab(text: 'Đã hủy'),
+          ],
         ),
       ),
       backgroundColor: AppColors.background,
@@ -127,47 +131,7 @@ class _MyOrderScreenState extends State<MyOrderScreen>
   }
 }
 
-class _SegmentedTabBar extends StatelessWidget {
-  final TabController controller;
-  const _SegmentedTabBar({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 44,
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TabBar(
-        controller: controller,
-        indicator: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        indicatorPadding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
-        labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-        labelColor: AppColors.white,
-        unselectedLabelColor: AppColors.text,
-        labelStyle: AppTextStyles.text14.copyWith(fontWeight: FontWeight.w600),
-        unselectedLabelStyle: AppTextStyles.text14.copyWith(fontWeight: FontWeight.w500),
-        tabs: const [
-          Tab(text: 'Đang giao'),
-          Tab(text: 'Đang xử lý'),
-          Tab(text: 'Đã hủy'),
-        ],
-      ),
-    );
-  }
-}
+// Simplified: removed custom segmented control in favor of default TabBar above
 
 class _OrderList extends StatelessWidget {
   final List<Order> orders;

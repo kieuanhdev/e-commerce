@@ -1,5 +1,3 @@
-import 'package:dartz/dartz.dart';
-import 'package:e_commerce/core/utils/failure.dart';
 import 'package:e_commerce/features/auth/data/datasource/firebase_auth_datasource.dart';
 import 'package:e_commerce/features/auth/domain/entities/app_user.dart';
 import 'package:e_commerce/features/auth/domain/repository/auth_repository.dart';
@@ -14,34 +12,34 @@ class AuthRepositoryImpl implements IAuthRepository {
   AuthRepositoryImpl(this.dataSource, this.cloudinaryService);
 
   @override
-  Future<Either<Failure, AppUser>> login(String email, String password) async {
+  Future<AppUser> login(String email, String password) async {
     try {
       // DataSource giờ đã trả về UserModel đầy đủ từ Firestore
       final userModel = await dataSource.login(email, password);
-      return Right(userModel);
+      return userModel;
     } on firebase.FirebaseAuthException catch (e) {
       final message = _mapFirebaseError(e, isRegister: false);
-      return Left(Failure(message));
+      throw Exception(message);
     } catch (e) {
-      return Left(Failure(e.toString()));
+      throw Exception(e.toString());
     }
   }
 
   @override
-  Future<Either<Failure, AppUser>> googleSignIn() async {
+  Future<AppUser> googleSignIn() async {
     try {
       final userModel = await dataSource.signInWithGoogle();
-      return Right(userModel);
+      return userModel;
     } on firebase.FirebaseAuthException catch (e) {
       final message = _mapFirebaseError(e, isRegister: false);
-      return Left(Failure(message));
+      throw Exception(message);
     } catch (e) {
-      return Left(Failure(e.toString()));
+      throw Exception(e.toString());
     }
   }
 
   @override
-  Future<Either<Failure, AppUser>> register({
+  Future<AppUser> register({
     required String email,
     required String password,
     required String displayName,
@@ -51,22 +49,22 @@ class AuthRepositoryImpl implements IAuthRepository {
       // DataSource giờ đã trả về UserModel đầy đủ
       final userModel = await dataSource.register(
           email, password, displayName, phoneNumber);
-      return Right(userModel);
+      return userModel;
     } on firebase.FirebaseAuthException catch (e) {
       final message = _mapFirebaseError(e, isRegister: true);
-      return Left(Failure(message));
+      throw Exception(message);
     } catch (e) {
-      return Left(Failure(e.toString()));
+      throw Exception(e.toString());
     }
   }
 
   @override
-  Future<Either<Failure, void>> logout() async {
+  Future<void> logout() async {
     try {
       await dataSource.logout();
-      return const Right(null);
+      return;
     } catch (_) {
-      return Left(Failure('Đăng xuất thất bại'));
+      throw Exception('Đăng xuất thất bại');
     }
   }
 
@@ -90,20 +88,20 @@ class AuthRepositoryImpl implements IAuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> forgotPassword(String email) async {
+  Future<void> forgotPassword(String email) async {
     try {
       await dataSource.sendPasswordResetEmail(email);
-      return const Right(null);
+      return;
     } on firebase.FirebaseAuthException catch (e) {
       final message = _mapFirebaseError(e, isRegister: false);
-      return Left(Failure(message));
+      throw Exception(message);
     } catch (e) {
-      return Left(Failure(e.toString()));
+      throw Exception(e.toString());
     }
   }
 
   @override
-  Future<Either<Failure, void>> changePassword({
+  Future<void> changePassword({
     required String currentPassword,
     required String newPassword,
   }) async {
@@ -112,12 +110,12 @@ class AuthRepositoryImpl implements IAuthRepository {
         currentPassword: currentPassword,
         newPassword: newPassword,
       );
-      return const Right(null);
+      return;
     } on firebase.FirebaseAuthException catch (e) {
       final message = _mapFirebaseError(e, isRegister: false);
-      return Left(Failure(message));
+      throw Exception(message);
     } catch (e) {
-      return Left(Failure(e.toString()));
+      throw Exception(e.toString());
     }
   }
 
