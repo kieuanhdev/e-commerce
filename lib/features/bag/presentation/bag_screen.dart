@@ -35,7 +35,10 @@ class _BagScreenState extends State<BagScreen> {
     return withVnd ? '$formatted VND' : formatted;
   }
 
-  List<CartItemWithProduct> _filterCartItems(List<CartItemWithProduct> items, String query) {
+  List<CartItemWithProduct> _filterCartItems(
+    List<CartItemWithProduct> items,
+    String query,
+  ) {
     if (query.isEmpty) {
       return items;
     }
@@ -53,10 +56,7 @@ class _BagScreenState extends State<BagScreen> {
         if (authState is! AuthAuthenticated) {
           return Scaffold(
             appBar: AppBar(
-              title: Text(
-                "Giỏ hàng",
-                style: AppTextStyles.headline3,
-              ),
+              title: Text("Giỏ hàng", style: AppTextStyles.headline3),
               backgroundColor: AppColors.white,
               elevation: 0,
             ),
@@ -78,16 +78,13 @@ class _BagScreenState extends State<BagScreen> {
             appBar: AppBar(
               title: Row(
                 children: [
-                  Text(
-                    "Giỏ hàng",
-                    style: AppTextStyles.headline3,
-                  ),
+                  Text("Giỏ hàng", style: AppTextStyles.headline3),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Container(
                       height: 40,
                       decoration: BoxDecoration(
-                        color: AppColors.placeholder.withOpacity(0.3),
+                        color: AppColors.placeholder.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: TextField(
@@ -95,8 +92,14 @@ class _BagScreenState extends State<BagScreen> {
                         style: AppTextStyles.text14,
                         decoration: InputDecoration(
                           hintText: 'Tìm kiếm sản phẩm...',
-                          hintStyle: AppTextStyles.text14.copyWith(color: AppColors.placeholder),
-                          prefixIcon: Icon(Icons.search, size: 20, color: AppColors.placeholder),
+                          hintStyle: AppTextStyles.text14.copyWith(
+                            color: AppColors.placeholder,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            size: 20,
+                            color: AppColors.placeholder,
+                          ),
                           suffixIcon: _searchQuery.isNotEmpty
                               ? IconButton(
                                   icon: Icon(Icons.clear, size: 18),
@@ -109,7 +112,10 @@ class _BagScreenState extends State<BagScreen> {
                                 )
                               : null,
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
                         ),
                         onChanged: (value) {
                           setState(() {
@@ -140,9 +146,7 @@ class _BagScreenState extends State<BagScreen> {
               builder: (context, state) {
                 if (state is BagLoading) {
                   return Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
-                    ),
+                    child: CircularProgressIndicator(color: AppColors.primary),
                   );
                 }
 
@@ -189,7 +193,7 @@ class _BagScreenState extends State<BagScreen> {
                           Text(
                             'Giỏ hàng trống',
                             style: AppTextStyles.headline3.copyWith(
-                              color: AppColors.text.withOpacity(0.6),
+                              color: AppColors.text.withValues(alpha: 0.6),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -204,15 +208,21 @@ class _BagScreenState extends State<BagScreen> {
                     );
                   }
 
-                  final filteredItems = _filterCartItems(state.cartItems, _searchQuery);
-                  
+                  final filteredItems = _filterCartItems(
+                    state.cartItems,
+                    _searchQuery,
+                  );
+
                   if (filteredItems.isEmpty && _searchQuery.isNotEmpty) {
                     return const Center(
                       child: Text('Không tìm thấy sản phẩm nào trong giỏ hàng'),
                     );
                   }
 
-                  final filteredTotalPrice = filteredItems.fold(0.0, (sum, item) => sum + item.totalPrice);
+                  final filteredTotalPrice = filteredItems.fold(
+                    0.0,
+                    (sum, item) => sum + item.totalPrice,
+                  );
 
                   return Column(
                     children: [
@@ -221,199 +231,310 @@ class _BagScreenState extends State<BagScreen> {
                           padding: const EdgeInsets.all(16),
                           itemCount: filteredItems.length,
                           itemBuilder: (context, index) {
-                              final item = filteredItems[index];
-                              final cartItem = item.cartItem;
-                              final product = item.product;
+                            final item = filteredItems[index];
+                            final cartItem = item.cartItem;
+                            final product = item.product;
 
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 16),
-                                decoration: BoxDecoration(
-                                  color: AppColors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.shadow,
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 16),
+                              decoration: BoxDecoration(
+                                color: AppColors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.shadow,
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child:
+                                          product.imageUrl != null &&
+                                              product.imageUrl!.isNotEmpty
+                                          ? Image.network(
+                                              product.imageUrl!,
+                                              width: 80,
+                                              height: 80,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => Container(
+                                                    width: 80,
+                                                    height: 80,
+                                                    color: AppColors.background,
+                                                    child: Icon(
+                                                      Icons.image,
+                                                      color:
+                                                          AppColors.placeholder,
+                                                    ),
+                                                  ),
+                                            )
+                                          : Container(
+                                              width: 80,
+                                              height: 80,
+                                              color: AppColors.background,
+                                              child: Icon(
+                                                Icons.image,
+                                                color: AppColors.placeholder,
+                                              ),
+                                            ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      product.name,
+                                                      style: AppTextStyles
+                                                          .text16
+                                                          .copyWith(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                      maxLines: 2,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                    const SizedBox(height: 4),
+                                                    if (cartItem.color !=
+                                                            null ||
+                                                        cartItem.size != null)
+                                                      Row(
+                                                        children: [
+                                                          if (cartItem.color !=
+                                                              null)
+                                                            Text.rich(
+                                                              TextSpan(
+                                                                text:
+                                                                    'Màu sắc: ',
+                                                                style: AppTextStyles
+                                                                    .text11
+                                                                    .copyWith(
+                                                                      color: AppColors
+                                                                          .text
+                                                                          .withValues(
+                                                                            alpha:
+                                                                                0.54,
+                                                                          ),
+                                                                    ),
+                                                                children: [
+                                                                  TextSpan(
+                                                                    text: cartItem
+                                                                        .color,
+                                                                    style: AppTextStyles
+                                                                        .text11
+                                                                        .copyWith(
+                                                                          color:
+                                                                              AppColors.error,
+                                                                        ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          if (cartItem.color !=
+                                                                  null &&
+                                                              cartItem.size !=
+                                                                  null)
+                                                            const SizedBox(
+                                                              width: 16,
+                                                            ),
+                                                          if (cartItem.size !=
+                                                              null)
+                                                            Text.rich(
+                                                              TextSpan(
+                                                                text:
+                                                                    'Kích cỡ: ',
+                                                                style: AppTextStyles
+                                                                    .text11
+                                                                    .copyWith(
+                                                                      color: AppColors
+                                                                          .text
+                                                                          .withValues(
+                                                                            alpha:
+                                                                                0.54,
+                                                                          ),
+                                                                    ),
+                                                                children: [
+                                                                  TextSpan(
+                                                                    text: cartItem
+                                                                        .size,
+                                                                    style: AppTextStyles
+                                                                        .text11
+                                                                        .copyWith(
+                                                                          color:
+                                                                              AppColors.error,
+                                                                        ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                        ],
+                                                      ),
+                                                  ],
+                                                ),
+                                              ),
+                                              PopupMenuButton<int>(
+                                                itemBuilder: (context) =>
+                                                    const [
+                                                      PopupMenuItem(
+                                                        value: 1,
+                                                        child: Text(
+                                                          'Xóa khỏi giỏ hàng',
+                                                        ),
+                                                      ),
+                                                    ],
+                                                onSelected: (value) {
+                                                  if (value == 1) {
+                                                    context.read<BagBloc>().add(
+                                                      RemoveFromCart(
+                                                        cartItem.id,
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                                icon: const Icon(
+                                                  Icons.more_vert,
+                                                ),
+                                                tooltip: 'Tùy chọn',
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 12),
+                                          Row(
+                                            children: [
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.background,
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  border: Border.all(
+                                                    color: AppColors.placeholder
+                                                        .withValues(alpha: 0.3),
+                                                  ),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    InkWell(
+                                                      onTap: () {
+                                                        if (cartItem.quantity >
+                                                            1) {
+                                                          context
+                                                              .read<BagBloc>()
+                                                              .add(
+                                                                UpdateQuantity(
+                                                                  cartItem.id,
+                                                                  cartItem.quantity -
+                                                                      1,
+                                                                ),
+                                                              );
+                                                        }
+                                                      },
+                                                      child: Container(
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                              8,
+                                                            ),
+                                                        child: Icon(
+                                                          Icons.remove,
+                                                          size: 18,
+                                                          color:
+                                                              cartItem.quantity >
+                                                                  1
+                                                              ? AppColors.text
+                                                              : AppColors
+                                                                    .placeholder,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 12,
+                                                          ),
+                                                      child: Text(
+                                                        '${cartItem.quantity}',
+                                                        style: AppTextStyles
+                                                            .text14
+                                                            .copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                    InkWell(
+                                                      onTap: () {
+                                                        context
+                                                            .read<BagBloc>()
+                                                            .add(
+                                                              UpdateQuantity(
+                                                                cartItem.id,
+                                                                cartItem.quantity +
+                                                                    1,
+                                                              ),
+                                                            );
+                                                      },
+                                                      child: Container(
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                              8,
+                                                            ),
+                                                        child: Icon(
+                                                          Icons.add,
+                                                          size: 18,
+                                                          color:
+                                                              AppColors.primary,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const Spacer(),
+                                              Text(
+                                                formatAmount(
+                                                  item.totalPrice,
+                                                  withVnd: true,
+                                                ),
+                                                style: AppTextStyles.text16
+                                                    .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: AppColors.primary,
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: product.imageUrl != null && product.imageUrl!.isNotEmpty
-                                            ? Image.network(
-                                                product.imageUrl!,
-                                                width: 80,
-                                                height: 80,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (context, error, stackTrace) => Container(
-                                                  width: 80,
-                                                  height: 80,
-                                                  color: AppColors.background,
-                                                  child: Icon(Icons.image, color: AppColors.placeholder),
-                                                ),
-                                              )
-                                            : Container(
-                                                width: 80,
-                                                height: 80,
-                                                color: AppColors.background,
-                                                child: Icon(Icons.image, color: AppColors.placeholder),
-                                              ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(
-                                                        product.name,
-                                                        style: AppTextStyles.text16.copyWith(
-                                                          fontWeight: FontWeight.w600,
-                                                        ),
-                                                        maxLines: 2,
-                                                        overflow: TextOverflow.ellipsis,
-                                                      ),
-                                                      const SizedBox(height: 4),
-                                                      if (cartItem.color != null || cartItem.size != null)
-                                                        Row(
-                                                          children: [
-                                                            if (cartItem.color != null)
-                                                              Text.rich(
-                                                                TextSpan(
-                                                                  text: 'Màu sắc: ',
-                                                                  style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
-                                                                  children: [
-                                                                    TextSpan(
-                                                                      text: cartItem.color,
-                                                                      style: AppTextStyles.text11.copyWith(color: AppColors.error),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            if (cartItem.color != null && cartItem.size != null)
-                                                              const SizedBox(width: 16),
-                                                            if (cartItem.size != null)
-                                                              Text.rich(
-                                                                TextSpan(
-                                                                  text: 'Kích cỡ: ',
-                                                                  style: AppTextStyles.text11.copyWith(color: AppColors.text.withOpacity(0.54)),
-                                                                  children: [
-                                                                    TextSpan(
-                                                                      text: cartItem.size,
-                                                                      style: AppTextStyles.text11.copyWith(color: AppColors.error),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                          ],
-                                                        ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                PopupMenuButton<int>(
-                                                  itemBuilder: (context) => const [
-                                                    PopupMenuItem(
-                                                      value: 1,
-                                                      child: Text('Xóa khỏi giỏ hàng'),
-                                                    ),
-                                                  ],
-                                                  onSelected: (value) {
-                                                    if (value == 1) {
-                                                      context.read<BagBloc>().add(RemoveFromCart(cartItem.id));
-                                                    }
-                                                  },
-                                                  icon: const Icon(Icons.more_vert),
-                                                  tooltip: 'Tùy chọn',
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 12),
-                                            Row(
-                                              children: [
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    color: AppColors.background,
-                                                    borderRadius: BorderRadius.circular(8),
-                                                    border: Border.all(
-                                                      color: AppColors.placeholder.withOpacity(0.3),
-                                                    ),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      InkWell(
-                                                        onTap: () {
-                                                          if (cartItem.quantity > 1) {
-                                                            context.read<BagBloc>().add(
-                                                                  UpdateQuantity(cartItem.id, cartItem.quantity - 1),
-                                                                );
-                                                          }
-                                                        },
-                                                        child: Container(
-                                                          padding: const EdgeInsets.all(8),
-                                                          child: Icon(
-                                                            Icons.remove,
-                                                            size: 18,
-                                                            color: cartItem.quantity > 1 ? AppColors.text : AppColors.placeholder,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Container(
-                                                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                                                        child: Text(
-                                                          '${cartItem.quantity}',
-                                                          style: AppTextStyles.text14.copyWith(
-                                                            fontWeight: FontWeight.w600,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      InkWell(
-                                                        onTap: () {
-                                                          context.read<BagBloc>().add(
-                                                                UpdateQuantity(cartItem.id, cartItem.quantity + 1),
-                                                              );
-                                                        },
-                                                        child: Container(
-                                                          padding: const EdgeInsets.all(8),
-                                                          child: Icon(
-                                                            Icons.add,
-                                                            size: 18,
-                                                            color: AppColors.primary,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                const Spacer(),
-                                                Text(
-                                                  formatAmount(item.totalPrice, withVnd: true),
-                                                  style: AppTextStyles.text16.copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: AppColors.primary,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
+                              ),
+                            );
                           },
                         ),
                       ),
@@ -442,31 +563,41 @@ class _BagScreenState extends State<BagScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             "Tổng tiền",
-                                            style: AppTextStyles.text14.copyWith(
-                                              color: AppColors.text.withOpacity(0.6),
-                                            ),
+                                            style: AppTextStyles.text14
+                                                .copyWith(
+                                                  color: AppColors.text
+                                                      .withValues(alpha: 0.6),
+                                                ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            formatAmount(filteredTotalPrice, withVnd: true),
-                                            style: AppTextStyles.headline3.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColors.primary,
+                                            formatAmount(
+                                              filteredTotalPrice,
+                                              withVnd: true,
                                             ),
+                                            style: AppTextStyles.headline3
+                                                .copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: AppColors.primary,
+                                                ),
                                           ),
                                         ],
                                       ),
                                       Text(
                                         '${filteredItems.length} sản phẩm',
                                         style: AppTextStyles.text14.copyWith(
-                                          color: AppColors.text.withOpacity(0.6),
+                                          color: AppColors.text.withValues(
+                                            alpha: 0.6,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -495,7 +626,8 @@ class _BagScreenState extends State<BagScreen> {
                                       ),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Text(
                                           "Thanh toán",
