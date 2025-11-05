@@ -27,7 +27,7 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
   String? _error;
 
   final _getAllUsersUseCase = sl<GetAllUsersUseCase>();
-  final _updateUserStatusUseCase = sl<UpdateUserStatusUseCase>();
+  // final _updateUserStatusUseCase = sl<UpdateUserStatusUseCase>();
   final _createUserByAdminUseCase = sl<CreateUserByAdminUseCase>();
 
   @override
@@ -80,31 +80,6 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
       final email = user.email.toLowerCase();
       return displayName.contains(lowerQuery) || email.contains(lowerQuery);
     }).toList();
-  }
-
-  Future<void> _toggleUserStatus(AppUser user) async {
-    try {
-      await _updateUserStatusUseCase(user.id, !user.isDisabled);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              user.isDisabled ? 'Đã mở khóa tài khoản' : 'Đã khóa tài khoản',
-            ),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
   }
 
   @override
@@ -240,10 +215,7 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
                     itemCount: filteredUsers.length,
                     itemBuilder: (context, index) {
                       final user = filteredUsers[index];
-                      return _UserCard(
-                        user: user,
-                        onToggleStatus: () => _showToggleStatusDialog(user),
-                      );
+                      return _UserCard(user: user);
                     },
                   ),
           ),
@@ -307,38 +279,6 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
             _searchQuery = value;
           });
         },
-      ),
-    );
-  }
-
-  void _showToggleStatusDialog(AppUser user) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(user.isDisabled ? 'Mở khóa tài khoản?' : 'Khóa tài khoản?'),
-        content: Text(
-          user.isDisabled
-              ? 'Bạn có chắc chắn muốn mở khóa tài khoản của ${user.displayName ?? user.email}?'
-              : 'Bạn có chắc chắn muốn khóa tài khoản của ${user.displayName ?? user.email}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              _toggleUserStatus(user);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: user.isDisabled
-                  ? AppColors.success
-                  : AppColors.error,
-            ),
-            child: Text(user.isDisabled ? 'Mở khóa' : 'Khóa'),
-          ),
-        ],
       ),
     );
   }
@@ -515,9 +455,8 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
 
 class _UserCard extends StatelessWidget {
   final AppUser user;
-  final VoidCallback onToggleStatus;
 
-  const _UserCard({required this.user, required this.onToggleStatus});
+  const _UserCard({required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -644,7 +583,28 @@ class _UserCard extends StatelessWidget {
             user.isDisabled ? Icons.lock_open : Icons.lock,
             color: user.isDisabled ? AppColors.success : AppColors.error,
           ),
-          onPressed: onToggleStatus,
+          onPressed: () async {
+            try {
+              await sl<UpdateUserStatusUseCase>()(user.id, !user.isDisabled);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    user.isDisabled
+                        ? 'Đã mở khóa tài khoản'
+                        : 'Đã khóa tài khoản',
+                  ),
+                  backgroundColor: AppColors.success,
+                ),
+              );
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(e.toString()),
+                  backgroundColor: AppColors.error,
+                ),
+              );
+            }
+          },
           tooltip: user.isDisabled ? 'Mở khóa tài khoản' : 'Khóa tài khoản',
         ),
       ),
