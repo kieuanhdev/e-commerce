@@ -6,6 +6,7 @@ import 'package:e_commerce/core/theme/app_sizes.dart';
 import 'package:e_commerce/di.dart';
 import 'package:e_commerce/features/admin/domain/usecase/get_all_users.dart';
 import 'package:e_commerce/features/admin/domain/usecase/update_user_status.dart';
+import 'package:e_commerce/features/admin/domain/usecase/create_user_by_admin.dart';
 import 'package:e_commerce/features/auth/domain/entities/app_user.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -27,6 +28,7 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
 
   final _getAllUsersUseCase = sl<GetAllUsersUseCase>();
   final _updateUserStatusUseCase = sl<UpdateUserStatusUseCase>();
+  final _createUserByAdminUseCase = sl<CreateUserByAdminUseCase>();
 
   @override
   void initState() {
@@ -87,9 +89,7 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              user.isDisabled
-                  ? 'Đã mở khóa tài khoản'
-                  : 'Đã khóa tài khoản',
+              user.isDisabled ? 'Đã mở khóa tài khoản' : 'Đã khóa tài khoản',
             ),
             backgroundColor: AppColors.success,
           ),
@@ -111,18 +111,14 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Quản lý Khách hàng'),
-        ),
+        appBar: AppBar(title: const Text('Quản lý Khách hàng')),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_error != null && _users.isEmpty) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Quản lý Khách hàng'),
-        ),
+        appBar: AppBar(title: const Text('Quản lý Khách hàng')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -148,9 +144,7 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
     final filteredUsers = _filterUsers(_users, _searchQuery);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quản lý Khách hàng'),
-      ),
+      appBar: AppBar(title: const Text('Quản lý Khách hàng')),
       body: Column(
         children: [
           // Search bar
@@ -187,7 +181,9 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
           if (_searchQuery.isNotEmpty)
             Container(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.paddingMD, vertical: AppSizes.spacingSM),
+                horizontal: AppSizes.paddingMD,
+                vertical: AppSizes.spacingSM,
+              ),
               color: AppColors.background,
               child: Row(
                 children: [
@@ -210,8 +206,11 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.search_off,
-                            size: 64, color: AppColors.placeholder),
+                        Icon(
+                          Icons.search_off,
+                          size: 64,
+                          color: AppColors.placeholder,
+                        ),
                         const SizedBox(height: AppSizes.spacingMD),
                         Text(
                           _users.isEmpty
@@ -223,7 +222,9 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
                         ),
                         if (_users.isNotEmpty && _searchQuery.isNotEmpty)
                           Padding(
-                            padding: const EdgeInsets.only(top: AppSizes.spacingSM),
+                            padding: const EdgeInsets.only(
+                              top: AppSizes.spacingSM,
+                            ),
                             child: Text(
                               'Thử tìm kiếm với từ khóa khác',
                               style: AppTextStyles.text11.copyWith(
@@ -247,6 +248,11 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
                   ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showCreateUserDialog,
+        icon: const Icon(Icons.person_add),
+        label: const Text('Thêm tài khoản'),
       ),
     );
   }
@@ -326,12 +332,183 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
               _toggleUserStatus(user);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: user.isDisabled ? AppColors.success : AppColors.error,
+              backgroundColor: user.isDisabled
+                  ? AppColors.success
+                  : AppColors.error,
             ),
             child: Text(user.isDisabled ? 'Mở khóa' : 'Khóa'),
           ),
         ],
       ),
+    );
+  }
+
+  void _showCreateUserDialog() {
+    final formKey = GlobalKey<FormState>();
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    final nameController = TextEditingController();
+    final phoneController = TextEditingController();
+    String role = 'customer';
+    bool isSubmitting = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            Future<void> handleSubmit() async {
+              if (isSubmitting) return;
+              final form = formKey.currentState;
+              if (form == null) return;
+              if (!form.validate()) return;
+              setState(() => isSubmitting = true);
+              try {
+                await _createUserByAdminUseCase(
+                  email: emailController.text.trim(),
+                  password: passwordController.text,
+                  displayName: nameController.text.trim(),
+                  phoneNumber: phoneController.text.trim().isEmpty
+                      ? null
+                      : phoneController.text.trim(),
+                  role: role,
+                );
+                if (mounted) {
+                  Navigator.of(dialogContext).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Tạo tài khoản thành công'),
+                      backgroundColor: AppColors.success,
+                    ),
+                  );
+                }
+              } catch (e) {
+                setState(() => isSubmitting = false);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(e.toString()),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
+            }
+
+            return AlertDialog(
+              title: const Text('Thêm tài khoản mới'),
+              content: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        controller: emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: Icon(Icons.email_outlined),
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          final text = (value ?? '').trim();
+                          if (text.isEmpty) return 'Vui lòng nhập email';
+                          final emailRegex = RegExp(r'^.+@.+\..+$');
+                          if (!emailRegex.hasMatch(text))
+                            return 'Email không hợp lệ';
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: AppSizes.spacingSM),
+                      TextFormField(
+                        controller: passwordController,
+                        decoration: const InputDecoration(
+                          labelText: 'Mật khẩu',
+                          prefixIcon: Icon(Icons.lock_outline),
+                        ),
+                        obscureText: true,
+                        validator: (value) {
+                          final text = value ?? '';
+                          if (text.isEmpty) return 'Vui lòng nhập mật khẩu';
+                          if (text.length < 6)
+                            return 'Mật khẩu tối thiểu 6 ký tự';
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: AppSizes.spacingSM),
+                      TextFormField(
+                        controller: nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Họ và tên',
+                          prefixIcon: Icon(Icons.person_outline),
+                        ),
+                        validator: (value) {
+                          final text = (value ?? '').trim();
+                          if (text.isEmpty) return 'Vui lòng nhập họ và tên';
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: AppSizes.spacingSM),
+                      TextFormField(
+                        controller: phoneController,
+                        decoration: const InputDecoration(
+                          labelText: 'Số điện thoại (tuỳ chọn)',
+                          prefixIcon: Icon(Icons.phone_outlined),
+                        ),
+                        keyboardType: TextInputType.phone,
+                      ),
+                      const SizedBox(height: AppSizes.spacingSM),
+                      DropdownButtonFormField<String>(
+                        value: role,
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'customer',
+                            child: Text('Khách hàng'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'admin',
+                            child: Text('Quản trị viên'),
+                          ),
+                        ],
+                        onChanged: isSubmitting
+                            ? null
+                            : (v) => setState(() => role = v ?? 'customer'),
+                        decoration: const InputDecoration(
+                          labelText: 'Vai trò',
+                          prefixIcon: Icon(Icons.admin_panel_settings_outlined),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Hủy'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: isSubmitting ? null : handleSubmit,
+                  icon: isSubmitting
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.white,
+                            ),
+                          ),
+                        )
+                      : const Icon(Icons.save_outlined),
+                  label: Text(isSubmitting ? 'Đang lưu...' : 'Tạo tài khoản'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -340,21 +517,21 @@ class _UserCard extends StatelessWidget {
   final AppUser user;
   final VoidCallback onToggleStatus;
 
-  const _UserCard({
-    required this.user,
-    required this.onToggleStatus,
-  });
+  const _UserCard({required this.user, required this.onToggleStatus});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: AppSizes.cardElevation,
       margin: const EdgeInsets.symmetric(
-          horizontal: AppSizes.spacingSM, vertical: AppSizes.spacingXS),
+        horizontal: AppSizes.spacingSM,
+        vertical: AppSizes.spacingXS,
+      ),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor:
-              user.isDisabled ? AppColors.placeholder : AppColors.primary,
+          backgroundColor: user.isDisabled
+              ? AppColors.placeholder
+              : AppColors.primary,
           child: user.avatarUrl != null
               ? ClipOval(
                   child: Image.network(
@@ -376,7 +553,7 @@ class _UserCard extends StatelessWidget {
                         child: CircularProgressIndicator(
                           value: loadingProgress.expectedTotalBytes != null
                               ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
+                                    loadingProgress.expectedTotalBytes!
                               : null,
                           strokeWidth: 2,
                           valueColor: const AlwaysStoppedAnimation<Color>(
@@ -414,7 +591,9 @@ class _UserCard extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.spacingSM, vertical: 2),
+                    horizontal: AppSizes.spacingSM,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: user.role == 'admin'
                         ? Colors.purple[100]
@@ -435,7 +614,9 @@ class _UserCard extends StatelessWidget {
                 if (user.isDisabled)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.spacingSM, vertical: 2),
+                      horizontal: AppSizes.spacingSM,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.error.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(AppSizes.radiusMD),
@@ -452,7 +633,9 @@ class _UserCard extends StatelessWidget {
             ),
             Text(
               'Ngày tạo: ${DateFormat('dd/MM/yyyy HH:mm').format(user.createdAt)}',
-              style: AppTextStyles.text11.copyWith(color: AppColors.placeholder),
+              style: AppTextStyles.text11.copyWith(
+                color: AppColors.placeholder,
+              ),
             ),
           ],
         ),

@@ -4,8 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce/features/auth/data/model/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
 import 'package:google_sign_in/google_sign_in.dart';
-
-
+import 'package:firebase_core/firebase_core.dart' as firebase_core;
+import 'package:e_commerce/firebase_options.dart';
 
 class FirebaseAuthDatasource {
   final firebase.FirebaseAuth _auth;
@@ -23,8 +23,7 @@ class FirebaseAuthDatasource {
       password: password,
     );
     // Sau khi đăng nhập Auth, lấy profile từ Firestore
-    final userDoc =
-        await _usersCollection.doc(userCredential.user!.uid).get();
+    final userDoc = await _usersCollection.doc(userCredential.user!.uid).get();
     if (!userDoc.exists) {
       throw Exception('Không tìm thấy thông tin người dùng.');
     }
@@ -33,7 +32,11 @@ class FirebaseAuthDatasource {
 
   // ĐÃ CẬP NHẬT: Register
   Future<UserModel> register(
-      String email, String password, String displayName, String? phoneNumber) async {
+    String email,
+    String password,
+    String displayName,
+    String? phoneNumber,
+  ) async {
     try {
       // 1. Tạo user trong Firebase Auth
       final userCredential = await _auth.createUserWithEmailAndPassword(
@@ -104,7 +107,10 @@ class FirebaseAuthDatasource {
       final newUser = UserModel(
         id: uid,
         email: userCredential.user!.email ?? googleUser.email,
-        displayName: userCredential.user!.displayName ?? googleUser.displayName ?? 'User',
+        displayName:
+            userCredential.user!.displayName ??
+            googleUser.displayName ??
+            'User',
         phoneNumber: userCredential.user!.phoneNumber,
         role: 'customer',
         isDisabled: false,
@@ -130,7 +136,9 @@ class FirebaseAuthDatasource {
       if (firebaseUser == null) {
         controller.add(null);
       } else {
-        userDocSub = _usersCollection.doc(firebaseUser.uid).snapshots().listen((snap) {
+        userDocSub = _usersCollection.doc(firebaseUser.uid).snapshots().listen((
+          snap,
+        ) {
           try {
             if (snap.exists && snap.data() != null) {
               controller.add(UserModel.fromSnapshot(snap));
@@ -166,7 +174,12 @@ class FirebaseAuthDatasource {
   }
 
   // Update user profile (cho Settings)
-  Future<void> updateUser({String? displayName, String? avatarUrl, String? phoneNumber, String? defaultAddressId}) async {
+  Future<void> updateUser({
+    String? displayName,
+    String? avatarUrl,
+    String? phoneNumber,
+    String? defaultAddressId,
+  }) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('No logged-in user!');
     final Map<String, dynamic> data = {};
@@ -201,15 +214,16 @@ class FirebaseAuthDatasource {
     await user.reauthenticateWithCredential(credential);
     await user.updatePassword(newPassword);
   }
-  
+
   // Lấy tất cả users (cho admin)
   Stream<List<UserModel>> getAllUsers() {
     return _usersCollection
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => UserModel.fromSnapshot(doc))
-            .toList());
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => UserModel.fromSnapshot(doc)).toList(),
+        );
   }
 
   // Cập nhật trạng thái khóa/mở khóa tài khoản (cho admin)
@@ -226,34 +240,53 @@ class FirebaseAuthDatasource {
     String role = 'customer',
   }) async {
     try {
-      // 1. Tạo user trong Firebase Auth
-      final userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      // Sử dụng FirebaseApp thứ cấp để không ảnh hưởng phiên đăng nhập hiện tại
+      final secondaryAppName =
+          'admin-create-user-${DateTime.now().millisecondsSinceEpoch}';
+      firebase_core.FirebaseApp? secondaryApp;
+      firebase.FirebaseAuth? secondaryAuth;
+      try {
+        secondaryApp = await firebase_core.Firebase.initializeApp(
+          name: secondaryAppName,
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+        secondaryAuth = firebase.FirebaseAuth.instanceFor(app: secondaryApp);
 
-      final uid = userCredential.user!.uid;
+        // 1. Tạo user trong Firebase Auth (trên app/auth thứ cấp)
+        final userCredential = await secondaryAuth
+            .createUserWithEmailAndPassword(email: email, password: password);
 
-      // 2. Tạo đối tượng UserModel mới
-      final newUser = UserModel(
-        id: uid,
-        email: email,
-        displayName: displayName,
-        phoneNumber: phoneNumber,
-        role: role,
-        isDisabled: false,
-        createdAt: DateTime.now(),
-        avatarUrl: null,
-        defaultAddressId: null,
-      );
+        final uid = userCredential.user!.uid;
 
-      // 3. Ghi đối tượng này vào Firestore
-      await _usersCollection.doc(uid).set(newUser.toMap());
+        // 2. Tạo đối tượng UserModel mới
+        final newUser = UserModel(
+          id: uid,
+          email: email,
+          displayName: displayName,
+          phoneNumber: phoneNumber,
+          role: role,
+          isDisabled: false,
+          createdAt: DateTime.now(),
+          avatarUrl: null,
+          defaultAddressId: null,
+        );
 
-      // 4. Cập nhật displayName trong Auth
-      await userCredential.user?.updateDisplayName(displayName);
+        // 3. Ghi đối tượng này vào Firestore
+        await _usersCollection.doc(uid).set(newUser.toMap());
 
-      return newUser;
+        // 4. Cập nhật displayName trong Auth (trên app/auth thứ cấp)
+        await userCredential.user?.updateDisplayName(displayName);
+
+        return newUser;
+      } finally {
+        // Đảm bảo đăng xuất và giải phóng app thứ cấp
+        try {
+          await secondaryAuth?.signOut();
+        } catch (_) {}
+        try {
+          await secondaryApp?.delete();
+        } catch (_) {}
+      }
     } on firebase.FirebaseException catch (e) {
       throw Exception(e.message ?? 'Lỗi khi tạo người dùng');
     }
