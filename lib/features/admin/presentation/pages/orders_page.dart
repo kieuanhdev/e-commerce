@@ -24,7 +24,7 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> {
   String? _error;
 
   final _getAllOrdersUseCase = sl<GetAllOrdersUseCase>();
-  final _updateOrderStatusUseCase = sl<UpdateOrderStatusUseCase>();
+  // final _updateOrderStatusUseCase = sl<UpdateOrderStatusUseCase>();
 
   @override
   void initState() {
@@ -65,46 +65,18 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> {
     super.dispose();
   }
 
-  Future<void> _updateOrderStatus(String orderId, OrderStatus newStatus) async {
-    try {
-      await _updateOrderStatusUseCase(orderId, newStatus.displayName);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đã cập nhật trạng thái'),
-            duration: Duration(seconds: 2),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Quản lý Đơn hàng'),
-        ),
+        appBar: AppBar(title: const Text('Quản lý Đơn hàng')),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_error != null && _orders.isEmpty) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Quản lý Đơn hàng'),
-        ),
+        appBar: AppBar(title: const Text('Quản lý Đơn hàng')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -129,9 +101,7 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> {
 
     if (_orders.isEmpty) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Quản lý Đơn hàng'),
-        ),
+        appBar: AppBar(title: const Text('Quản lý Đơn hàng')),
         body: Center(
           child: Text(
             'Chưa có đơn hàng nào',
@@ -142,105 +112,23 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quản lý Đơn hàng'),
-      ),
+      appBar: AppBar(title: const Text('Quản lý Đơn hàng')),
       body: ListView.builder(
         padding: const EdgeInsets.all(AppSizes.paddingMD),
         itemCount: _orders.length,
         itemBuilder: (context, index) {
           final order = _orders[index];
-          return _OrderCard(
-            order: order,
-            onUpdateStatus: (newStatus) => _showConfirmDialog(order, newStatus),
-          );
+          return _OrderCard(order: order);
         },
       ),
     );
-  }
-
-  void _showConfirmDialog(Order order, OrderStatus newStatus) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Xác nhận thay đổi'),
-        content: Text(
-          'Bạn có chắc chắn muốn chuyển đơn hàng #${order.trackingNumber} sang trạng thái "${_getStatusText(newStatus)}"?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              _updateOrderStatus(order.id, newStatus);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _getStatusColor(newStatus),
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Xác nhận'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Color _getStatusColor(OrderStatus status) {
-    switch (status) {
-      case OrderStatus.processing:
-        return Colors.orange;
-      case OrderStatus.delivery:
-        return AppColors.success;
-      case OrderStatus.cancelled:
-        return AppColors.error;
-    }
-  }
-
-  String _getStatusText(OrderStatus status) {
-    switch (status) {
-      case OrderStatus.processing:
-        return 'Đang xử lý';
-      case OrderStatus.delivery:
-        return 'Đang giao hàng';
-      case OrderStatus.cancelled:
-        return 'Đã hủy';
-    }
   }
 }
 
 class _OrderCard extends StatelessWidget {
   final Order order;
-  final Function(OrderStatus) onUpdateStatus;
 
-  const _OrderCard({
-    required this.order,
-    required this.onUpdateStatus,
-  });
-
-  Color _getStatusColor(OrderStatus status) {
-    switch (status) {
-      case OrderStatus.processing:
-        return Colors.orange;
-      case OrderStatus.delivery:
-        return AppColors.success;
-      case OrderStatus.cancelled:
-        return AppColors.error;
-    }
-  }
-
-  String _getStatusText(OrderStatus status) {
-    switch (status) {
-      case OrderStatus.processing:
-        return 'Đang xử lý';
-      case OrderStatus.delivery:
-        return 'Đang giao hàng';
-      case OrderStatus.cancelled:
-        return 'Đã hủy';
-    }
-  }
+  const _OrderCard({required this.order});
 
   @override
   Widget build(BuildContext context) {
@@ -273,10 +161,7 @@ class _OrderCard extends StatelessWidget {
             const SizedBox(height: AppSizes.spacingMD),
 
             // Customer info
-            Text(
-              order.customerName,
-              style: AppTextStyles.text14,
-            ),
+            Text(order.customerName, style: AppTextStyles.text14),
             Text(
               order.customerEmail,
               style: AppTextStyles.text11.copyWith(
@@ -317,19 +202,19 @@ class _OrderCard extends StatelessWidget {
                               width: 12,
                               height: 12,
                               decoration: BoxDecoration(
-                                color: _getStatusColor(status),
+                                color: status.color,
                                 shape: BoxShape.circle,
                               ),
                             ),
                             const SizedBox(width: AppSizes.spacingSM),
-                            Text(_getStatusText(status)),
+                            Text(status.text),
                           ],
                         ),
                       );
                     }).toList(),
                     onChanged: (newStatus) {
                       if (newStatus != null && newStatus != order.status) {
-                        onUpdateStatus(newStatus);
+                        _confirmAndUpdate(context, newStatus);
                       }
                     },
                   ),
@@ -340,5 +225,77 @@ class _OrderCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _confirmAndUpdate(BuildContext context, OrderStatus newStatus) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Xác nhận thay đổi'),
+        content: Text(
+          'Bạn có chắc chắn muốn chuyển đơn hàng #${order.trackingNumber} sang trạng thái "${newStatus.text}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              try {
+                await sl<UpdateOrderStatusUseCase>()(
+                  order.id,
+                  newStatus.displayName,
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Đã cập nhật trạng thái'),
+                    duration: Duration(seconds: 2),
+                    backgroundColor: AppColors.success,
+                  ),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(e.toString()),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: newStatus.color,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Xác nhận'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+extension OrderStatusX on OrderStatus {
+  String get text {
+    switch (this) {
+      case OrderStatus.processing:
+        return 'Đang xử lý';
+      case OrderStatus.delivery:
+        return 'Đang giao hàng';
+      case OrderStatus.cancelled:
+        return 'Đã hủy';
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case OrderStatus.processing:
+        return Colors.orange;
+      case OrderStatus.delivery:
+        return AppColors.success;
+      case OrderStatus.cancelled:
+        return AppColors.error;
+    }
   }
 }

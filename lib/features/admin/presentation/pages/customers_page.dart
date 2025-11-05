@@ -19,7 +19,6 @@ class AdminCustomersPage extends StatefulWidget {
 }
 
 class _AdminCustomersPageState extends State<AdminCustomersPage> {
-  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   StreamSubscription<List<AppUser>>? _usersSubscription;
   List<AppUser> _users = [];
@@ -65,7 +64,6 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
 
   @override
   void dispose() {
-    _searchController.dispose();
     _usersSubscription?.cancel();
     super.dispose();
   }
@@ -244,35 +242,9 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
         ],
       ),
       child: TextField(
-        controller: _searchController,
         decoration: InputDecoration(
           hintText: 'Tìm kiếm theo tên hoặc email...',
           prefixIcon: const Icon(Icons.search),
-          suffixIcon: _searchQuery.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    setState(() {
-                      _searchController.clear();
-                      _searchQuery = '';
-                    });
-                  },
-                )
-              : null,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSizes.radiusMD),
-            borderSide: const BorderSide(color: AppColors.placeholder),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSizes.radiusMD),
-            borderSide: const BorderSide(color: AppColors.placeholder),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSizes.radiusMD),
-            borderSide: const BorderSide(color: AppColors.primary),
-          ),
-          filled: true,
-          fillColor: AppColors.white,
         ),
         onChanged: (value) {
           setState(() {
