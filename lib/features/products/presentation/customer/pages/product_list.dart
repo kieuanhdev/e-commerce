@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:e_commerce/core/data/cloudinary_service.dart';
-import 'package:e_commerce/features/products/data/datasources/product_remote_datasource.dart';
-import 'package:e_commerce/features/products/data/repositories/product_repository_impl.dart';
+import 'package:e_commerce/di.dart';
 import 'package:e_commerce/features/products/domain/entities/product.dart';
 import 'package:e_commerce/features/products/domain/usecases/get_products.dart';
 import 'package:e_commerce/features/products/domain/services/product_cache_service.dart';
@@ -28,13 +26,7 @@ class _ProductListBodyState extends State<ProductListBody> {
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _allProductKey = GlobalKey();
 
-  late final ProductRemoteDataSource _remote = ProductRemoteDataSourceImpl();
-  late final CloudinaryService _cloudinary = CloudinaryService();
-  late final ProductRepositoryImpl _repo = ProductRepositoryImpl(
-    _remote,
-    _cloudinary,
-  );
-  late final GetProducts _getAllProducts = GetProducts(_repo);
+  late final GetProducts _getAllProducts = sl<GetProducts>();
   final _cacheService = ProductCacheService.instance;
 
   bool _isLoading = true;

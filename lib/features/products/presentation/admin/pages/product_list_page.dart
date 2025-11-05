@@ -225,41 +225,48 @@ class _ProductListPageState extends State<ProductListPage> {
                       itemBuilder: (context, index) {
                         final p = _products[index];
                         final bool isHidden = !p.isVisible;
-                        return Card(
-                          color: isHidden ? AppColors.background : AppColors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppSizes.radiusLG),
-                          ),
-                          elevation: AppSizes.cardElevation,
-                          margin: const EdgeInsets.only(bottom: AppSizes.spacingMD),
-                          child: ListTile(
-                            leading: SizedBox(
-                              width: 120,
-                              child: AspectRatio(
-                                aspectRatio: 3 / 4, // 3x4
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(AppSizes.radiusSM),
-                                      child: ColorFiltered(
-                                        colorFilter: isHidden
-                                            ? const ColorFilter.mode(
-                                                Colors.black26,
-                                                BlendMode.darken,
-                                              )
-                                            : const ColorFilter.mode(
-                                                Colors.transparent,
-                                                BlendMode.dst,
-                                              ),
-                                        child:
-                                            (p.imageUrl != null &&
-                                                p.imageUrl!.isNotEmpty)
-                                            ? Image.network(
-                                                p.imageUrl!,
-                                                fit: BoxFit.cover,
-                                                errorBuilder:
-                                                    (
+                        return LayoutBuilder(
+                          builder: (context, constraints) {
+                            final bool isNarrow = constraints.maxWidth < 360;
+                            final double imageWidth = isNarrow ? 88 : 120;
+                            final EdgeInsets contentPadding = isNarrow
+                                ? const EdgeInsets.symmetric(horizontal: 8, vertical: 6)
+                                : const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
+
+                            return Card(
+                              color: isHidden ? AppColors.background : AppColors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(AppSizes.radiusLG),
+                              ),
+                              elevation: AppSizes.cardElevation,
+                              margin: const EdgeInsets.only(bottom: AppSizes.spacingMD),
+                              child: ListTile(
+                                contentPadding: contentPadding,
+                                visualDensity: isNarrow ? VisualDensity.compact : VisualDensity.standard,
+                                leading: SizedBox(
+                                  width: imageWidth,
+                                  child: AspectRatio(
+                                    aspectRatio: 3 / 4, // 3x4
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(AppSizes.radiusSM),
+                                          child: ColorFiltered(
+                                            colorFilter: isHidden
+                                                ? const ColorFilter.mode(
+                                                    Colors.black26,
+                                                    BlendMode.darken,
+                                                  )
+                                                : const ColorFilter.mode(
+                                                    Colors.transparent,
+                                                    BlendMode.dst,
+                                                  ),
+                                            child: (p.imageUrl != null && p.imageUrl!.isNotEmpty)
+                                                ? Image.network(
+                                                    p.imageUrl!,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (
                                                       context,
                                                       error,
                                                       stackTrace,
@@ -270,131 +277,135 @@ class _ProductListPageState extends State<ProductListPage> {
                                                         color: AppColors.placeholder,
                                                       ),
                                                     ),
-                                              )
-                                            : Container(
-                                                color: AppColors.background,
-                                                child: const Icon(
-                                                  Icons.image_not_supported,
-                                                  color: AppColors.placeholder,
+                                                  )
+                                                : Container(
+                                                    color: AppColors.background,
+                                                    child: const Icon(
+                                                      Icons.image_not_supported,
+                                                      color: AppColors.placeholder,
+                                                    ),
+                                                  ),
+                                          ),
+                                        ),
+                                        if (isHidden)
+                                          Align(
+                                            alignment: Alignment.topLeft,
+                                            child: Container(
+                                              margin: const EdgeInsets.all(AppSizes.spacingMD),
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: AppSizes.spacingSM,
+                                                vertical: AppSizes.spacingXS,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.black54,
+                                                borderRadius: BorderRadius.circular(AppSizes.radiusXS),
+                                              ),
+                                              child: const Text(
+                                                'ĐÃ ẨN',
+                                                style: TextStyle(
+                                                  color: AppColors.white,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w600,
                                                 ),
                                               ),
-                                      ),
+                                            ),
+                                          ),
+                                      ],
                                     ),
+                                  ),
+                                ),
+                                title: Text(
+                                  p.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.text16.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: isHidden ? AppColors.placeholder : null,
+                                    decoration: isHidden ? TextDecoration.lineThrough : TextDecoration.none,
+                                  ),
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
                                     if (isHidden)
-                                      Align(
-                                        alignment: Alignment.topLeft,
-                                        child: Container(
-                                          margin: const EdgeInsets.all(AppSizes.spacingMD),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: AppSizes.spacingSM,
-                                            vertical: AppSizes.spacingXS,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.black54,
-                                            borderRadius: BorderRadius.circular(
-                                              AppSizes.radiusXS,
-                                            ),
-                                          ),
-                                          child: const Text(
-                                            'ĐÃ ẨN',
-                                            style: TextStyle(
-                                              color: AppColors.white,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(bottom: 2),
+                                        child: Text(
+                                          'Sản phẩm này đang được ẩn',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppTextStyles.text11.copyWith(
+                                            color: Colors.orange[800],
+                                            fontStyle: FontStyle.italic,
                                           ),
                                         ),
                                       ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            title: Text(
-                              p.name,
-                              style: AppTextStyles.text16.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: isHidden ? AppColors.placeholder : null,
-                                decoration: isHidden
-                                    ? TextDecoration.lineThrough
-                                    : TextDecoration.none,
-                              ),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (isHidden)
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 2),
-                                    child: Text(
-                                      'Sản phẩm này đang được ẩn',
-                                      style: AppTextStyles.text11.copyWith(
-                                        color: Colors.orange[800],
+                                    Text(
+                                      'Danh mục: ${p.categoryId ?? '-'}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTextStyles.text14.copyWith(
+                                        color: AppColors.placeholder,
+                                        height: 1.2,
+                                      ),
+                                    ),
+                                    Text(
+                                      p.shortDescription,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTextStyles.text14.copyWith(
+                                        color: AppColors.placeholder,
                                         fontStyle: FontStyle.italic,
                                       ),
                                     ),
-                                  ),
-                                Text(
-                                  'Danh mục: ${p.categoryId ?? '-'}',
-                                  style: AppTextStyles.text14.copyWith(
-                                    color: AppColors.placeholder,
-                                    height: 1.3,
+                                    Text(
+                                      'Giá: \$${p.price.toStringAsFixed(2)} | SL: ${p.quantity}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTextStyles.text14.copyWith(
+                                        color: AppColors.placeholder,
+                                        height: 1.2,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                isThreeLine: !isNarrow,
+                                trailing: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(
+                                          p.isVisible ? Icons.visibility_off : Icons.visibility,
+                                          color: Colors.orange,
+                                        ),
+                                        tooltip: p.isVisible ? 'Ẩn sản phẩm' : 'Hiển thị sản phẩm',
+                                        onPressed: () => _toggleVisibility(p),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.edit_rounded,
+                                          color: AppColors.primary,
+                                        ),
+                                        tooltip: 'Chỉnh sửa',
+                                        onPressed: () => _openForm(p),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.delete_rounded,
+                                          color: AppColors.error,
+                                        ),
+                                        tooltip: 'Xóa',
+                                        onPressed: () => _delete(p.id),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                Text(
-                                  p.shortDescription,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.text14.copyWith(
-                                    color: isHidden
-                                        ? AppColors.placeholder
-                                        : AppColors.placeholder,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                                Text(
-                                  'Giá: \$${p.price.toStringAsFixed(2)} | SL: ${p.quantity}',
-                                  style: AppTextStyles.text14.copyWith(
-                                    color: AppColors.placeholder,
-                                    height: 1.3,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            isThreeLine: true,
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    p.isVisible
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                    color: Colors.orange,
-                                  ),
-                                  tooltip: p.isVisible
-                                      ? 'Ẩn sản phẩm'
-                                      : 'Hiển thị sản phẩm',
-                                  onPressed: () => _toggleVisibility(p),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit_rounded,
-                                    color: AppColors.primary,
-                                  ),
-                                  tooltip: 'Chỉnh sửa',
-                                  onPressed: () => _openForm(p),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete_rounded,
-                                    color: AppColors.error,
-                                  ),
-                                  tooltip: 'Xóa',
-                                  onPressed: () => _delete(p.id),
-                                ),
-                              ],
-                            ),
-                          ),
+                              ),
+                            );
+                          },
                         );
                       },
                     ),
